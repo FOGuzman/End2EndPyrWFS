@@ -108,7 +108,7 @@ from phaseGenerators import *
 
 nLenslet      = 16                 # plens res
 resAO         = 2*nLenslet+1       # AO resolution
-r0            = 1.2            
+r0            = 0.8            
 L0            = 25
 fR0           = 1
 noiseVariance = 0.7
