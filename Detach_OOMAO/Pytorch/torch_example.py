@@ -1,6 +1,4 @@
 from loadData import Imgdataset
-from torch.utils.data import DataLoader
-from models_generalized import kNet
 import torch.optim as optim
 import torch.nn as nn
 import torch
@@ -18,6 +16,7 @@ from skimage.metrics import structural_similarity as compare_ssim
 from oomao_functions import *
 from phaseGenerators import *
 from math import sqrt, pi
+from matplotlib import pyplot as plt
 
 
 
@@ -99,7 +98,7 @@ fig, ax = plt.subplots()
 plt.title("Estimation")
 line1, = ax.plot(Zgt[:,0])
 line2, = ax.plot(Zpyr[:,0])
-plt.show()
+plt.show(block=False)
 
 
 #%% ############# Fourier Phase

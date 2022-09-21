@@ -1,24 +1,24 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import math
 from mpmath import *
 import scipy.special as scp
 import torch
 import torchvision.transforms.functional as F
+from matplotlib import pyplot as plt
 
 def plot_ctensor(t):
     t = np.array(t)
     t_ = np.squeeze(np.angle(t))
     d = plt.imshow(t_, cmap ='jet', interpolation ='nearest', origin ='lower')
     plt.colorbar(d)
-    plt.show()
+    plt.show(block=False)
     
 def plot_tensor(t):
     t = np.array(t)
     t_ = np.squeeze(t)
     d = plt.imshow(t_, cmap ='jet', interpolation ='nearest', origin ='lower')
     plt.colorbar(d)
-    plt.show()
+    plt.show(block=False)
     
 def plot_tensorwt(t,name):
     t = np.array(t)
@@ -26,7 +26,7 @@ def plot_tensorwt(t,name):
     d = plt.imshow(t_, cmap ='jet', interpolation ='nearest', origin ='lower')
     plt.colorbar(d)
     plt.title(name)
-    plt.show()    
+    plt.show(block=False)    
     
     
 
