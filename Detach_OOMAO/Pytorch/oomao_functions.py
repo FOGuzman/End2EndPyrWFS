@@ -265,10 +265,8 @@ def Pro2OptPyrNoMod_torch(phaseMap,OL1,wfs):
     nTheta = torch.tensor(nTheta)
     PyrQ  = torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
     pyrMask = torch.unsqueeze(wfs.pyrMask,0)  
-    yin = phaseMap
     pupil = wfs.pupil  
-    I4Q4 =  torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
-    pyrPupil = pupil*torch.exp(1j*yin)
+    pyrPupil = pupil*torch.exp(1j*phaseMap)
     subscale = 1/(2*wfs.samp)
     sx = torch.round(wfs.fovInPixel*subscale).to(torch.int16)   
     npv = ((wfs.fovInPixel-sx)/2).to(torch.int16)
@@ -283,10 +281,9 @@ def Pro2OptWFS_torch(phaseMap,OL1,wfs):
     nTheta = np.round(2*math.pi*wfs.samp*wfs.modulation)
     nTheta = torch.tensor(nTheta)
     PyrQ  = torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
-    yin = phaseMap
     pupil = wfs.pupil  
     I4Q4 =  torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
-    pyrPupil = pupil*torch.exp(1j*yin)
+    pyrPupil = pupil*torch.exp(1j*phaseMap)
     subscale = 1/(2*wfs.samp)
     sx = torch.round(wfs.fovInPixel*subscale).to(torch.int16)   
     npv = ((wfs.fovInPixel-sx)/2).to(torch.int16)
