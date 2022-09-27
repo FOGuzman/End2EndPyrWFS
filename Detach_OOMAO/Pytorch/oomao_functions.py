@@ -11,14 +11,14 @@ def plot_ctensor(t):
     t_ = np.squeeze(np.angle(t))
     d = plt.imshow(t_, cmap ='jet', interpolation ='nearest', origin ='lower')
     plt.colorbar(d)
-    plt.show()
+    plt.show(block=False)
     
 def plot_tensor(t):
     t = np.array(t)
     t_ = np.squeeze(t)
     d = plt.imshow(t_, cmap ='jet', interpolation ='nearest', origin ='lower')
     plt.colorbar(d)
-    plt.show()
+    plt.show(block=False)
     
 def plot_tensorwt(t,name):
     t = np.array(t)
@@ -26,7 +26,7 @@ def plot_tensorwt(t,name):
     d = plt.imshow(t_, cmap ='jet', interpolation ='nearest', origin ='lower')
     plt.colorbar(d)
     plt.title(name)
-    plt.show()    
+    plt.show(block=False)    
     
     
 
@@ -211,11 +211,10 @@ def Propagate2Pyramid_torch(phaseMap,wfs):
     nTheta = torch.tensor(nTheta)
     PyrQ  = torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
     pyrMask = torch.unsqueeze(torch.tensor(wfs.pyrMask),0)
-    yin = phaseMap
     pupil = torch.tensor(wfs.pupil)
     
     I4Q4 =  torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
-    pyrPupil = pupil*torch.exp(1j*yin)
+    pyrPupil = pupil*torch.exp(1j*phaseMap)
     subscale = 1/(2*wfs.samp)
     sx = torch.round(torch.tensor(wfs.fovInPixel*subscale)).to(torch.int16)   
     npv = ((wfs.fovInPixel-sx)/2).to(torch.int16)
@@ -242,11 +241,9 @@ def Propagate2PyramidNoMod_torch(phaseMap,wfs):
     nTheta = torch.tensor(nTheta)
     PyrQ  = torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
     pyrMask = torch.unsqueeze(torch.tensor(wfs.pyrMask),0)
-    yin = phaseMap
     pupil = torch.tensor(wfs.pupil)
-    
     I4Q4 =  torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
-    pyrPupil = pupil*torch.exp(1j*yin)
+    pyrPupil = pupil*torch.exp(1j*phaseMap)
     subscale = 1/(2*wfs.samp)
     sx = torch.round(torch.tensor(wfs.fovInPixel*subscale)).to(torch.int16)   
     npv = ((wfs.fovInPixel-sx)/2).to(torch.int16)
@@ -265,10 +262,9 @@ def Pro2OptPyrNoMod_torch(phaseMap,OL1,wfs):
     nTheta = torch.tensor(nTheta)
     PyrQ  = torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
     pyrMask = torch.unsqueeze(wfs.pyrMask,0)  
-    yin = phaseMap
     pupil = wfs.pupil  
     I4Q4 =  torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
-    pyrPupil = pupil*torch.exp(1j*yin)
+    pyrPupil = pupil*torch.exp(1j*phaseMap)
     subscale = 1/(2*wfs.samp)
     sx = torch.round(wfs.fovInPixel*subscale).to(torch.int16)   
     npv = ((wfs.fovInPixel-sx)/2).to(torch.int16)
