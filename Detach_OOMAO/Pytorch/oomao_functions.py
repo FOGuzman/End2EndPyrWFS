@@ -1,24 +1,24 @@
 import numpy as np
+import matplotlib.pyplot as plt
 import math
 from mpmath import *
 import scipy.special as scp
 import torch
 import torchvision.transforms.functional as F
-from matplotlib import pyplot as plt
 
 def plot_ctensor(t):
     t = np.array(t)
     t_ = np.squeeze(np.angle(t))
     d = plt.imshow(t_, cmap ='jet', interpolation ='nearest', origin ='lower')
     plt.colorbar(d)
-    plt.show(block=False)
+    plt.show()
     
 def plot_tensor(t):
     t = np.array(t)
     t_ = np.squeeze(t)
     d = plt.imshow(t_, cmap ='jet', interpolation ='nearest', origin ='lower')
     plt.colorbar(d)
-    plt.show(block=False)
+    plt.show()
     
 def plot_tensorwt(t,name):
     t = np.array(t)
@@ -26,7 +26,7 @@ def plot_tensorwt(t,name):
     d = plt.imshow(t_, cmap ='jet', interpolation ='nearest', origin ='lower')
     plt.colorbar(d)
     plt.title(name)
-    plt.show(block=False)    
+    plt.show()    
     
     
 
@@ -265,8 +265,10 @@ def Pro2OptPyrNoMod_torch(phaseMap,OL1,wfs):
     nTheta = torch.tensor(nTheta)
     PyrQ  = torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
     pyrMask = torch.unsqueeze(wfs.pyrMask,0)  
+    yin = phaseMap
     pupil = wfs.pupil  
-    pyrPupil = pupil*torch.exp(1j*phaseMap)
+    I4Q4 =  torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
+    pyrPupil = pupil*torch.exp(1j*yin)
     subscale = 1/(2*wfs.samp)
     sx = torch.round(wfs.fovInPixel*subscale).to(torch.int16)   
     npv = ((wfs.fovInPixel-sx)/2).to(torch.int16)
@@ -281,9 +283,10 @@ def Pro2OptWFS_torch(phaseMap,OL1,wfs):
     nTheta = np.round(2*math.pi*wfs.samp*wfs.modulation)
     nTheta = torch.tensor(nTheta)
     PyrQ  = torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
+    yin = phaseMap
     pupil = wfs.pupil  
     I4Q4 =  torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
-    pyrPupil = pupil*torch.exp(1j*phaseMap)
+    pyrPupil = pupil*torch.exp(1j*yin)
     subscale = 1/(2*wfs.samp)
     sx = torch.round(wfs.fovInPixel*subscale).to(torch.int16)   
     npv = ((wfs.fovInPixel-sx)/2).to(torch.int16)
