@@ -1,11 +1,11 @@
 addpath functions
 clear all
 
-preFold = "../Best_linear/OL1_R128_M0_RMSE0.0833_Epoch_84.mat";
+preFold = "../Preconditioners/OL1_R128_M0_RMSE0.04296_Epoch_99.mat";
 
 binning       = 1;
 D             = 8;
-modulation    = 0;
+modulation    = 3;
 nLenslet      = 16;
 resAO         = 2*nLenslet+1;
 r0            = 0.8;
@@ -55,7 +55,7 @@ load(preFold);OL1_trained = OL1;
     ,modulation,rooftop,alpha,pupil,OL1_trained,0);
         
 %% Meas
-r0            = 0.8;
+r0            = 0.5;
 
 [x,Zg] = GenerateFourierPhase(nLenslet,D,binning,r0,L0,fR0,modulation,...
     fovInPixel,resAO,Samp,nPxPup,pupil,jModes,modes,PhaseCM);

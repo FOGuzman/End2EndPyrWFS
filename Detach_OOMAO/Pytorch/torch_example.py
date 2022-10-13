@@ -1,3 +1,4 @@
+#%%
 from loadData import Imgdataset
 import torch.optim as optim
 import torch.nn as nn
@@ -31,12 +32,12 @@ print('The number of GPU is {}'.format(n_gpu))
 
 parser = argparse.ArgumentParser(description='Setting, compressive rate, size, and mode')
 
-parser.add_argument('--modulation', default=0, type=int, help='Pyramid modulation')
+parser.add_argument('--modulation', default=3, type=int, help='Pyramid modulation')
 parser.add_argument('--samp', default=2, type=int, help='Sampling')
 parser.add_argument('--nPxPup', default=268, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=float)
 parser.add_argument('--alpha', default=pi/2, type=float)
-parser.add_argument('--zModes', default=[2,36], type=int, help='Reconstruction Zernikes')
+parser.add_argument('--zModes', default=[300,330], type=int, help='Reconstruction Zernikes')
 wfs = parser.parse_args()
 
 wfs.fovInPixel    = wfs.nPxPup*2*wfs.samp 
@@ -46,7 +47,7 @@ wfs.jModes = torch.arange(wfs.zModes[0], wfs.zModes[1]+1)
 wfs.pupilLogical = wfs.pupil!=0
 wfs.modes = CreateZernikePolynomials(wfs)
 wfs.amplitude = 0.2 #small for low noise systems
-wfs.ModPhasor = CreateModulationPhasor(wfs)
+wfs.ModPhasor = torch.tensor(CreateModulationPhasor(wfs))
 
 ###### Flat prop
 zim = np.reshape(wfs.modes[:,0],(wfs.nPxPup,wfs.nPxPup))
@@ -118,7 +119,7 @@ nTimes        = wfs.fovInPixel/resAO
 
 phaseMap,Zgt = GenerateFourierPhaseXY(r0,L0,D,resAO,nLenslet,nTimes,n_lvl,noiseVariance,wfs)
 phaseMap = torch.unsqueeze(torch.tensor(phaseMap),0)
-Ip = Propagate2PyramidNoMod_torch(phaseMap,wfs)
+Ip = Propagate2Pyramid_torch(phaseMap,wfs)
 Ip = Ip/torch.sum(Ip)
 
 Zpyr = torch.matmul(CM,torch.reshape(Ip,[-1]))

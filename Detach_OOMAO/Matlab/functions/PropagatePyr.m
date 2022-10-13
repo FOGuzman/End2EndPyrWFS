@@ -1,4 +1,7 @@
 function [I4Q] = PropagatePyr(fovInPixel,phaseMap,Samp,modulation,rooftop,alpha,pupil,nPxPup,PreC,flag)
+
+
+
 [uu,vv]       = ndgrid((0:(fovInPixel-1))./fovInPixel);
 [o,r]         = cart2pol(uu,vv);
 pyrPupil      = pupil.*exp(1i.*phaseMap);
