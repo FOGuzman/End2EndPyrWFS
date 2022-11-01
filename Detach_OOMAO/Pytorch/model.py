@@ -27,9 +27,9 @@ class OptimizedPyramid(nn.Module):
         self.jModes = wfs.jModes
         self.amplitude = wfs.amplitude
         self.ReadoutNoise = wfs.ReadoutNoise
-        self.PhotonNoise = wfs.PhotonNoise
-        self.quantumEfficiency = wfs.quantumEfficiency
-        self.nPhotonBackground = wfs.nPhotonBackground
+        self.PhotonNoise = torch.tensor(wfs.PhotonNoise)
+        self.quantumEfficiency = torch.tensor(wfs.quantumEfficiency)
+        self.nPhotonBackground = torch.tensor(wfs.nPhotonBackground)
         if wfs.modulation > 0:
             self.ModPhasor = torch.tensor(wfs.ModPhasor)
         self.fovInPixel    = torch.tensor(wfs.fovInPixel)
@@ -50,6 +50,9 @@ class OptimizedPyramid(nn.Module):
             self.pupil = self.pupil.cuda()
             if wfs.modulation > 0:
                 self.ModPhasor = self.ModPhasor.cuda()
+        self.PhotonNoise = self.PhotonNoise.cuda()
+        self.quantumEfficiency = self.quantumEfficiency.cuda()
+        self.nPhotonBackground = self.nPhotonBackground.cuda()    
             
             
 
@@ -86,10 +89,11 @@ class OptimizedPyramid(nn.Module):
         #propagation of X
         Ip = Pro2OptPyrNoMod_torch(inputs,OL1,self)
         #Photon noise
-        if self.
-        
+        if self.PhotonNoise == 1:
+            Ip = AddPhotonNoise(Ip,self)          
         #Read out noise 
-        Ip = Ip + torch.normal(torch.shape(Ip))*self.ReadoutNoise   
+        if self.ReadoutNoise != 0:
+            Ip = Ip + torch.normal(0,self.ReadoutNoise,size=Ip.shape).cuda()   
         
         # Normalization
         Inorm = torch.sum(torch.sum(Ip,-1),-1)

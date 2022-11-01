@@ -205,7 +205,7 @@ def CreateModulationPhasor(wfs):
 
 def AddPhotonNoise(y,wfs):
     buffer    = y + wfs.nPhotonBackground
-    y = y + torch.normal(torch.shape(y))*(y + wfs.nPhotonBackground)
+    y = y + torch.normal(0,1,size=y.shape).cuda()*(y + wfs.nPhotonBackground)
     index     = y<0
     y[index] = buffer[index]
     y = wfs.quantumEfficiency*y
