@@ -17,8 +17,8 @@ fy = fy*fc + 1e-7;
 [Rx, Ry] =  RxRy(fx,fy,fc,nLenslet+1,D,r0,L0,fR0,modulation,binning,noiseVariance);
 
 
-psdFit = fittingPSD(fx,fy,fc,'square',nTimes,r0,L0,fR0,D);
-psdNoise = noisePSD(fx,fy,fc,Rx,Ry,noiseVariance,D);
+psdFit = fittingPSD(fx,fy,fc,'square',nTimes,r0,L0,fR0,D)./r0^(-5/3);
+psdNoise = noisePSD(fx,fy,fc,Rx,Ry,noiseVariance,D)/noiseVariance;
 
 
 [fxExt,fyExt] = freqspace(size(fx,1)*nTimes,'meshgrid');
@@ -30,8 +30,8 @@ index = abs(fxExt)<fc & abs(fyExt)<fc;
 
 psdAO_mean = zeros(size(fxExt));
 aSlPSD = anisoServoLagPSD(fx,fy,fc,Rx,Ry,SxAv,SyAv,r0,L0,fR0,D);
-psdAO_mean(index) = aSlPSD  + psdNoise*mean(n_lvl);
-psdAO_mean = psdAO_mean + psdFit*mean(r0)^(-5/3);
+psdAO_mean(index) = aSlPSD  + psdNoise*n_lvl;
+psdAO_mean = psdAO_mean + psdFit*r0^(-5/3);
 
 fourierSampling = 1./L;
 

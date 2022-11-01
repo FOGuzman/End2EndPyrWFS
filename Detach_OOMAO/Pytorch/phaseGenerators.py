@@ -171,8 +171,8 @@ def GenerateFourierPhase(pupil,resAO,nLenslet,D,r0,L0,fR0,modulation,binning,noi
     fx = fx*fc + 1e-7
     fy = fy*fc + 1e-7
     Rx, Ry    = PerformRxRy(fx,fy,fc,nLenslet+1,D,r0,L0,fR0,modulation,binning,noiseVariance)
-    psdFit    = fittingPSD(fx,fy,fc,"square",nTimes,r0,L0,fR0,D)
-    psdNoise  = noisePSD(fx,fy,fc,Rx,Ry,noiseVariance,D)
+    psdFit    = fittingPSD(fx,fy,fc,"square",nTimes,r0,L0,fR0,D)/r0**(5/3)
+    psdNoise  = noisePSD(fx,fy,fc,Rx,Ry,noiseVariance,D)/noiseVariance
     
     fxExt,fyExt = freqspace(np.size(fx,1)*nTimes,"meshgrid")
     fxExt = fxExt*fc*nTimes;
@@ -185,7 +185,7 @@ def GenerateFourierPhase(pupil,resAO,nLenslet,D,r0,L0,fR0,modulation,binning,noi
     aSlPSD = anisoServoLagPSD(fx,fy,fc,Rx,Ry,SxAv,SyAv,r0,L0,fR0,D)
     psdFact = aSlPSD  + psdNoise*np.mean(n_lvl)
     psdAO_mean[index] = psdFact.flatten()
-    psdAO_mean = psdAO_mean + psdFit*np.mean(r0)**(-5/3)
+    psdAO_mean = psdAO_mean + psdFit*r0**(-5/3)
     
     fourierSampling = 1/L;
     
