@@ -28,8 +28,8 @@ n_gpu = torch.cuda.device_count()
 print(torch.cuda.is_available())
 print('The number of GPU is {}'.format(n_gpu))
 
-tData = 20000
-vData = 4000
+tData = 5
+vData = 5
 
 Rs = [0.3,1]
 
@@ -76,9 +76,24 @@ D             = 8
 nTimes        = wfs.fovInPixel/resAO
 
 
+IM = None
+    #%% Control matrix
+for k in range(len(wfs.jModes)):
+    imMode = torch.reshape(torch.tensor(wfs.modes[:,k]),(wfs.nPxPup,wfs.nPxPup))
+    Zv = torch.unsqueeze(torch.reshape(imMode,[-1]),1)
+    if IM is not None:
+        IM = torch.concat([IM,Zv],1)
+    else:
+        IM = Zv
+    
+    
+CM = torch.linalg.pinv(IM)
+
+#%% Start loop
+
 for k in range(tData):
     r0            = random.uniform(Rs[0], Rs[1])
-    phaseMap,Zgt = GenerateFourierPhaseXY(r0,L0,D,resAO,nLenslet,nTimes,n_lvl,noiseVariance,wfs)
+    phaseMap,Zgt = GenerateFourierPhaseXY(r0,L0,D,resAO,nLenslet,nTimes,n_lvl,noiseVariance,CM,wfs)
     phaseMap = torch.unsqueeze(torch.tensor(phaseMap),0)
     name = train_fold + "/data_{}.mat".format(k)
     scio.savemat(name, {'x': phaseMap.numpy(),'Zgt': Zgt.numpy()})
@@ -88,7 +103,7 @@ for k in range(tData):
 
 for k in range(vData):
     r0            = random.uniform(Rs[0], Rs[1])
-    phaseMap,Zgt = GenerateFourierPhaseXY(r0,L0,D,resAO,nLenslet,nTimes,n_lvl,noiseVariance,wfs)
+    phaseMap,Zgt = GenerateFourierPhaseXY(r0,L0,D,resAO,nLenslet,nTimes,n_lvl,noiseVariance,CM,wfs)
     phaseMap = torch.unsqueeze(torch.tensor(phaseMap),0)
     name = val_fold + "/data_{}.mat".format(k)
     scio.savemat(name, {'x': phaseMap.numpy(),'Zgt': Zgt.numpy()})

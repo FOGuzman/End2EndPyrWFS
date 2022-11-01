@@ -200,7 +200,7 @@ def GenerateFourierPhase(pupil,resAO,nLenslet,D,r0,L0,fR0,modulation,binning,noi
     return(phaseMap)  
 
 
-def GenerateFourierPhaseXY(r0,L0,D,resAO,nLenslet,nTimes,n_lvl,noiseVariance,wfs):
+def GenerateFourierPhaseXY(r0,L0,D,resAO,nLenslet,nTimes,n_lvl,noiseVariance,CM,wfs):
     fR0           = 1
     binning       = 1
     Samp          = wfs.samp
@@ -212,17 +212,6 @@ def GenerateFourierPhaseXY(r0,L0,D,resAO,nLenslet,nTimes,n_lvl,noiseVariance,wfs
     fc            = 1/binning*0.5*(nLenslet)/D
     
     phaseMap = GenerateFourierPhase(wfs.pupil,resAO,nLenslet,D,r0,L0,fR0,wfs.modulation,binning,noiseVariance,fc,nTimes,n_lvl,L,N,nPxPup)
-    IM = None
-    #%% Calibration layer
-    for k in range(len(wfs.jModes)):
-        imMode = torch.reshape(torch.tensor(wfs.modes[:,k]),(nPxPup,nPxPup))
-        Zv = torch.unsqueeze(torch.reshape(imMode,[-1]),1)
-        if IM is not None:
-                IM = torch.concat([IM,Zv],1)
-        else:
-                IM = Zv
-    
-    
-    CM = torch.linalg.pinv(IM)
+
     Ze = np.matmul(CM,torch.reshape(torch.tensor(phaseMap),[-1]))
     return(phaseMap,Ze)

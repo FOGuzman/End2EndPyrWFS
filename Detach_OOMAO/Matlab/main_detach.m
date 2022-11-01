@@ -4,7 +4,7 @@ clear all
 preFold = "../Preconditioners/OL1_R128_M0_RMSE0.04296_Epoch_99.mat";
 
 binning       = 1;
-D             = 8;
+D             = 1.5;
 modulation    = 3;
 nLenslet      = 16;
 resAO         = 2*nLenslet+1;
@@ -55,7 +55,7 @@ load(preFold);OL1_trained = OL1;
     ,modulation,rooftop,alpha,pupil,OL1_trained,0);
         
 %% Meas
-r0            = 0.5;
+r0            = 0.06;
 
 [x,Zg] = GenerateFourierPhase(nLenslet,D,binning,r0,L0,fR0,modulation,...
     fovInPixel,resAO,Samp,nPxPup,pupil,jModes,modes,PhaseCM);
