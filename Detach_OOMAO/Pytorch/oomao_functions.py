@@ -203,7 +203,13 @@ def CreateModulationPhasor(wfs):
     return(ModPhasor)
 
 
-
+def AddPhotonNoise(y,wfs):
+    buffer    = y + wfs.nPhotonBackground
+    y = y + torch.normal(torch.shape(y))*(y + wfs.nPhotonBackground)
+    index     = y<0
+    y[index] = buffer[index]
+    y = wfs.quantumEfficiency*y
+    return y
 
 def Propagate2Pyramid_torch(phaseMap,wfs):
     
@@ -299,3 +305,6 @@ def Pro2OptWFS_torch(phaseMap,OL1,wfs):
         I4Q = torch.abs(torch.fft.fft2(buf))**2
     I4Q = F.resize(I4Q,(sx,sx))*2*wfs.samp
     return(I4Q)
+
+
+

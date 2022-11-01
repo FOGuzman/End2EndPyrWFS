@@ -5,7 +5,7 @@ preFold = "../Preconditioners/OL1_R128_M0_RMSE0.04296_Epoch_99.mat";
 
 binning       = 1;
 D             = 1.5;
-modulation    = 0;
+modulation    = 1;
 nLenslet      = 16;
 resAO         = 2*nLenslet+1;
 r0            = 0.8;
@@ -58,7 +58,7 @@ load(preFold);OL1_trained = OL1;
 r0            = 0.06;
 ReadoutNoise = 0;
 PhotonNoise = 1;
-nPhotonBackground = 1;
+nPhotonBackground = 0.2*max(y);
 quantumEfficiency = 1;
 
 [x,Zg] = GenerateFourierPhase(nLenslet,D,binning,r0,L0,fR0,modulation,...
