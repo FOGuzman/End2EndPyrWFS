@@ -19,9 +19,10 @@ from oomao_functions import *
 from phaseGenerators import *
 from customLoss      import RMSE
 from math import sqrt, pi
+from utils import *
 
 
-
+date = datetime.date.today()  
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 n_gpu = torch.cuda.device_count()
@@ -39,7 +40,7 @@ parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=float)
 parser.add_argument('--alpha', default=pi/2, type=float)
 parser.add_argument('--zModes', default=[2,36], type=int, help='Reconstruction Zernikes')
-parser.add_argument('--batchSize', default=2, type=int, help='Pupil Resolution')
+parser.add_argument('--batchSize', default=1, type=int, help='Pupil Resolution')
 parser.add_argument('--PupilConstrain', default=0, type=int, help='Limit information only on pupils of PyrWFS')
 parser.add_argument('--ReadoutNoise', default=0, type=float)
 parser.add_argument('--PhotonNoise', default=1, type=float)
@@ -62,6 +63,7 @@ train_fold = "./dataset/train"
 val_fold   = "./dataset/val"
 model_path = "./model/checkpoint"
 result_path = "./results"
+log_path   = "./logs"
 load_train = 0
 nEpochs    = 120
 lr         = 0.002
@@ -120,7 +122,7 @@ def test(test_path, epoch, result_path, model):
                 Ygt_res = Ypyr.cpu()
             
             
-    prtname = "PyrNet result: RMSE -- {:.4f}".format(torch.mean(rmse_cnn))        
+    prtname = "Diffractive Element result: RMSE -- {:.4f}".format(torch.mean(rmse_cnn))        
     scio.savemat(name, {'Ypyr': Ypyr_res.numpy(),'Ygt': Ygt_res.numpy()})
     print(prtname)
     OL1_trained = PyrNet.state_dict()['prop.OL1'].cpu()
@@ -138,7 +140,7 @@ def test(test_path, epoch, result_path, model):
 
 
 
-def train(epoch, result_pa8000th, model, lr):
+def train(epoch, result_path, model, lr):
     epoch_loss = 0
     begin = time.time()
 
@@ -181,6 +183,8 @@ if not os.path.exists(result_path):
         os.makedirs(result_path)
 if not os.path.exists(model_path):
         os.makedirs(model_path)
+
+GenerateLog(date,log_path,result_path,wfs,loss,"update")        
 for epoch in range(load_train + 1, load_train + nEpochs + 1):
     train(epoch, result_path, PyrNet, lr)
     if (epoch % 5 == 0) and (epoch < 100):
@@ -191,3 +195,5 @@ for epoch in range(load_train + 1, load_train + nEpochs + 1):
         checkpoint(epoch, model_path)
     if n_gpu > 1:
         PyrNet = torch.nn.DataParallel(PyrNet)    
+ 
+        
