@@ -88,7 +88,7 @@ subplot(344)
 imagesc(reshape(modes*NetZe,[nPxPup nPxPup]));axis image;colorbar
 title('Network estimation')
 subplot(345)
-imagesc(y);axis image;colorbar
+imagesc(Net_y);axis image;colorbar
 title('Network estimation')
 
 

@@ -40,6 +40,10 @@ parser.add_argument('--rooftop', default=[0,0], type=float)
 parser.add_argument('--alpha', default=pi/2, type=float)
 parser.add_argument('--zModes', default=[2,50], type=int, help='Reconstruction Zernikes')
 parser.add_argument('--batchSize', default=2, type=int, help='Pupil Resolution')
+parser.add_argument('--PupilConstrain', defaul=0, type=int, help='Limit information only on pupils of PyrWFS')
+parser.add_argument('--ReadoutNoise', default=0, type=float)
+parser.add_argument('--PhothonNoise', default=0, type=float)
+
 wfs = parser.parse_args()
 wfs.fovInPixel    = wfs.nPxPup*2*wfs.samp 
 wfs.pupil = CreateTelescopePupil(wfs.nPxPup,"disc")

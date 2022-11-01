@@ -26,6 +26,7 @@ class OptimizedPyramid(nn.Module):
         self.alpha = wfs.alpha
         self.jModes = wfs.jModes
         self.amplitude = wfs.amplitude
+        self.ReadoutNoise = wfs.ReadoutNoise
         if wfs.modulation > 0:
             self.ModPhasor = torch.tensor(wfs.ModPhasor)
         self.fovInPixel    = torch.tensor(wfs.fovInPixel)
@@ -81,8 +82,10 @@ class OptimizedPyramid(nn.Module):
         CM = torch.linalg.pinv(IM)       
         #propagation of X
         Ip = Pro2OptPyrNoMod_torch(inputs,OL1,self)
-        #noise 
-        #Ip = Ip + torch.normal(torch.shape(Ip))*self.ReadOutNoise        
+        #Read out noise 
+        Ip = Ip + torch.normal(torch.shape(Ip))*self.ReadoutNoise   
+        
+        # Normalization
         Inorm = torch.sum(torch.sum(Ip,-1),-1)
         Ip = Ip/torch.unsqueeze(torch.unsqueeze(Inorm,-1),-1)-self.I_0
         # Estimation
