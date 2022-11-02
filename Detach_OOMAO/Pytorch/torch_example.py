@@ -32,12 +32,12 @@ print('The number of GPU is {}'.format(n_gpu))
 
 parser = argparse.ArgumentParser(description='Setting, compressive rate, size, and mode')
 
-parser.add_argument('--modulation', default=3, type=int, help='Pyramid modulation')
+parser.add_argument('--modulation', default=0, type=int, help='Pyramid modulation')
 parser.add_argument('--samp', default=2, type=int, help='Sampling')
-parser.add_argument('--nPxPup', default=268, type=int, help='Pupil Resolution')
+parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=float)
 parser.add_argument('--alpha', default=pi/2, type=float)
-parser.add_argument('--zModes', default=[300,330], type=int, help='Reconstruction Zernikes')
+parser.add_argument('--zModes', default=[2,36], type=int, help='Reconstruction Zernikes')
 wfs = parser.parse_args()
 
 wfs.fovInPixel    = wfs.nPxPup*2*wfs.samp 
@@ -102,22 +102,38 @@ line2, = ax.plot(Zpyr[:,0])
 plt.show(block=False)
 
 
+
+#% Control matrix
+phIM = None
+for k in range(len(wfs.jModes)):
+    imMode = torch.reshape(torch.tensor(wfs.modes[:,k]),(wfs.nPxPup,wfs.nPxPup))
+    Zv = torch.unsqueeze(torch.reshape(imMode,[-1]),1)
+    if phIM is not None:
+        phIM = torch.concat([phIM,Zv],1)
+    else:
+        phIM = Zv
+    
+    
+phCM = torch.linalg.pinv(phIM)
 #%% ############# Fourier Phase
 
 from phaseGenerators import *
 
 nLenslet      = 16                 # plens res
 resAO         = 2*nLenslet+1       # AO resolution
-r0            = 0.8            
+r0            = 1            
 L0            = 25
-fR0           = 1
+fR0           = 1.2
 noiseVariance = 0.7
 n_lvl         = 0.1
 D             = 8
 nTimes        = wfs.fovInPixel/resAO
 
 
-phaseMap,Zgt = GenerateFourierPhaseXY(r0,L0,D,resAO,nLenslet,nTimes,n_lvl,noiseVariance,wfs)
+
+
+
+phaseMap,Zgt = GenerateFourierPhaseXY(r0,L0,D,resAO,nLenslet,nTimes,n_lvl,noiseVariance,phCM,wfs)
 phaseMap = torch.unsqueeze(torch.tensor(phaseMap),0)
 Ip = Propagate2Pyramid_torch(phaseMap,wfs)
 Ip = Ip/torch.sum(Ip)

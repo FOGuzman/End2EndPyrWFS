@@ -39,7 +39,7 @@ class OptimizedPyramid(nn.Module):
         self.pupilLogical = torch.tensor(wfs.pupilLogical)
         OL1 = torch.ones((wfs.fovInPixel,wfs.fovInPixel))
         OL1 = torch.tensor(np.angle(wfs.pyrMask))
-        self.OL1  = nn.Parameter(OL1)        
+        self.OL1  = nn.Parameter(OL1)
 
         # init weights
         nn.init.constant_(self.OL1,1)
@@ -110,7 +110,7 @@ class PhaseConstraint(object):
     def __call__(self,module):
         if hasattr(module,'OL1'):
             w=module.OL1.data
-            w=w.clamp(-1*math.pi,1*math.pi)
+            w=w.clamp(-6*math.pi,6*math.pi)
             module.OL1.data=w    
        
             

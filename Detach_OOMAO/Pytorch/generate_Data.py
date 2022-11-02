@@ -28,18 +28,11 @@ n_gpu = torch.cuda.device_count()
 print(torch.cuda.is_available())
 print('The number of GPU is {}'.format(n_gpu))
 
-tData = 5
-vData = 5
+tData = 10000
+vData = 1000
+Rs = [0.2,1.2]
+main_fold = "./dataset/"
 
-Rs = [0.3,1]
-
-train_fold = "./dataset/train"
-val_fold   = "./dataset/val"
-
-if not os.path.exists(train_fold):
-        os.makedirs(train_fold)
-if not os.path.exists(val_fold):
-        os.makedirs(val_fold)
 
 
 parser = argparse.ArgumentParser(description='Setting, compressive rate, size, and mode')
@@ -49,7 +42,7 @@ parser.add_argument('--samp', default=2, type=int, help='Sampling')
 parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=float)
 parser.add_argument('--alpha', default=pi/2, type=float)
-parser.add_argument('--zModes', default=[2,50], type=int, help='Reconstruction Zernikes')
+parser.add_argument('--zModes', default=[2,36], type=int, help='Reconstruction Zernikes')
 wfs = parser.parse_args()
 
 wfs.fovInPixel    = wfs.nPxPup*2*wfs.samp 
@@ -68,12 +61,23 @@ from phaseGenerators import *
 
 nLenslet      = 16                 # plens res
 resAO         = 2*nLenslet+1       # AO resolution           
-L0            = 20
+L0            = 25
 fR0           = 1
 noiseVariance = 0.7
 n_lvl         = 0.1
 D             = 8
 nTimes        = wfs.fovInPixel/resAO
+
+
+
+sub_fold = "M{}_S{}_R{}_Z{}-{}_D{:d}".format(wfs.modulation,wfs.samp,wfs.nPxPup,wfs.zModes[0],wfs.zModes[1],D)
+train_fold = main_fold + sub_fold + "/train"
+val_fold   = main_fold + sub_fold + "/val"
+
+if not os.path.exists(train_fold):
+        os.makedirs(train_fold)
+if not os.path.exists(val_fold):
+        os.makedirs(val_fold)
 
 
 IM = None

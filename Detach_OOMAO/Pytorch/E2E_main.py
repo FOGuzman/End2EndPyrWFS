@@ -43,7 +43,7 @@ parser.add_argument('--zModes', default=[2,36], type=int, help='Reconstruction Z
 parser.add_argument('--batchSize', default=1, type=int, help='Pupil Resolution')
 parser.add_argument('--PupilConstrain', default=0, type=int, help='Limit information only on pupils of PyrWFS')
 parser.add_argument('--ReadoutNoise', default=0, type=float)
-parser.add_argument('--PhotonNoise', default=1, type=float)
+parser.add_argument('--PhotonNoise', default=0, type=float)
 parser.add_argument('--nPhotonBackground', default=0, type=float)
 parser.add_argument('--quantumEfficiency', default=1, type=float)
 
@@ -59,11 +59,13 @@ wfs.ModPhasor = CreateModulationPhasor(wfs)
 
 
 ## Network parameters
-train_fold = "./dataset/train"
-val_fold   = "./dataset/val"
-model_path = "./model/checkpoint"
+main_fold = "./dataset/"
+sub_fold = "M{}_S{}_R{}_Z{}-{}_D{:d}".format(wfs.modulation,wfs.samp,wfs.nPxPup,wfs.zModes[0],wfs.zModes[1],8)
+train_fold = main_fold + sub_fold + "/train"
+val_fold   = main_fold + sub_fold + "/val"
+model_path = "./model/base/checkpoint"
 result_path = "./results"
-log_path   = "./logs"
+log_path   = "./model/base"
 load_train = 0
 nEpochs    = 120
 lr         = 0.002

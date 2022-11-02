@@ -4,11 +4,10 @@ clear all
 preFold = "../Preconditioners/OL1_R128_M0_RMSE0.04296_Epoch_99.mat";
 
 binning       = 1;
-D             = 1.5;
+D             = 8;
 modulation    = 0;
 nLenslet      = 16;
 resAO         = 2*nLenslet+1;
-r0            = 0.8;
 L0            = 25;
 fR0           = 1;
 noiseVariance = 0.7;
@@ -55,9 +54,9 @@ load(preFold);OL1_trained = OL1;
     ,modulation,rooftop,alpha,pupil,OL1_trained,0);
         
 %% Meas
-r0            = 0.06;
+r0            = 0.1;
 ReadoutNoise = 0;
-PhotonNoise = 1;
+PhotonNoise = 0;
 nPhotonBackground = 1;
 quantumEfficiency = 1;
 
