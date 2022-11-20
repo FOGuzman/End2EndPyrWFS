@@ -269,7 +269,6 @@ def Pro2OptPyrNoMod_torch(phaseMap,OL1,wfs):
     PyrQ  = torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
     pyrMask = torch.unsqueeze(wfs.pyrMask,0)  
     pupil = wfs.pupil  
-    I4Q4 =  torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
     pyrPupil = pupil*torch.exp(1j*phaseMap)
     subscale = 1/(2*wfs.samp)
     sx = torch.round(wfs.fovInPixel*subscale).to(torch.int16)   

@@ -4,11 +4,10 @@ clear all
 preFold = "../Preconditioners/OL1_R128_M0_RMSE0.04296_Epoch_99.mat";
 
 binning       = 1;
-D             = 1.5;
-modulation    = 1;
+D             = 8;
+modulation    = 0;
 nLenslet      = 16;
 resAO         = 2*nLenslet+1;
-r0            = 0.8;
 L0            = 25;
 fR0           = 1;
 noiseVariance = 0.7;
@@ -25,9 +24,10 @@ nTimes        = fovInPixel/resAO;
 N             = 2*Samp*nPxPup;
 L             = (N-1)*D/(nPxPup-1);
 pupil         = CreatePupil(nPxPup,"disc");
-jModes = [2:36];
+jModesc = [2:4,6:7,10:12,15:18,21:25,28:33,36:42,45:52,55:63,66:75,78:87,91:102,...
+    105:117,120:133,136:299];
 
-
+jModes = [2:300];
 
 %% Pyramid calibration
 modes = CreateZernikePolynomials(nPxPup,jModes,pupil~=0);
@@ -51,14 +51,17 @@ load(preFold);OL1_trained = OL1;
 [NetCM,NetI_0] = PyrCalibration(jModes,modes,flatMode,fovInPixel,nPxPup,Samp...
     ,modulation,rooftop,alpha,pupil,OL1_trained,1);
 
-[PyrCM,PyrI_0] = PyrCalibration(jModes,modes,flatMode,fovInPixel,nPxPup,Samp...
+[PyrCM,PyrI_0,PyrIM] = PyrCalibration(jModes,modes,flatMode,fovInPixel,nPxPup,Samp...
     ,modulation,rooftop,alpha,pupil,OL1_trained,0);
         
+plot(jModes,diag(PyrIM'*PyrIM),'r')
+hold on
+plot(jModesc+1,diag(PyrIM(:,jModesc)'*PyrIM(:,jModesc)),'b')
 %% Meas
-r0            = 0.06;
+r0            = 0.1;
 ReadoutNoise = 0;
-PhotonNoise = 1;
-nPhotonBackground = 0.2*max(y);
+PhotonNoise = 0;
+nPhotonBackground = 1;
 quantumEfficiency = 1;
 
 [x,Zg] = GenerateFourierPhase(nLenslet,D,binning,r0,L0,fR0,modulation,...
