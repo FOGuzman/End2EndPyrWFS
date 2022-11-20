@@ -53,14 +53,13 @@ load(preFold);OL1_trained = OL1;
     ,modulation,rooftop,alpha,pupil,OL1_trained,0);
         
 %% Meas
-r0            = 0.3;
-ReadoutNoise = 1;
-PhotonNoise = 1;
+r0            = 1.1;
+ReadoutNoise = 0;
+PhotonNoise = 0;
 nPhotonBackground = 0.1;
 quantumEfficiency = 1;
 atm = GenerateAtmosphereParameters(nLenslet,D,binning,r0,L0,fR0,modulation,fovInPixel,resAO,Samp,nPxPup,pupil);
 
-%%
 [x,Zg] = ComputePhaseScreen(atm,PhaseCM);
 % [x,Zg] = GenerateFourierPhase(nLenslet,D,binning,r0,L0,fR0,modulation,...
 %     fovInPixel,resAO,Samp,nPxPup,pupil,jModes,modes,PhaseCM);
