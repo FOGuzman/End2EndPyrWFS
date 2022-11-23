@@ -37,6 +37,7 @@ parser = argparse.ArgumentParser(description='Setting, compressive rate, size, a
 
 parser.add_argument('--modulation', default=1, type=int, help='Pyramid modulation')
 parser.add_argument('--samp', default=2, type=int, help='Sampling')
+parser.add_argument('--D', default=8, type=int, help='Telescope Diameter [m]')
 parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=float)
 parser.add_argument('--alpha', default=pi/2, type=float)
@@ -63,7 +64,7 @@ L0            = 25
 fR0           = 1
 noiseVariance = 0.7
 n_lvl         = 0.1
-D             = 8
+D             = wfs.D
 nTimes        = wfs.fovInPixel/resAO
 
 
@@ -92,22 +93,26 @@ for k in range(len(wfs.jModes)):
 CM = torch.linalg.pinv(IM)
 
 #%% Start loop
-
+t0 = time.time()
 for k in range(tData):
     r0            = random.uniform(Rs[0], Rs[1])
-    phaseMap,Zgt = GenerateFourierPhaseXY(r0,L0,D,resAO,nLenslet,nTimes,n_lvl,noiseVariance,CM,wfs)
-    phaseMap = torch.unsqueeze(torch.tensor(phaseMap),0)
+    atm = GetTurbulenceParameters(wfs,resAO,nLenslet,r0,L0,fR0,noiseVariance,nTimes,n_lvl)
+    phaseMap,Zgt = GetPhaseMapAndZernike(atm,CM)
     name = train_fold + "/data_{}.mat".format(k)
     scio.savemat(name, {'x': phaseMap.numpy(),'Zgt': Zgt.numpy()})
     if k%100 == 0:
-        print("Train data ({}/{}) created".format(k+1,tData))
+        t1 = time.time()
+        print("Train data ({}/{}) created Avg. time per data {:.2f}ms".format(k,tData,(t1-t0)*10))
+        t0 = time.time()
     
-
+t0 = time.time()
 for k in range(vData):
     r0            = random.uniform(Rs[0], Rs[1])
-    phaseMap,Zgt = GenerateFourierPhaseXY(r0,L0,D,resAO,nLenslet,nTimes,n_lvl,noiseVariance,CM,wfs)
-    phaseMap = torch.unsqueeze(torch.tensor(phaseMap),0)
+    atm = GetTurbulenceParameters(wfs,resAO,nLenslet,r0,L0,fR0,noiseVariance,nTimes,n_lvl)
+    phaseMap,Zgt = GetPhaseMapAndZernike(atm,CM)
     name = val_fold + "/data_{}.mat".format(k)
     scio.savemat(name, {'x': phaseMap.numpy(),'Zgt': Zgt.numpy()})
     if k%100 == 0:
-        print("Validation data ({}/{}) created".format(k+1,vData))    
+       t1 = time.time()
+       print("Validation data ({}/{}) created Avg. time per data {:.2f}ms".format(k,vData,(t1-t0)*10)) 
+       t0 = time.time()

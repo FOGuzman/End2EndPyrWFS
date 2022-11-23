@@ -25,7 +25,7 @@ N             = 2*Samp*nPxPup;
 L             = (N-1)*D/(nPxPup-1);
 pupil         = CreatePupil(nPxPup,"disc");
 
-jModes = [2:60];
+jModes = [2:200];
 
 %% Pyramid calibration
 modes = CreateZernikePolynomials(nPxPup,jModes,pupil~=0);
@@ -34,14 +34,7 @@ flatMode = CreateZernikePolynomials(nPxPup,1,pupil~=0);
 
 %% Test
 % Phase inversion
-IM = [];     
-
-for k = 1:length(jModes)
-
-imMode = reshape(modes(:,k),[nPxPup nPxPup]);
-IM = [IM imMode(:)];
-end
-PhaseCM = pinv(IM);
+PhaseCM = pinv(modes);
 
 load(preFold);OL1_trained = OL1;
 %OL1_trained = 20*rand(512,512);
@@ -61,8 +54,8 @@ quantumEfficiency = 1;
 atm = GenerateAtmosphereParameters(nLenslet,D,binning,r0,L0,fR0,modulation,fovInPixel,resAO,Samp,nPxPup,pupil);
 rng(666)
 [x,Zg] = ComputePhaseScreen(atm,PhaseCM);
-% [x,Zg] = GenerateFourierPhase(nLenslet,D,binning,r0,L0,fR0,modulation,...
-%     fovInPixel,resAO,Samp,nPxPup,pupil,jModes,modes,PhaseCM);
+[x,Zg] = GenerateFourierPhase(nLenslet,D,binning,r0,L0,fR0,modulation,...
+    fovInPixel,resAO,Samp,nPxPup,pupil,jModes,modes,PhaseCM);
 
 y = PropagatePyr(fovInPixel,x,Samp,modulation,rooftop,alpha,pupil,nPxPup,OL1_trained,1);
 if PhotonNoise

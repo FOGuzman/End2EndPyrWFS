@@ -160,9 +160,79 @@ def graduatedHeaviside(x,n):
     return(out)
 
 
+def GetTurbulenceParameters(wfs,resAO,nLenslet,r0,L0,fR0,noiseVariance,nTimes,n_lvl):
+    Samp = wfs.samp
+    nPxPup = wfs.nPxPup
+    modulation = wfs.modulation
+    binning = 1
+    D = wfs.D
+    N             = 2*Samp*nPxPup;
+    L             = (N-1)*D/(nPxPup-1)
+    fc            = 1/binning*0.5*(nLenslet)/D
+    
+    fx,fy = freqspace(resAO,"meshgrid")
+    fx = fx*fc + 1e-7
+    fy = fy*fc + 1e-7
+    Rx, Ry    = PerformRxRy(fx,fy,fc,nLenslet+1,D,r0,L0,fR0,modulation,binning,noiseVariance)
+    psdFit    = fittingPSD(fx,fy,fc,"square",nTimes,r0,L0,fR0,D)/r0**(-5/3)
+    psdNoise  = noisePSD(fx,fy,fc,Rx,Ry,noiseVariance,D)/noiseVariance
+    
+    fxExt,fyExt = freqspace(np.size(fx,1)*nTimes,"meshgrid")
+    fxExt = fxExt*fc*nTimes;
+    fyExt = fyExt*fc*nTimes;
+    index = np.logical_and(np.absolute(fxExt)<fc,np.absolute(fyExt)<fc)
+    
+    SxAv,SyAv = SxyAv(fx,fy,D,nLenslet)
+    
+    psdAO_mean = np.zeros((np.size(fxExt,0),np.size(fxExt,1)))
+    aSlPSD = anisoServoLagPSD(fx,fy,fc,Rx,Ry,SxAv,SyAv,r0,L0,fR0,D)
+    psdFact = aSlPSD  + psdNoise*np.mean(n_lvl)
+    psdAO_mean[index] = psdFact.flatten()
+    psdAO_mean = psdAO_mean + psdFit*r0**(-5/3)
+    
+    fourierSampling = 1/L;
+    
+    fx,fy = freqspace(N,"meshgrid")
+    fr,a  = cart2pol(fx,fy)
+    fr    = np.fft.fftshift(fr*(N-1)/L/2)
+    idx = np.where(fr.flatten() == 0)
+    idx = idx[0][0]+1
+    N = np.int16(N)
+    nPxPup = np.int32(nPxPup)
+    atm = {
+   "psdAO_mean": psdAO_mean,
+   "N": N,
+   "fourierSampling": fourierSampling,
+   "idx": idx,
+   "pupil": wfs.pupil,
+   "nPxPup": nPxPup
+    }
+    return(atm)
+
+def GetPhaseMapAndZernike(atm,CM):
+    psdAO_mean = atm['psdAO_mean']
+    N = atm['N']
+    fourierSampling = atm['fourierSampling']
+    idx = atm['idx']
+    pupil = atm['pupil']
+    nPxPup = atm['nPxPup']
+    
+    phaseMap = np.fft.ifft2(idx*np.sqrt(np.fft.fftshift(psdAO_mean))*np.fft.fft2(np.random.randn(N,N))/N)*fourierSampling
+    phaseMap = phaseMap.real*N**2
+    phaseMap = pupil*phaseMap[0:nPxPup,0:nPxPup]
+    Ze = np.matmul(CM,torch.reshape(torch.tensor(phaseMap),[-1]))
+    return(phaseMap,Ze)
 
 
-
+def GetPhaseMapAndZernike_CUDA(psdAO_mean,N,fourierSampling,idx,pupil,nPxPup,CM):
+    n = N.type(torch.int16)
+    randMap = torch.cuda.FloatTensor(torch.Size((n,n)))
+    randMap = torch.randn((n,n),out=randMap)
+    phaseMap = torch.fft.ifft2(idx*torch.sqrt(torch.fft.fftshift(psdAO_mean))*torch.fft.fft2(randMap)/N)*fourierSampling
+    phaseMap = phaseMap.real*N**2
+    phaseMap = pupil*phaseMap[0:nPxPup,0:nPxPup]
+    Ze = torch.matmul(CM,torch.reshape(phaseMap,[-1]))
+    return(phaseMap,Ze)
 
 
 
@@ -192,9 +262,11 @@ def GenerateFourierPhase(pupil,resAO,nLenslet,D,r0,L0,fR0,modulation,binning,noi
     fx,fy = freqspace(N,"meshgrid")
     fr,a  = cart2pol(fx,fy)
     fr    = np.fft.fftshift(fr*(N-1)/L/2)
+    idx = np.where(fr.flatten() == 0)
+    idx = idx[0][0]+1
     N = np.int16(N)
     nPxPup = np.int32(nPxPup)
-    phaseMap = np.fft.ifft2(np.sqrt(np.fft.fftshift(psdAO_mean))*np.fft.fft2(np.random.randn(N,N))/N)*fourierSampling
+    phaseMap = np.fft.ifft2(idx*np.sqrt(np.fft.fftshift(psdAO_mean))*np.fft.fft2(np.random.randn(N,N))/N)*fourierSampling
     phaseMap = phaseMap.real*N**2
     phaseMap = pupil*phaseMap[0:nPxPup,0:nPxPup]
     return(phaseMap)  

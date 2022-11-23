@@ -38,7 +38,7 @@ fourierSampling = 1./L;
 [fx,fy] = freqspace(N,'meshgrid');
 [~,fr]  = cart2pol(fx,fy);
 fr      = fftshift(fr.*(N-1)/L./2);
-[idx]           = find(fr==0);
+idx     = find(fr==0);
 
 phaseMap = real(ifft2(idx.*sqrt(fftshift(psdAO_mean)).*fft2(randn(N))./N).*fourierSampling).*N.^2;
 phaseMap = pupil.*phaseMap(1:nPxPup,1:nPxPup);

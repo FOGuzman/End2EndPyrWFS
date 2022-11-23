@@ -1,6 +1,8 @@
 function [fun] = CreateZernikePolynomials(nPxPup,jModes,pupilLogical)
+normZ = 0;
 u = nPxPup;
-u = 2.*[-(u-1)/2:(u)/2]/u;
+%u = 2.*[-(u-1)/2:(u)/2]/u;
+u = linspace(-1,1,u);
 v = u;
 [x,y] = meshgrid(u,v);
 [o,r] = cart2pol(x,y) ;
@@ -43,6 +45,9 @@ for counti=1:size(mode,1)
 
     end
 end
+
+
+nollNorm = (sqrt((2-(mf==0)).*(nf+1)))';
 nv = nf;
 mv = mf;
 nf  = length(jModes);
@@ -73,7 +78,9 @@ m = mv(cpt);
 fun(pupilLogical,cpt) = sqrt(n+1).*R_fun(r,n,m).*sqrt(2).*sin(m.*o);
 end
 
-
+if normZ == 1
+    fun = fun*diag(1./nollNorm);
+end
 
 end
 

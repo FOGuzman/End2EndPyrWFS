@@ -115,7 +115,7 @@ def CreateZernikePolynomials(wfs):
     jModes = wfs.jModes
     pupilLogical = wfs.pupilLogical
     u = nPxPup
-    u = 2*np.arange(-(u-1)/2,(u)/2)/u
+    u = np.linspace(-1,1,u)
     v = u
     x,y = np.meshgrid(u,v)
     r,o = cart2pol(x,y) 
