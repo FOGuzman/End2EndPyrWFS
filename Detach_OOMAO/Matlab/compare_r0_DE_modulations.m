@@ -1,7 +1,7 @@
 addpath functions
 clear all;clc
 
-preFold = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.029_Epoch_85.mat";
+preFold = "../Preconditioners/nocap/l1/checkpoint/OL1_R128_M0_RMSE0.02862_Epoch_97.mat";
 
 
 binning       = 1;
@@ -25,9 +25,9 @@ pupil         = CreatePupil(nPxPup,"disc");
 jModes        = [2:60];
 
 %% Test parameters
-saveFold = "../Preconditioners/nocap/base/";
-tpr0  = 60;    % test per r0
-D_R0s = [80 60 50 40 30 20 10 8 6];
+saveFold = "../Preconditioners/nocap/l1/";
+tpr0  = 1200;    % test per r0
+D_R0s = [90 80 70 60 40 30 20 10 6];
 R0s = D./D_R0s;
 rjumps = length(R0s);
 Mods = [0 1 2];
@@ -91,8 +91,8 @@ r0_v_stdRMSE_pyr = zeros(1,rjumps);
 r0_v_stdRMSE_de = zeros(1,rjumps);
 for rc = 1:rjumps
 r0            = R0s(rc);
-ReadoutNoise = 0;
-PhotonNoise = 0;
+ReadoutNoise = 0.4;
+PhotonNoise = 1;
 nPhotonBackground = 0.1;
 quantumEfficiency = 1;
 atm = GenerateAtmosphereParameters(nLenslet,D,binning,r0,L0,fR0,modulation,fovInPixel,resAO,Samp,nPxPup,pupil);
@@ -141,7 +141,10 @@ R(mc).meanRMSEpyr = r0_v_meanRMSE_pyr;
 R(mc).stdRMSEpyr = r0_v_stdRMSE_pyr;
 R(mc).meanRMSEde = r0_v_meanRMSE_de;
 R(mc).stdRMSEde = r0_v_stdRMSE_de;
-
+R(mc).ReadoutNoise = ReadoutNoise;
+R(mc).PhotonNoise = PhotonNoise;
+R(mc).nPhotonBackground = nPhotonBackground;
+R(mc).quantumEfficiency = quantumEfficiency;
 
 
 [x,Zg] = ComputePhaseScreen(atm,PhaseCM);
@@ -155,7 +158,11 @@ Net_y = y/sum(y(:));
 R(mc).ExampleMeas = Net_y;
 end
 
-save(saveFold+"rmseResults.mat",'R')
+save(saveFold+"rmseResults_noise.mat",'R')
 
 %% Plot
 compare_r0_DE_modulations_plot();
+
+fold = "./figures/";
+name = "R0_Result_Noise_trained_l1.pdf";
+exportgraphics(fig,fold+name)

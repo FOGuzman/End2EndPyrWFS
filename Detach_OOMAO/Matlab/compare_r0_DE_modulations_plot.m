@@ -1,8 +1,6 @@
-clear all; clc
-
 %%
-saveFold = "../Preconditioners/nocap/base/";
-load(saveFold+"rmseResults.mat")
+% saveFold = "../Preconditioners/nocap/pnoise/";
+% load(saveFold+"rmseResults.mat")
 
 x = R(1).D_R0s;
 
@@ -20,7 +18,7 @@ lbltxt{4} = sprintf("Pyr+DE Mod $= %i\\lambda/D_0$",R(1).modulation);
 lbltxt{5} = sprintf("Pyr+DE Mod $= %i\\lambda/D_0$",R(2).modulation);
 lbltxt{6} = sprintf("Pyr+DE Mod $= %i\\lambda/D_0$",R(3).modulation);
 
-figure('Color','w','Position',[607 316 680 547])
+fig = figure('Color','w','Position',[607 316 680 547]);
 % ha = tight_subplot(1,2,[.0 .06],[0.12 .03],[.01 .01]);
 % axes(ha(1));
 % imagesc(R(1).ExampleMeas);colormap jet;axis off
@@ -36,3 +34,4 @@ set(gca,'XDir','reverse','FontSize',15,'TickLabelInterpreter','latex')
 xlabel('$D/r_0$','interpreter','latex','FontSize',18)
 ylabel('RMSE','interpreter','latex','FontSize',18)
 legend(lbltxt,'interpreter','latex')
+xlim([min(x) max(x)])

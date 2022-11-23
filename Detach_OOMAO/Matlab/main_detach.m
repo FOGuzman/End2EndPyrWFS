@@ -1,11 +1,11 @@
 addpath functions
 clear all
 
-preFold = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.029_Epoch_85.mat";
+preFold = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
 
 binning       = 1;
 D             = 8;
-modulation    = 1;
+modulation    = 0;
 nLenslet      = 16;
 resAO         = 2*nLenslet+1;
 L0            = 25;
@@ -53,13 +53,13 @@ load(preFold);OL1_trained = OL1;
     ,modulation,rooftop,alpha,pupil,OL1_trained,0);
         
 %% Meas
-r0            = 1.1;
-ReadoutNoise = 0;
-PhotonNoise = 0;
+r0            = 0.8;
+ReadoutNoise = 0.;
+PhotonNoise = 1;
 nPhotonBackground = 0.1;
 quantumEfficiency = 1;
 atm = GenerateAtmosphereParameters(nLenslet,D,binning,r0,L0,fR0,modulation,fovInPixel,resAO,Samp,nPxPup,pupil);
-
+rng(666)
 [x,Zg] = ComputePhaseScreen(atm,PhaseCM);
 % [x,Zg] = GenerateFourierPhase(nLenslet,D,binning,r0,L0,fR0,modulation,...
 %     fovInPixel,resAO,Samp,nPxPup,pupil,jModes,modes,PhaseCM);

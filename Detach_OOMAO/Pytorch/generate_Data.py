@@ -1,6 +1,4 @@
 from loadData import Imgdataset
-from torch.utils.data import DataLoader
-from models_generalized import kNet
 import torch.optim as optim
 import torch.nn as nn
 import torch
@@ -28,8 +26,8 @@ n_gpu = torch.cuda.device_count()
 print(torch.cuda.is_available())
 print('The number of GPU is {}'.format(n_gpu))
 
-tData = 100
-vData = 1
+tData = 10000
+vData = 1000
 Rs = [0.2,1.2]
 main_fold = "./dataset/"
 
@@ -37,12 +35,12 @@ main_fold = "./dataset/"
 
 parser = argparse.ArgumentParser(description='Setting, compressive rate, size, and mode')
 
-parser.add_argument('--modulation', default=0, type=int, help='Pyramid modulation')
+parser.add_argument('--modulation', default=1, type=int, help='Pyramid modulation')
 parser.add_argument('--samp', default=2, type=int, help='Sampling')
-parser.add_argument('--nPxPup', default=140, type=int, help='Pupil Resolution')
+parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=float)
 parser.add_argument('--alpha', default=pi/2, type=float)
-parser.add_argument('--zModes', default=[2,16], type=int, help='Reconstruction Zernikes')
+parser.add_argument('--zModes', default=[2,26], type=int, help='Reconstruction Zernikes')
 wfs = parser.parse_args()
 
 wfs.fovInPixel    = wfs.nPxPup*2*wfs.samp 
@@ -70,7 +68,7 @@ nTimes        = wfs.fovInPixel/resAO
 
 
 
-sub_fold = "M{}_S{}_R{}_Z{}-{}_D{:d}".format(wfs.modulation,wfs.samp,wfs.nPxPup,wfs.zModes[0],wfs.zModes[1],D)
+sub_fold = "S{}_R{}_Z{}-{}_D{:d}".format(wfs.samp,wfs.nPxPup,wfs.zModes[0],wfs.zModes[1],D)
 train_fold = main_fold + sub_fold + "/train"
 val_fold   = main_fold + sub_fold + "/val"
 

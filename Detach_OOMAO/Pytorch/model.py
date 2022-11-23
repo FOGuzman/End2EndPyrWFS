@@ -110,7 +110,7 @@ class PhaseConstraint(object):
     def __call__(self,module):
         if hasattr(module,'OL1'):
             w=module.OL1.data
-            w=w.clamp(-6*math.pi,6*math.pi)
+            w=w.clamp(-8*math.pi,8*math.pi)
             module.OL1.data=w    
        
             
