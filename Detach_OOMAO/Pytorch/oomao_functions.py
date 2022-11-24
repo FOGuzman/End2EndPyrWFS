@@ -143,16 +143,18 @@ def CreateZernikePolynomials(wfs):
     mv = np.array(mf)
     nf  = len(jModes)
     fun = np.zeros((np.size(r),nf))
+    r = np.transpose(r)
+    o = np.transpose(o)
     r = r[pupilLogical]
     o = o[pupilLogical]
-    
+    pupilVec = pupilLogical.flatten()
     
     def R_fun(r,n,m):
         R=np.zeros(np.size(r))
         sran = np.int((n-m)/2)+1
         for s in range(sran):
-            Rn = (-1)**s*np.prod(np.arange(1,(n-s)+1))*r**(n-2*s)
-            Rd = (np.prod(np.arange(1,s+1))*np.prod(np.arange(1,((n+m)/2-s+1)))*np.prod(np.arange(1,((n-m)/2-s)+1)))
+            Rn = (-1)**s*np.prod(np.arange(1,(n-s)+1,dtype=float))*r**(n-2*s)
+            Rd = (np.prod(np.arange(1,s+1))*np.prod(np.arange(1,((n+m)/2-s+1),dtype=float))*np.prod(np.arange(1,((n-m)/2-s)+1)))
             R = R + Rn/Rd
         return(R)    
     

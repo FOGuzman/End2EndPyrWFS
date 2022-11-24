@@ -25,7 +25,7 @@ N             = 2*Samp*nPxPup;
 L             = (N-1)*D/(nPxPup-1);
 pupil         = CreatePupil(nPxPup,"disc");
 
-jModes = [2:200];
+jModes = [2:300];
 
 %% Pyramid calibration
 modes = CreateZernikePolynomials(nPxPup,jModes,pupil~=0);
@@ -46,16 +46,14 @@ load(preFold);OL1_trained = OL1;
     ,modulation,rooftop,alpha,pupil,OL1_trained,0);
         
 %% Meas
-r0            = 0.8;
+r0            = 0.2;
 ReadoutNoise = 0.;
-PhotonNoise = 1;
+PhotonNoise = 0;
 nPhotonBackground = 0.1;
 quantumEfficiency = 1;
 atm = GenerateAtmosphereParameters(nLenslet,D,binning,r0,L0,fR0,modulation,fovInPixel,resAO,Samp,nPxPup,pupil);
-rng(666)
 [x,Zg] = ComputePhaseScreen(atm,PhaseCM);
-[x,Zg] = GenerateFourierPhase(nLenslet,D,binning,r0,L0,fR0,modulation,...
-    fovInPixel,resAO,Samp,nPxPup,pupil,jModes,modes,PhaseCM);
+
 
 y = PropagatePyr(fovInPixel,x,Samp,modulation,rooftop,alpha,pupil,nPxPup,OL1_trained,1);
 if PhotonNoise
@@ -85,10 +83,10 @@ subplot(342)
 imagesc(reshape(modes*Zg,[nPxPup nPxPup]));axis image;colorbar
 title('Phase inversion')
 subplot(343)
-imagesc(reshape(modes*PyrZe,[nPxPup nPxPup]));axis image;colorbar
+imagesc(reshape(modes*PyrZe*24,[nPxPup nPxPup]));axis image;colorbar
 title('Pyramid estimation')
 subplot(344)
-imagesc(reshape(modes*NetZe,[nPxPup nPxPup]));axis image;colorbar
+imagesc(reshape(modes*NetZe*24,[nPxPup nPxPup]));axis image;colorbar
 title('Network estimation')
 subplot(345)
 imagesc(Net_y);axis image;colorbar
