@@ -4,7 +4,7 @@ clear all
 preFold = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
 
 binning       = 1;
-D             = 8;
+D             = 1.5;
 modulation    = 0;
 nLenslet      = 16;
 resAO         = 2*nLenslet+1;
@@ -25,7 +25,7 @@ N             = 2*Samp*nPxPup;
 L             = (N-1)*D/(nPxPup-1);
 pupil         = CreatePupil(nPxPup,"disc");
 
-jModes = [2:300];
+jModes = [2:64];
 
 %% Pyramid calibration
 modes = CreateZernikePolynomials(nPxPup,jModes,pupil~=0);
@@ -49,7 +49,7 @@ load(preFold);OL1_trained = OL1;
 r0            = 0.2;
 ReadoutNoise = 0.;
 PhotonNoise = 0;
-nPhotonBackground = 0.1;
+nPhotonBackground = 0;
 quantumEfficiency = 1;
 atm = GenerateAtmosphereParameters(nLenslet,D,binning,r0,L0,fR0,modulation,fovInPixel,resAO,Samp,nPxPup,pupil);
 [x,Zg] = ComputePhaseScreen(atm,PhaseCM);
@@ -83,10 +83,10 @@ subplot(342)
 imagesc(reshape(modes*Zg,[nPxPup nPxPup]));axis image;colorbar
 title('Phase inversion')
 subplot(343)
-imagesc(reshape(modes*PyrZe*24,[nPxPup nPxPup]));axis image;colorbar
+imagesc(reshape(modes*PyrZe,[nPxPup nPxPup]));axis image;colorbar
 title('Pyramid estimation')
 subplot(344)
-imagesc(reshape(modes*NetZe*24,[nPxPup nPxPup]));axis image;colorbar
+imagesc(reshape(modes*NetZe,[nPxPup nPxPup]));axis image;colorbar
 title('Network estimation')
 subplot(345)
 imagesc(Net_y);axis image;colorbar
