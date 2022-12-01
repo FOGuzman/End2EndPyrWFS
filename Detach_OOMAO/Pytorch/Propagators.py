@@ -98,15 +98,16 @@ def Prop2OptimizeDWFS_torch(phaseMap,DE,wfs):
     subscale = 1/(2*wfs.samp)
     sx = torch.round(wfs.fovInPixel*subscale).to(torch.int16)   
     npv = ((wfs.fovInPixel-sx)/2).to(torch.int16)
-    PyrQ = torch.unsqueeze(torch.nn.functional.pad(pyrPupil,(npv,npv,npv,npv), "constant", 0),1)
+    PyrQ = torch.nn.functional.pad(pyrPupil,(npv,npv,npv,npv), "constant", 0)
     if nTheta > 0:
         I4Q4 =  torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
         ModPhasor = torch.permute(wfs.ModPhasor,(2,0,1))
         buf = PyrQ*ModPhasor
         buf = torch.fft.fft2(buf)*DE 
         buf = torch.fft.fft2(buf)      
-        I4Q4 = torch.sum(torch.abs(buf)**2 ,1) 
+        I4Q4 = torch.sum(torch.abs(buf)**2 ,2) 
         I4Q = I4Q4/nTheta
+        I4Q = I4Q
     else:
         buf = torch.fft.fft2(PyrQ)*DE
         I4Q = torch.abs(torch.fft.fft2(buf))**2

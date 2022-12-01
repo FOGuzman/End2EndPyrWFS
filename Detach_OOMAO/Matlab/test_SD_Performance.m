@@ -152,18 +152,27 @@ nTheta = round(2*pi*Samp*modulation);
 fftPhasor = GetModPhasor(nPxPup,Samp,modulation);
 for k = 1:length(jModes)
 x = reshape(modes(:,k),[nPxPup nPxPup]);
-Sv(m,k) = Sensitivity(x,nTheta,fftPhasor,mv,Samp,nPxPup,pupil);
-S1(m,k) = Sensitivity(x,nTheta,fftPhasor,m1,Samp,nPxPup,pupil);
-S2(m,k) = Sensitivity(x,nTheta,fftPhasor,m2,Samp,nPxPup,pupil);
+x1 = x/norm(x,2);
+Sv(m,k) = Sensitivity(x1,nTheta,fftPhasor,mv,Samp,nPxPup,pupil);
+S1(m,k) = Sensitivity(x1,nTheta,fftPhasor,m1,Samp,nPxPup,pupil);
+S2(m,k) = Sensitivity(x1,nTheta,fftPhasor,m2,Samp,nPxPup,pupil);
 
-Dv(m,k) = Linearity(x,nTheta,fftPhasor,mv,Samp,nPxPup,pupil);
-D1(m,k) = Linearity(x,nTheta,fftPhasor,m1,Samp,nPxPup,pupil);
-D2(m,k) = Linearity(x,nTheta,fftPhasor,m2,Samp,nPxPup,pupil);
+x2 = x/norm(x,2);
+Dv(m,k) = Linearity(x2,nTheta,fftPhasor,mv,Samp,nPxPup,pupil);
+D1(m,k) = Linearity(x2,nTheta,fftPhasor,m1,Samp,nPxPup,pupil);
+D2(m,k) = Linearity(x2,nTheta,fftPhasor,m2,Samp,nPxPup,pupil);
+
+
+SDv(m,k) = SDFactor(Sv(m,k),Dv(m,k),1.3);
+SD1(m,k) = SDFactor(S1(m,k),D1(m,k),1.3);
+SD2(m,k) = SDFactor(S2(m,k),D2(m,k),1.3);
 
 end
 
 end
-
+Dv = Dv.^-1;
+D1 = D1.^-1;
+D2 = D2.^-1;
 %%
 
 lbltxt{1} = sprintf("Pyr Mod $= %i\\lambda/D_0$",Mods(1));
@@ -209,69 +218,72 @@ lbltxt{6} = sprintf("Pyr+DE Mod $= %i\\lambda/D_0$",Mods(3));
 % set(gca,'XScale','log','YScale','log')
 % legend(lbltxt,'interpreter','latex')
 %% Fullplot
-ylimit = [floor(min(min([Dv(:) D1(:) D2(:)]))) ceil(max(max([Sv(:) S1(:) S2(:)])))+5 ];
-ylimit = [1e-2 1e2]
+ylimit = sort([floor(min(min([Dv(:) D1(:) D2(:)]))) ceil(max(max([Sv(:) S1(:) S2(:)])))+5 ]);
+% ylimit = [1e-2 1e2]
+
+lw = 1;
 fig = figure('Color','w','Position',[670 348 1065 624]);
 subplot(3,2,[1 3])
 hold on
-plot(1:length(jModes),Sv(1,:),'--r')
-plot(1:length(jModes),Sv(2,:),'--g')
-plot(1:length(jModes),Sv(3,:),'--b')
-plot(1:length(jModes),S1(1,:),'-r')
-plot(1:length(jModes),S1(2,:),'-g')
-plot(1:length(jModes),S1(3,:),'-b')
+plot(1:length(jModes),Sv(1,:),'--r','LineWidth',lw)
+plot(1:length(jModes),Sv(2,:),'--g','LineWidth',lw)
+plot(1:length(jModes),Sv(3,:),'--b','LineWidth',lw)
+plot(1:length(jModes),S1(1,:),'-r','LineWidth',lw)
+plot(1:length(jModes),S1(2,:),'-g','LineWidth',lw)
+plot(1:length(jModes),S1(3,:),'-b','LineWidth',lw)
 
-plot(1:length(jModes),Sv(1,:).*Dv(1,:),'--r')
-plot(1:length(jModes),Sv(2,:).*Dv(2,:),'--g')
-plot(1:length(jModes),Sv(3,:).*Dv(3,:),'--b')
-plot(1:length(jModes),S1(1,:).*D1(1,:),'-r')
-plot(1:length(jModes),S1(2,:).*D1(2,:),'-g')
-plot(1:length(jModes),S1(3,:).*D1(3,:),'-b')
+plot(1:length(jModes),SDv(1,:),'--r','LineWidth',lw)
+plot(1:length(jModes),SDv(2,:),'--g','LineWidth',lw)
+plot(1:length(jModes),SDv(3,:),'--b','LineWidth',lw)
+plot(1:length(jModes),SD1(1,:),'-r','LineWidth',lw)
+plot(1:length(jModes),SD1(2,:),'-g','LineWidth',lw)
+plot(1:length(jModes),SD1(3,:),'-b','LineWidth',lw)
 
-plot(1:length(jModes),Dv(1,:),'--r')
-plot(1:length(jModes),Dv(2,:),'--g')
-plot(1:length(jModes),Dv(3,:),'--b')
-plot(1:length(jModes),D1(1,:),'-r')
-plot(1:length(jModes),D1(2,:),'-g')
-plot(1:length(jModes),D1(3,:),'-b')
+plot(1:length(jModes),Dv(1,:),'--r','LineWidth',lw)
+plot(1:length(jModes),Dv(2,:),'--g','LineWidth',lw)
+plot(1:length(jModes),Dv(3,:),'--b','LineWidth',lw)
+plot(1:length(jModes),D1(1,:),'-r','LineWidth',lw)
+plot(1:length(jModes),D1(2,:),'-g','LineWidth',lw)
+plot(1:length(jModes),D1(3,:),'-b','LineWidth',lw)
 xlabel("Zernike radial order",'interpreter','latex')
-set(gca,'XScale','log','YScale','log','FontSize',14,'TickLabelInterpreter','latex')
+set(gca,'XScale','log','YScale','log','FontSize',14,'TickLabelInterpreter','latex','LineWidth',1)
 box on
-ylim(ylimit)
+% ylim(ylimit)
 
 subplot(3,2,[1 3]+1)
 hold on
-plot(1:length(jModes),Sv(1,:),'--r')
-plot(1:length(jModes),Sv(2,:),'--g')
-plot(1:length(jModes),Sv(3,:),'--b')
-plot(1:length(jModes),S2(1,:),'-r')
-plot(1:length(jModes),S2(2,:),'-g')
-plot(1:length(jModes),S2(3,:),'-b')
+plot(1:length(jModes),Sv(1,:),'--r','LineWidth',lw)
+plot(1:length(jModes),Sv(2,:),'--g','LineWidth',lw)
+plot(1:length(jModes),Sv(3,:),'--b','LineWidth',lw)
+plot(1:length(jModes),S2(1,:),'-r','LineWidth',lw)
+plot(1:length(jModes),S2(2,:),'-g','LineWidth',lw)
+plot(1:length(jModes),S2(3,:),'-b','LineWidth',lw)
 
-plot(1:length(jModes),Sv(1,:).*Dv(1,:),'--r')
-plot(1:length(jModes),Sv(2,:).*Dv(2,:),'--g')
-plot(1:length(jModes),Sv(3,:).*Dv(3,:),'--b')
-plot(1:length(jModes),S2(1,:).*D2(1,:),'-r')
-plot(1:length(jModes),S2(2,:).*D2(2,:),'-g')
-plot(1:length(jModes),S2(3,:).*D2(3,:),'-b')
+plot(1:length(jModes),SDv(1,:),'--r','LineWidth',lw)
+plot(1:length(jModes),SDv(2,:),'--g','LineWidth',lw)
+plot(1:length(jModes),SDv(3,:),'--b','LineWidth',lw)
+plot(1:length(jModes),SD2(1,:),'-r','LineWidth',lw)
+plot(1:length(jModes),SD2(2,:),'-g','LineWidth',lw)
+plot(1:length(jModes),SD2(3,:),'-b','LineWidth',lw)
 
-plot(1:length(jModes),Dv(1,:),'--r')
-plot(1:length(jModes),Dv(2,:),'--g')
-plot(1:length(jModes),Dv(3,:),'--b')
-plot(1:length(jModes),D2(1,:),'-r')
-plot(1:length(jModes),D2(2,:),'-g')
-plot(1:length(jModes),D2(3,:),'-b')
+plot(1:length(jModes),Dv(1,:),'--r','LineWidth',lw)
+plot(1:length(jModes),Dv(2,:),'--g','LineWidth',lw)
+plot(1:length(jModes),Dv(3,:),'--b','LineWidth',lw)
+plot(1:length(jModes),D2(1,:),'-r','LineWidth',lw)
+plot(1:length(jModes),D2(2,:),'-g','LineWidth',lw)
+plot(1:length(jModes),D2(3,:),'-b','LineWidth',lw)
 xlabel("Zernike radial order",'interpreter','latex')
-set(gca,'XScale','log','YScale','log','FontSize',14,'TickLabelInterpreter','latex')
+set(gca,'XScale','log','YScale','log','FontSize',14,'TickLabelInterpreter','latex','LineWidth',1)
 box on
-ylim(ylimit)
+%ylim(ylimit)
 leg = legend(lbltxt,'interpreter','latex','NumColumns',2,'Position',[0.3225 0.1883 0.3838 0.1046]);
 
 
 fold = "./figures/";
 name = "SD_Performance.pdf";
-exportgraphics(fig,fold+name)
+%exportgraphics(fig,fold+name)
 %% FUNCTIONS
+unwraper = @(x) unwrap(unwrap(x,[],2),[],1);
 
 function s = Sensitivity(x,nTheta,fftPhasor,pyrMask,Samp,nPxPup,pupil)
 fovInPixel = nPxPup*2*Samp;
@@ -333,7 +345,11 @@ f2 =  ifft2(fft2(Pup.*fftPhasor(:,:,k).*phi_i.^2).*fft2(Fm));
 ImqB = ImqB + (real(f1.*conj(f2)))/nTheta;
 end
 
-d = norm(ImqA-ImqB,2).^-1;
+d = norm(ImqA-ImqB,2);
 
 end
 
+
+function [sd] = SDFactor(s,d,nu)
+sd = s.^nu.*d.^(-1/nu);
+end
