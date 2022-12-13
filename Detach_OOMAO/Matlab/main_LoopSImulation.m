@@ -8,12 +8,12 @@ addpath(genpath(oomao_path))
 
 
 binning       = 1;
-D             = 1;
+D             = 8;
 modulation    = 1;
 nLenslet      = 16;
 resAO         = 2*nLenslet+1;
 L0            = 30;
-r0            = 0.1;
+r0            = 0.7;
 fR0           = 1;
 noiseVariance = 0.7;
 n_lvl         = 0.1;             % noise level in rad^2
@@ -30,7 +30,7 @@ N             = 2*Samp*nPxPup;
 L             = (N-1)*D/(nPxPup-1);
 pupil         = CreatePupil(nPxPup,"disc");
 
-jModes = [2:100];
+jModes = [2:200];
 
 %% Pyramid calibration
 modes = CreateZernikePolynomials(nPxPup,jModes,pupil~=0);
@@ -70,16 +70,19 @@ Alts = [4,10]*1e3;
 FR0s = [0.7,0.3];
 WS = [1,2];
 WD = [0,pi/4];
+s = RandStream('mt19937ar','Seed',15);
 ngs = source('wavelength',photometry.R);
 atm = atmosphere(photometry.R,r0,L0,'altitude',Alts,...
     'fractionnalR0',FR0s,...
     'windSpeed',WS,...
+    'randStream',s,...
     'windDirection',WD);
+
 wvlf = atm.wavelength/(2*pi)/1e-6;
 tel = telescope(D,...
     'fieldOfViewInArcMin',30,...
     'resolution',nPxPup,...
-    'samplingTime',1/200);
+    'samplingTime',1/300);
 tel = tel + atm;
 ngs = ngs.*tel
 +tel
@@ -246,8 +249,8 @@ end
 
 
 
-cmos.resolution = 124;
-cmos.nyquistSampling = 512;
-cmos.fieldStopSize = 10;
-sc1 = DetachImager(cmos,phi_res1);
-imagesc(sc1)
+% cmos.resolution = 124;
+% cmos.nyquistSampling = 16;
+% cmos.fieldStopSize = 20;
+% sc1 = DetachImager(cmos,phi_res1);
+% imagesc(sc1)
