@@ -2,12 +2,12 @@ addpath functions
 clear all;clc
 
 preFold = "../Preconditioners/nocap/l1/checkpoint/OL1_R128_M0_RMSE0.02862_Epoch_97.mat";
-%preFold = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
+preFold = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
 
 
 binning       = 1;
 D             = 8;
-r0            = 0.6;
+r0            = 0.3;
 nLenslet      = 16;
 resAO         = 2*nLenslet+1;
 L0            = 25;
@@ -26,12 +26,12 @@ pupil         = CreatePupil(nPxPup,"disc");
 jModes        = [2:60];
 
 %% Test parameters
-saveFold = "../Preconditioners/nocap/base/";
+saveFold = "../Preconditioners/nocap/pnoise/";
 tpr0  = 600;    % test per r0
 D_R0s = 20;
 R0s = D./D_R0s;
 njumps = 30;
-nLims = [0 4];
+nLims = [0 1];
 nInterval = linspace(nLims(1),nLims(2),njumps);
 Mods = [0 1 2];
 
@@ -154,20 +154,25 @@ end
 save(saveFold+"RNoisermseResults_noise.mat",'R')
 
 %% Plot
-% loadFold = "../Preconditioners/nocap/base/";
-% R1 =load(loadFold+"PNoisermseResults_noise.mat");R1=R1.R;
-% loadFold = "../Preconditioners/nocap/pnoise/";
-% R2 =load(loadFold+"PNoisermseResults_noise.mat");R2=R2.R;
-% mod = 3;
-% lbltxt{1} = sprintf("Pyr Mod $= %i\\lambda/D_0$",mod-1);
-% lbltxt{2} = sprintf("Pyr Mod + DE $= %i\\lambda/D_0$",mod-1);
-% lbltxt{3} = sprintf("Pyr Mod + DE* $= %i\\lambda/D_0$",mod-1);
-% fig = figure('Color','w');
-% errorbar(nInterval,R1(mod).meanRMSEpyr,R1(mod).stdRMSEpyr,'r','LineWidth',1)
-% hold on
-% errorbar(nInterval,R1(mod).meanRMSEde,R1(mod).stdRMSEde,'g','LineWidth',1)
-% errorbar(nInterval,R2(mod).meanRMSEde,R2(mod).stdRMSEde,'b','LineWidth',1)
-% xlabel("Photon noise",'Interpreter','latex')
-% ylabel("RMSE",'Interpreter','latex')
-% set(gca,'FontSize',13,'TickLabelInterpreter','latex','LineWidth',1)
-% leg = legend(lbltxt,'interpreter','latex','Location','northwest');
+loadFold = "../Preconditioners/nocap/base/";
+R1 =load(loadFold+"RNoisermseResults_noise.mat");R1=R1.R;
+loadFold = "../Preconditioners/nocap/pnoise/";
+R2 =load(loadFold+"RNoisermseResults_noise.mat");R2=R2.R;
+mod = 1;
+lbltxt{1} = sprintf("Pyr Mod $= %i\\lambda/D_0$",mod-1);
+lbltxt{2} = sprintf("Pyr Mod + DE $= %i\\lambda/D_0$",mod-1);
+lbltxt{3} = sprintf("Pyr Mod + DE* $= %i\\lambda/D_0$",mod-1);
+fig = figure('Color','w');
+errorbar(nInterval,R1(mod).meanRMSEpyr,R1(mod).stdRMSEpyr,'r','LineWidth',1)
+hold on
+errorbar(nInterval,R1(mod).meanRMSEde,R1(mod).stdRMSEde,'g','LineWidth',1)
+errorbar(nInterval,R2(mod).meanRMSEde,R2(mod).stdRMSEde,'b','LineWidth',1)
+xlabel("Readout noise",'Interpreter','latex')
+ylabel("RMSE",'Interpreter','latex')
+set(gca,'FontSize',13,'TickLabelInterpreter','latex','LineWidth',1)
+leg = legend(lbltxt,'interpreter','latex','Location','northwest');
+
+
+fold = "./figures/";
+name = "Rnoise_Performance.pdf";
+exportgraphics(fig,fold+name)

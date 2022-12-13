@@ -46,7 +46,7 @@ load(preFold);OL1_trained = OL1;
     ,modulation,rooftop,alpha,pupil,OL1_trained,0);
         
 %% Meas
-r0            = 0.2;
+r0            = 0.1;
 ReadoutNoise = 0.;
 PhotonNoise = 0;
 nPhotonBackground = 0;

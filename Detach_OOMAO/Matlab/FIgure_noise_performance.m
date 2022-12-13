@@ -7,7 +7,7 @@ preFold = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Ep
 
 binning       = 1;
 D             = 8;
-r0            = 0.6;
+r0            = 0.3;
 nLenslet      = 16;
 resAO         = 2*nLenslet+1;
 L0            = 25;
@@ -31,7 +31,7 @@ tpr0  = 600;    % test per r0
 D_R0s = 20;
 R0s = D./D_R0s;
 njumps = 30;
-nLims = [0 4];
+nLims = [0 1];
 nInterval = linspace(nLims(1),nLims(2),njumps);
 Mods = [0 1 2];
 
@@ -48,12 +48,6 @@ fprintf("]\n");
 
 %% Vectors and operators
 rmse = @(x,y) sqrt(mse(x(:),y(:)));
-
-
-
-
-
-
 
 
 
@@ -158,7 +152,7 @@ loadFold = "../Preconditioners/nocap/base/";
 R1 =load(loadFold+"PNoisermseResults_noise.mat");R1=R1.R;
 loadFold = "../Preconditioners/nocap/pnoise/";
 R2 =load(loadFold+"PNoisermseResults_noise.mat");R2=R2.R;
-mod = 3;
+mod = 1;
 lbltxt{1} = sprintf("Pyr Mod $= %i\\lambda/D_0$",mod-1);
 lbltxt{2} = sprintf("Pyr Mod + DE $= %i\\lambda/D_0$",mod-1);
 lbltxt{3} = sprintf("Pyr Mod + DE* $= %i\\lambda/D_0$",mod-1);
@@ -171,7 +165,8 @@ xlabel("Photon noise",'Interpreter','latex')
 ylabel("RMSE",'Interpreter','latex')
 set(gca,'FontSize',13,'TickLabelInterpreter','latex','LineWidth',1)
 leg = legend(lbltxt,'interpreter','latex','Location','northwest');
-
+% 
+% 
 fold = "./figures/";
 name = "Pnoise_Performance.pdf";
 exportgraphics(fig,fold+name)

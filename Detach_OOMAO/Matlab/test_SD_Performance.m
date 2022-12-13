@@ -281,7 +281,7 @@ leg = legend(lbltxt,'interpreter','latex','NumColumns',2,'Position',[0.3225 0.18
 
 fold = "./figures/";
 name = "SD_Performance.pdf";
-%exportgraphics(fig,fold+name)
+exportgraphics(fig,fold+name)
 %% FUNCTIONS
 unwraper = @(x) unwrap(unwrap(x,[],2),[],1);
 
