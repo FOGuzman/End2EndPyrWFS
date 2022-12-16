@@ -34,13 +34,13 @@ print('The number of GPU is {}'.format(n_gpu))
 
 parser = argparse.ArgumentParser(description='Setting, Pyramid Wavefron Sensor parameters')
 
-parser.add_argument('--modulation', default=1, type=int, help='Pyramid modulation')
+parser.add_argument('--modulation', default=2, type=int, help='Pyramid modulation')
 parser.add_argument('--samp', default=2, type=int, help='Sampling')
-parser.add_argument('--D', default=8, type=int, help='Telescope Diameter [m]')
-parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
+parser.add_argument('--D', default=3, type=int, help='Telescope Diameter [m]')
+parser.add_argument('--nPxPup', default=64, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=float)
 parser.add_argument('--alpha', default=pi/2, type=float)
-parser.add_argument('--zModes', default=[2,26], type=int, help='Reconstruction Zernikes')
+parser.add_argument('--zModes', default=[2,100], type=int, help='Reconstruction Zernikes')
 parser.add_argument('--batchSize', default=1, type=int, help='Pupil Resolution')
 parser.add_argument('--PupilConstrain', default=0, type=int, help='Limit information only on pupils of PyrWFS')
 parser.add_argument('--ReadoutNoise', default=0, type=float)
@@ -61,7 +61,7 @@ wfs.ModPhasor = CreateModulationPhasor(wfs)
 
 ## Network parameters
 main_fold = "./dataset/"
-sub_fold = "M{}_S{}_R{}_Z{}-{}_D{:d}".format(wfs.modulation,wfs.samp,wfs.nPxPup,wfs.zModes[0],wfs.zModes[1],wfs.D)
+sub_fold = "S{}_R{}_Z{}-{}_D{:d}".format(wfs.samp,wfs.nPxPup,wfs.zModes[0],wfs.zModes[1],wfs.D)
 train_fold = main_fold + sub_fold + "/train"
 val_fold   = main_fold + sub_fold + "/val"
 model_path = "./model/nocap/" + sub_fold + "/checkpoint"

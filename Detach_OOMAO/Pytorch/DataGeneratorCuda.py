@@ -26,22 +26,22 @@ n_gpu = torch.cuda.device_count()
 print(torch.cuda.is_available())
 print('The number of GPU is {}'.format(n_gpu))
 
-tData = 500
+tData = 5000
 vData = 500
 Rs = [0.2,1.2]
-main_fold = "./dataset_cuda_test/"
+main_fold = "./dataset/"
 
 
 
 parser = argparse.ArgumentParser(description='Setting, compressive rate, size, and mode')
 
-parser.add_argument('--modulation', default=1, type=int, help='Pyramid modulation')
+parser.add_argument('--modulation', default=2, type=int, help='Pyramid modulation')
 parser.add_argument('--samp', default=2, type=int, help='Sampling')
-parser.add_argument('--D', default=8, type=int, help='Telescope Diameter [m]')
-parser.add_argument('--nPxPup', default=268, type=int, help='Pupil Resolution')
+parser.add_argument('--D', default=3, type=int, help='Telescope Diameter [m]')
+parser.add_argument('--nPxPup', default=64, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=float)
 parser.add_argument('--alpha', default=pi/2, type=float)
-parser.add_argument('--zModes', default=[2,500], type=int, help='Reconstruction Zernikes')
+parser.add_argument('--zModes', default=[2,100], type=int, help='Reconstruction Zernikes')
 wfs = parser.parse_args()
 
 wfs.fovInPixel    = wfs.nPxPup*2*wfs.samp 
@@ -127,7 +127,7 @@ for k in range(vData):
     phaseMap = phaseMap.cpu()
     Zgt = Zgt.cpu()
     name = val_fold + "/data_{}.mat".format(k)
-    scio.savemat(name, {'x': phaseMap,'Zgt': Zgt.numpy()})
+    scio.savemat(name, {'x': phaseMap.numpy(),'Zgt': Zgt.numpy()})
     if k%100 == 0:
         t1 = time.time()
         print("Validation data ({}/{}) created Avg. time per data {:.2f}ms".format(k,vData,(t1-t0)*10)) 
