@@ -1,19 +1,20 @@
 close all;clear all; 
 addpath functions
-oomao_path = "/home/fg/Desktop/OOMAO/Vanilla_OOMAO/Simulations/oomao/OOMAO-master/OOMAO-master";
+oomao_path = "/home/fg/Desktop/OOMAO/";
 %preFold = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
 preFold = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.02807_Epoch_91.mat";
 
 addpath(genpath(oomao_path))
-
+vidName = "./loop_videos/OL1_R128_M0_RMSE0.02807_Epoch_91.mp4";
+saveVid = 0;
 %%
 binning       = 1;
-D             = 12;
+D             = 3;
 modulation    = 0;
 nLenslet      = 16;
 resAO         = 2*nLenslet+1;
-L0            = 30;
-r0            = 1;
+L0            = 20;
+r0            = 0.81;
 fR0           = 1;
 noiseVariance = 0.7;
 n_lvl         = 0.1;             % noise level in rad^2
@@ -52,13 +53,13 @@ load(preFold);OL1_trained = OL1;
         
 %% Loop parameters
 intMode = 1;
-numIter = 1000;
-gain = 0.7;
+numIter = 300;
+gain = 0.8;
 stroke = 10;
 
-cmos.resolution = 128;
+cmos.resolution = 256;
 cmos.nyquistSampling = 16;
-cmos.fieldStopSize = 10;
+cmos.fieldStopSize = 8;
 
 ReadoutNoise = 0.;
 PhotonNoise = 0;
@@ -67,11 +68,11 @@ quantumEfficiency = 1;
 
 ref_psf = DetachImager(cmos,reshape(flatMode,[nPxPup nPxPup]));
 %% OOMAO parameters
-Alts = [2,3]*1e3;
-FR0s = [0.6,0.4];
-WS = [5,10];
-WD = [0,pi/4];
-s = RandStream('mt19937ar','Seed',666);
+Alts = [2,3 7]*1e3;
+FR0s = [0.4,0.3 0.3];
+WS = [5,10 11];
+WD = [0,pi/4 pi/2];
+s = RandStream('mt19937ar','Seed',4);
 ngs = source('wavelength',photometry.R);
 atm = atmosphere(photometry.R,r0,L0,'altitude',Alts,...
     'fractionnalR0',FR0s,...
@@ -81,7 +82,7 @@ atm = atmosphere(photometry.R,r0,L0,'altitude',Alts,...
 
 wvlf = atm.wavelength/(2*pi)/1e-6;
 tel = telescope(D,...
-    'fieldOfViewInArcMin',30,...
+    'fieldOfViewInArcMin',10,...
     'resolution',nPxPup,...
     'samplingTime',1/300);
 tel = tel + atm;
@@ -102,16 +103,19 @@ fig = figure('Color','w','Position',[1 42 1920 957]);
 subplot(3,5,1)
 ha_phi.img = imagesc(phi_buffer1,'AlphaData',pupil);axis off;colormap jet;axis image
 ha_phi.cb = colorbar();
+ha_phi.cl = gca;
 ha_phi.title = title("$\phi_i^t$",'interpreter','latex','FontSize',16);
 
 subplot(3,5,2)
 ha_phi1a.img = imagesc(phi_buffer1,'AlphaData',pupil);axis off;colormap jet;axis image
 ha_phi1a.cb = colorbar();
-ha_phi1a.title = title("$\phi_i^t + \phi_{pyr}^{t-1}$",'interpreter','latex','FontSize',16);
+ha_phi1a.cl = gca;
+ha_phi1a.title = title("$\phi_i^t - \phi_{pyr}^{t-1}$",'interpreter','latex','FontSize',16);
 
 subplot(3,5,3)
 ha_phi1b.img = imagesc(phi_buffer1,'AlphaData',pupil);axis off;colormap jet;axis image
 ha_phi1b.cb = colorbar();
+ha_phi1b.cl = gca;
 ha_phi1b.title = title("$\phi_{pyr}^{t}$",'interpreter','latex','FontSize',16);
 
 subplot(3,5,4)
@@ -122,19 +126,22 @@ set(gca,'FontSize',14,'TickLabelInterpreter','latex')
 subplot(3,5,5)
 ha_psf1.ref = plot(ref_psf(midL,:)/max(ref_psf(:)),'-k','LineWidth',2);hold on
 ha_psf1.pyr = plot(ref_psf(midL,:)/max(ref_psf(:)),'-r','LineWidth',2);box on;grid on
-ha_psf1.title = title(sprintf("strel ratio $$ = %.2f $$",0),'interpreter','latex','FontSize',14);
+ha_psf1.de = plot(ref_psf(midL,:)/max(ref_psf(:)),'-b','LineWidth',2);box on;grid on
+ha_psf1.title = title("PSF",'interpreter','latex','FontSize',14);
 xlim([1 size(ref_psf,1)])
 set(gca,'FontSize',14,'TickLabelInterpreter','latex')
-legend("Ideal","Pyr",'interpreter','latex','FontSize',8)
+legend("Ideal","Pyr","Pyr+DE",'interpreter','latex','FontSize',8)
 
 subplot(3,5,7)
 ha_phi2a.img = imagesc(phi_buffer1,'AlphaData',pupil);axis off;colormap jet;axis image
 ha_phi2a.cb = colorbar();
-ha_phi2a.title = title("$\phi_i^t + \phi_{pyr+DE}^{t-1}$",'interpreter','latex','FontSize',16);
+ha_phi2a.cl = gca;
+ha_phi2a.title = title("$\phi_i^t - \phi_{pyr+DE}^{t-1}$",'interpreter','latex','FontSize',16);
 
 subplot(3,5,8)
 ha_phi2b.img = imagesc(phi_buffer1,'AlphaData',pupil);axis off;colormap jet;axis image
 ha_phi2b.cb = colorbar();
+ha_phi2b.cl = gca;
 ha_phi2b.title = title("$\phi_{pyr+DE}^{t}$",'interpreter','latex','FontSize',16);
 
 
@@ -144,12 +151,14 @@ ha_sc2.title = title("$SC2$",'interpreter','latex','FontSize',16);
 set(gca,'FontSize',14,'TickLabelInterpreter','latex')
 
 subplot(3,5,10)
-ha_psf2.ref = plot(ref_psf(midL,:)/max(ref_psf(:)),'-k','LineWidth',2);hold on
-ha_psf2.de = plot(ref_psf(midL,:)/max(ref_psf(:)),'-b','LineWidth',2);box on;grid on
-ha_psf2.title = title(sprintf("strel ratio $$ = %.2f $$",0),'interpreter','latex','FontSize',14);
+ha_psf2.pyr =  plot(1,we1,'-r','LineWidth',2);hold on
+ha_psf2.de = plot(1,we2,'-b','LineWidth',2);box on;grid on
 xlim([1 size(ref_psf,1)])
 set(gca,'FontSize',14,'TickLabelInterpreter','latex')
-legend("Ideal","Pyr+DE",'interpreter','latex','FontSize',8)
+ylabel("strel ratio",'interpreter','latex','FontSize',16)
+xlabel("$n^{\circ}$ Iteration",'interpreter','latex','FontSize',13)
+legend("Pyr","Pyr+DE",'interpreter','latex','FontSize',8)
+ylim([0 0.5]);xlim([1 numIter])
 
 subplot(3,5,[11 15])
 ha_line.p1 = plot(1,we_openloop,'-k','LineWidth',2);hold on
@@ -181,14 +190,21 @@ Tx = annotation('textbox','interpreter'...
     ,'latex','String',str,'FitBoxToText','on');
 set(Tx,'Position',[0.12 0.38 0.154 0.3],'FontSize',12)
 %%
+if saveVid
+vidTime = 20;
+vid = VideoWriter(vidName);
+vid.FrameRate = round(numIter/vidTime);
+vid.Quality = 100;
+open(vid)
+end
 
 phi_buffer1 = reshape(flatMode,[nPxPup nPxPup])*0;
 phi_buffer2 = reshape(flatMode,[nPxPup nPxPup])*0;
 phi_res1 = phi_buffer1;
 phi_res2 = phi_res1;
 we_openloop = [];
-we1 = [];
-we2 = [];
+we1 = [];sr1v = [];
+we2 = [];sr2v = [];
 itx = [];
 sc1=ref_psf*0;
 sc2 = sc1;
@@ -246,32 +262,52 @@ itx = [itx k];
 sr1 = max(sc1(:))/srm;
 sr2 = max(sc2(:))/srm;
 
+sr1v = [sr1v sr1];
+sr2v = [sr2v sr2];
+[midL1,~] = find(sc1 == max(sc1(:)));
+[midL2,~] = find(sc2 == max(sc2(:)));
 %update fig
 ha_phi.img.CData = phi;
+CLims = ha_phi.cl.CLim;
+
 ha_phi1a.img.CData = phi_res1;
+ha_phi1a.cl.CLim = CLims;
+
 ha_phi1b.img.CData = phi_hat1;
+ha_phi1b.cl.CLim = CLims;
+
 ha_sc1.img.CData = sc1;
 ha_phi2a.img.CData = phi_res2;
+ha_phi2a.cl.CLim = CLims;
 ha_phi2b.img.CData = phi_hat2;
+ha_phi2b.cl.CLim = CLims;
 ha_sc2.img.CData = sc2;
 
-ha_psf1.pyr.YData = sc1(midL,:)/srm;
-ha_psf2.de.YData = sc2(midL,:)/srm;
+ha_psf1.pyr.YData = sc1(midL1,:)/srm;
+ha_psf1.de.YData = sc2(midL2,:)/srm;
 if intMode
     ha_psf1.ref.YData = ref_psfa(midL,:)/srm;
-    ha_psf2.ref.YData = ref_psfa(midL,:)/srm;
 end
 
-ha_psf1.title.String = sprintf("strel ratio $$ = %.2f $$",sr1);
-ha_psf2.title.String = sprintf("strel ratio $$ = %.2f $$",sr2);
+ha_psf2.pyr.XData = itx;ha_psf2.pyr.YData = sr1v;
+ha_psf2.de.XData = itx;ha_psf2.de.YData = sr2v;
+
 
 ha_line.p1.XData = itx; ha_line.p1.YData = we_openloop;
 ha_line.p2.XData = itx; ha_line.p2.YData = we1;
 ha_line.p3.XData = itx; ha_line.p3.YData = we2;
 
 drawnow
+
+%vid loop
+
+if saveVid
+frame = getframe(fig); %get frame
+writeVideo(vid, frame);
 end
 
+end
+if saveVid;close(vid);end
 
 
 % cmos.resolution = 124;

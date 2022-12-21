@@ -1,11 +1,11 @@
 addpath functions
 clear all
 
-preFold = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
+preFold = "../Preconditioners/nocap/mod/OL1_R64_M2_RMSE0.03355_Epoch_70.mat";
 
 binning       = 1;
-D             = 1.5;
-modulation    = 0;
+D             = 3;
+modulation    = 1;
 nLenslet      = 16;
 resAO         = 2*nLenslet+1;
 L0            = 25;
@@ -13,7 +13,7 @@ fR0           = 1;
 noiseVariance = 0.7;
 n_lvl         = 0.1;             % noise level in rad^2
 Samp          = 2;                % OVer-sampling factor
-nPxPup        = 128;               % number of pixels to describe the pupil
+nPxPup        = 64;               % number of pixels to describe the pupil
 alpha         = pi/2;
 rooftop       = [0,0]; 
 fovInPixel    = nPxPup*2*Samp;    % number of pixel to describe the PSD
@@ -46,7 +46,7 @@ load(preFold);OL1_trained = OL1;
     ,modulation,rooftop,alpha,pupil,OL1_trained,0);
         
 %% Meas
-r0            = 0.1;
+r0            = 0.09;
 ReadoutNoise = 0.;
 PhotonNoise = 0;
 nPhotonBackground = 0;

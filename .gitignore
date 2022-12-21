@@ -5,6 +5,7 @@ Detach_OOMAO/Preconditioners
 Detach_OOMAO/Pytorch/__pycache__
 Detach_OOMAO/Pytorch/results/
 Detach_OOMAO/Matlab/figures/
+Detach_OOMAO/Matlab/loop_videos/
 Detach_OOMAO/Matlab/modes/
 Detach_OOMAO/Pytorch/logs/
 Detach_OOMAO/Matlab/*.asv

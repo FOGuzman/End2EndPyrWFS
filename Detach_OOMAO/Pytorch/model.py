@@ -13,7 +13,9 @@ from skimage.metrics import mean_squared_error as MSE
 from skimage.metrics import structural_similarity as compare_ssim
 from oomao_functions import *
 from phaseGenerators import *
+from Propagators import *
 from math import sqrt, pi
+from torch import unsqueeze as UNZ
 
 class OptimizedPyramid(nn.Module):
     def __init__(self, wfs):
@@ -31,7 +33,7 @@ class OptimizedPyramid(nn.Module):
         self.quantumEfficiency = torch.tensor(wfs.quantumEfficiency)
         self.nPhotonBackground = torch.tensor(wfs.nPhotonBackground)
         if wfs.modulation > 0:
-            self.ModPhasor = torch.tensor(wfs.ModPhasor)
+            self.ModPhasor = torch.permute(torch.tensor(wfs.ModPhasor),(2,0,1))
         self.fovInPixel    = torch.tensor(wfs.fovInPixel)
         self.pupil = torch.tensor(wfs.pupil)
         self.pyrMask = torch.tensor(wfs.pyrMask)
@@ -57,12 +59,12 @@ class OptimizedPyramid(nn.Module):
             
 
     def forward(self, inputs):
-        OL1 = torch.exp(1j * self.OL1)       
+        OL1 = UNZ(UNZ(torch.exp(1j * self.OL1),0),0)       
         # Flat prop
         zim = torch.reshape(self.modes[:,0],(self.nPxPup,self.nPxPup))
         zim = torch.ones((self.nPxPup,self.nPxPup))*self.pupilLogical
-        zim = torch.unsqueeze(zim,0).cuda()
-        I_0 = Pro2OptPyrNoMod_torch(zim,OL1,self)
+        zim = UNZ(UNZ(zim,0),0).cuda()
+        I_0 = Prop2OptimizePyrWFS_torch(zim,OL1,self)
         self.I_0 = I_0/torch.sum(I_0)        
         IM = None
         gain = 0.1
@@ -71,11 +73,11 @@ class OptimizedPyramid(nn.Module):
             zim = torch.unsqueeze(zim,0).cuda()
             #push
             z = gain*zim
-            I4Q = Pro2OptPyrNoMod_torch(z,OL1,self)
+            I4Q = Prop2OptimizePyrWFS_torch(z,OL1,self)
             sp = I4Q/torch.sum(I4Q)-self.I_0
             
             #pull
-            I4Q = Pro2OptPyrNoMod_torch(-z,OL1,self)
+            I4Q = Prop2OptimizePyrWFS_torch(-z,OL1,self)
             sm = I4Q/torch.sum(I4Q)-self.I_0
             
             MZc = 0.5*(sp-sm)/gain
@@ -87,7 +89,7 @@ class OptimizedPyramid(nn.Module):
 
         CM = torch.linalg.pinv(IM)       
         #propagation of X
-        Ip = Pro2OptPyrNoMod_torch(inputs,OL1,self)
+        Ip = Prop2OptimizePyrWFS_torch(inputs,OL1,self)
         #Photon noise
         if self.PhotonNoise == 1:
             Ip = AddPhotonNoise(Ip,self)          
@@ -96,8 +98,8 @@ class OptimizedPyramid(nn.Module):
             Ip = Ip + torch.normal(0,self.ReadoutNoise,size=Ip.shape).cuda()   
         
         # Normalization
-        Inorm = torch.sum(torch.sum(Ip,-1),-1)
-        Ip = Ip/torch.unsqueeze(torch.unsqueeze(Inorm,-1),-1)-self.I_0
+        Inorm = torch.sum(torch.sum(torch.sum(Ip,-1),-1),-1)
+        Ip = Ip/UNZ(UNZ(Inorm,-1),-1)-self.I_0
         # Estimation
         y = torch.matmul(CM,torch.transpose(torch.reshape(Ip,[Ip.shape[0],-1]),0,1))
         return y
