@@ -1,7 +1,7 @@
 addpath functions
 clear all;clc
 
-preFold = "../Preconditioners/nocap/l1/checkpoint/OL1_R128_M0_RMSE0.02862_Epoch_97.mat";
+preFold = "../Preconditioners/nocap/mod/OL1_R64_M2_RMSE0.03355_Epoch_70.mat";
 
 
 binning       = 1;
@@ -12,7 +12,7 @@ resAO         = 2*nLenslet+1;
 L0            = 25;
 fR0           = 1;
 Samp          = 2;                % OVer-sampling factor
-nPxPup        = 128;               % number of pixels to describe the pupil
+nPxPup        = 64;               % number of pixels to describe the pupil
 alpha         = pi/2;
 rooftop       = [0,0]; 
 fovInPixel    = nPxPup*2*Samp;    % number of pixel to describe the PSD
@@ -25,7 +25,7 @@ pupil         = CreatePupil(nPxPup,"disc");
 jModes        = [2:60];
 
 %% Test parameters
-saveFold = "../Preconditioners/nocap/l1/";
+saveFold = "../Preconditioners/nocap/mod/";
 tpr0  = 1200;    % test per r0
 D_R0s = [90 80 70 60 40 30 20 10 6];
 R0s = D./D_R0s;
@@ -164,5 +164,5 @@ save(saveFold+"rmseResults_noise.mat",'R')
 compare_r0_DE_modulations_plot();
 
 fold = "./figures/";
-name = "R0_Result_Noise_trained_l1.pdf";
+name = "R0_Result_noNoise_trained_mod.pdf";
 exportgraphics(fig,fold+name)

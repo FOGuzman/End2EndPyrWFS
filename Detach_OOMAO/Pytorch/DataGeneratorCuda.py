@@ -38,10 +38,10 @@ parser = argparse.ArgumentParser(description='Setting, compressive rate, size, a
 parser.add_argument('--modulation', default=2, type=int, help='Pyramid modulation')
 parser.add_argument('--samp', default=2, type=int, help='Sampling')
 parser.add_argument('--D', default=3, type=int, help='Telescope Diameter [m]')
-parser.add_argument('--nPxPup', default=64, type=int, help='Pupil Resolution')
+parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=float)
 parser.add_argument('--alpha', default=pi/2, type=float)
-parser.add_argument('--zModes', default=[2,24], type=int, help='Reconstruction Zernikes')
+parser.add_argument('--zModes', default=[2,100], type=int, help='Reconstruction Zernikes')
 wfs = parser.parse_args()
 
 wfs.fovInPixel    = wfs.nPxPup*2*wfs.samp 

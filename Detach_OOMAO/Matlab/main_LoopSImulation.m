@@ -2,24 +2,25 @@ close all;clear all;
 addpath functions
 oomao_path = "/home/fg/Desktop/OOMAO/";
 %preFold = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
-preFold = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.02807_Epoch_91.mat";
+%preFold = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.02807_Epoch_91.mat";
+preFold = "../Preconditioners/nocap/mod/OL1_R64_M2_RMSE0.03355_Epoch_70.mat";
 
 addpath(genpath(oomao_path))
 vidName = "./loop_videos/OL1_R128_M0_RMSE0.02807_Epoch_91.mp4";
 saveVid = 0;
 %%
 binning       = 1;
-D             = 3;
-modulation    = 0;
+D             = 8;
+modulation    = 2;
 nLenslet      = 16;
 resAO         = 2*nLenslet+1;
 L0            = 20;
-r0            = 0.81;
+r0            = 0.4;
 fR0           = 1;
 noiseVariance = 0.7;
 n_lvl         = 0.1;             % noise level in rad^2
 Samp          = 2;                % OVer-sampling factor
-nPxPup        = 128;               % number of pixels to describe the pupil
+nPxPup        = 64;               % number of pixels to describe the pupil
 alpha         = pi/2;
 rooftop       = [0,0]; 
 fovInPixel    = nPxPup*2*Samp;    % number of pixel to describe the PSD
@@ -31,7 +32,7 @@ N             = 2*Samp*nPxPup;
 L             = (N-1)*D/(nPxPup-1);
 pupil         = CreatePupil(nPxPup,"disc");
 
-jModes = [2:200];
+jModes = [2:100];
 
 %% Pyramid calibration
 modes = CreateZernikePolynomials(nPxPup,jModes,pupil~=0);
@@ -54,7 +55,7 @@ load(preFold);OL1_trained = OL1;
 %% Loop parameters
 intMode = 1;
 numIter = 300;
-gain = 0.8;
+gain = 0.5;
 stroke = 10;
 
 cmos.resolution = 256;

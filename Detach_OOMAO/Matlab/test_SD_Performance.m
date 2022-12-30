@@ -175,9 +175,9 @@ D1 = D1.^-1;
 D2 = D2.^-1;
 %%
 
-lbltxt{1} = sprintf("Pyr Mod $= %i\\lambda/D_0$",Mods(1));
-lbltxt{2} = sprintf("Pyr Mod $= %i\\lambda/D_0$",Mods(2));
-lbltxt{3} = sprintf("Pyr Mod $= %i\\lambda/D_0$",Mods(3));
+lbltxt{1} = sprintf("Pyr Mod $= %i\\lambda/D_0$   ",Mods(1));
+lbltxt{2} = sprintf("Pyr Mod $= %i\\lambda/D_0$   ",Mods(2));
+lbltxt{3} = sprintf("Pyr Mod $= %i\\lambda/D_0$   ",Mods(3));
 lbltxt{4} = sprintf("Pyr+DE Mod $= %i\\lambda/D_0$",Mods(1));
 lbltxt{5} = sprintf("Pyr+DE Mod $= %i\\lambda/D_0$",Mods(2));
 lbltxt{6} = sprintf("Pyr+DE Mod $= %i\\lambda/D_0$",Mods(3));
@@ -246,7 +246,7 @@ plot(1:length(jModes),D1(1,:),'-r','LineWidth',lw)
 plot(1:length(jModes),D1(2,:),'-g','LineWidth',lw)
 plot(1:length(jModes),D1(3,:),'-b','LineWidth',lw)
 xlabel("Zernike radial order",'interpreter','latex')
-set(gca,'XScale','log','YScale','log','FontSize',14,'TickLabelInterpreter','latex','LineWidth',1)
+set(gca,'XScale','log','YScale','log','FontSize',20,'TickLabelInterpreter','latex','LineWidth',1)
 box on
 % ylim(ylimit)
 
@@ -273,10 +273,10 @@ plot(1:length(jModes),D2(1,:),'-r','LineWidth',lw)
 plot(1:length(jModes),D2(2,:),'-g','LineWidth',lw)
 plot(1:length(jModes),D2(3,:),'-b','LineWidth',lw)
 xlabel("Zernike radial order",'interpreter','latex')
-set(gca,'XScale','log','YScale','log','FontSize',14,'TickLabelInterpreter','latex','LineWidth',1)
+set(gca,'XScale','log','YScale','log','FontSize',20,'TickLabelInterpreter','latex','LineWidth',1)
 box on
 %ylim(ylimit)
-leg = legend(lbltxt,'interpreter','latex','NumColumns',2,'Position',[0.3225 0.1883 0.3838 0.1046]);
+leg = legend(lbltxt,'FontSize',14,'interpreter','latex','NumColumns',2,'Position',[0.3225 0.1583 0.3838 0.1046]);
 
 
 fold = "./figures/";

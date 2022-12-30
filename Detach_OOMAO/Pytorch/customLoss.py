@@ -10,3 +10,5 @@ class RMSE(nn.Module):
         tmp = (inputs-targets)**2
         loss =  torch.sqrt(torch.mean(tmp) )       
         return loss
+    
+    
