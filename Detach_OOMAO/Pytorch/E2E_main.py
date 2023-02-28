@@ -34,7 +34,7 @@ print('The number of GPU is {}'.format(n_gpu))
 
 parser = argparse.ArgumentParser(description='Setting, Pyramid Wavefron Sensor parameters')
 
-parser.add_argument('--modulation', default=2, type=int, help='Pyramid modulation')
+parser.add_argument('--modulation', default=0, type=int, help='Pyramid modulation')
 parser.add_argument('--samp', default=2, type=int, help='Sampling')
 parser.add_argument('--D', default=3, type=int, help='Telescope Diameter [m]')
 parser.add_argument('--nPxPup', default=64, type=int, help='Pupil Resolution')

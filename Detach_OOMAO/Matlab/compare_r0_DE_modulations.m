@@ -1,7 +1,9 @@
 addpath functions
 clear all;clc
 
-preFold = "../Preconditioners/nocap/mod/OL1_R64_M2_RMSE0.03355_Epoch_70.mat";
+preFold = "../Preconditioners/nocap/mod/OL1_R64_M2_RMSE0.005704_Epoch_109.mat";
+preFold = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.0285_Epoch_92.mat";
+%preFold = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.0538_Epoch_106.mat";
 
 
 binning       = 1;
@@ -12,7 +14,7 @@ resAO         = 2*nLenslet+1;
 L0            = 25;
 fR0           = 1;
 Samp          = 2;                % OVer-sampling factor
-nPxPup        = 64;               % number of pixels to describe the pupil
+nPxPup        = 128;               % number of pixels to describe the pupil
 alpha         = pi/2;
 rooftop       = [0,0]; 
 fovInPixel    = nPxPup*2*Samp;    % number of pixel to describe the PSD
@@ -25,9 +27,9 @@ pupil         = CreatePupil(nPxPup,"disc");
 jModes        = [2:60];
 
 %% Test parameters
-saveFold = "../Preconditioners/nocap/mod/";
-tpr0  = 1200;    % test per r0
-D_R0s = [90 80 70 60 40 30 20 10 6];
+saveFold = "../Preconditioners/nocap/base/";
+tpr0  = 1000;    % test per r0
+D_R0s = [30 25 20 15 10 8 5 3 1];%[30 25 20 15 10 8 5 3 1]
 R0s = D./D_R0s;
 rjumps = length(R0s);
 Mods = [0 1 2];
@@ -91,9 +93,9 @@ r0_v_stdRMSE_pyr = zeros(1,rjumps);
 r0_v_stdRMSE_de = zeros(1,rjumps);
 for rc = 1:rjumps
 r0            = R0s(rc);
-ReadoutNoise = 0.4;
+ReadoutNoise = 1;
 PhotonNoise = 1;
-nPhotonBackground = 0.1;
+nPhotonBackground = 0.3;
 quantumEfficiency = 1;
 atm = GenerateAtmosphereParameters(nLenslet,D,binning,r0,L0,fR0,modulation,fovInPixel,resAO,Samp,nPxPup,pupil);
 
@@ -158,11 +160,11 @@ Net_y = y/sum(y(:));
 R(mc).ExampleMeas = Net_y;
 end
 
-save(saveFold+"rmseResults_noise.mat",'R')
+save(saveFold+"rmseResults_R0_noise_zoom2.mat",'R')
 
 %% Plot
 compare_r0_DE_modulations_plot();
 
-fold = "./figures/";
-name = "R0_Result_noNoise_trained_mod.pdf";
+fold = "./figures/v3/";
+name = "R0_result2N_zoom_v2.pdf";
 exportgraphics(fig,fold+name)

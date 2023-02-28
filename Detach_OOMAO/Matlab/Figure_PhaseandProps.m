@@ -13,9 +13,9 @@ L0            = 25;
 fR0           = 1;
 noiseVariance = 0.7;
 n_lvl         = 0.1;             % noise level in rad^2
-Samp          = 1;                % OVer-sampling factor
-nPxPup        = 512;               % number of pixels to describe the pupil
-alpha         = pi/8;
+Samp          = 2;                % OVer-sampling factor
+nPxPup        = 128;               % number of pixels to describe the pupil
+alpha         = pi/2;
 rooftop       = [0,0]; 
 fovInPixel    = nPxPup*2*Samp;    % number of pixel to describe the PSD
 PyrQ          = zeros(fovInPixel,fovInPixel);
@@ -71,21 +71,21 @@ atm = GenerateAtmosphereParameters(nLenslet,D,binning,r0,L0,fR0,modulation,fovIn
 % [x,Zg] = GenerateFourierPhase(nLenslet,D,binning,r0,L0,fR0,modulation,...
 %     fovInPixel,resAO,Samp,nPxPup,pupil,jModes,modes,PhaseCM);
 
-% y = PropagatePyr(fovInPixel,x,Samp,modulation,rooftop,alpha,pupil,nPxPup,OL1_base,1);
-% y_base = y/sum(y(:));
-% if PhotonNoise
-% y = AddPhotonNoise(y,nPhotonBackground,quantumEfficiency);
-% end
-% y = y +randn(size(y)).*ReadoutNoise;
-% Net_y_base = y/sum(y(:));
-% 
-% y = PropagatePyr(fovInPixel,x,Samp,modulation,rooftop,alpha,pupil,nPxPup,OL1_noise,1);
-% y_noise = y/sum(y(:));;
-% if PhotonNoise
-% y = AddPhotonNoise(y,nPhotonBackground,quantumEfficiency);
-% end
-% y = y +randn(size(y)).*ReadoutNoise;
-% Net_y_noise = y/sum(y(:));
+y = PropagatePyr(fovInPixel,x,Samp,modulation,rooftop,alpha,pupil,nPxPup,OL1_base,1);
+y_base = y/sum(y(:));
+if PhotonNoise
+y = AddPhotonNoise(y,nPhotonBackground,quantumEfficiency);
+end
+y = y +randn(size(y)).*ReadoutNoise;
+Net_y_base = y/sum(y(:));
+
+y = PropagatePyr(fovInPixel,x,Samp,modulation,rooftop,alpha,pupil,nPxPup,OL1_noise,1);
+y_noise = y/sum(y(:));
+if PhotonNoise
+y = AddPhotonNoise(y,nPhotonBackground,quantumEfficiency);
+end
+y = y +randn(size(y)).*ReadoutNoise;
+Net_y_noise = y/sum(y(:));
 
 y = PropagatePyr(fovInPixel,x,Samp,modulation,rooftop,alpha,pupil,nPxPup,OL1_base,0);
 if PhotonNoise
@@ -105,6 +105,12 @@ dmin = min(min([OL1_base(:) OL1_noise(:)]));
 
 fig = figure('Color','w','Position',[420 345 1471 627]);
 ha = tight_subplot(2,4,[.0 .0],[.01 .01],[.01 .06]);
+
+axes(ha(2));
+imshow(255);
+axes(ha(4));
+imshow(255)
+
 axes(ha(2));
 imshow(ones(3,3,3));
 axes(ha(4));
@@ -134,7 +140,7 @@ cb3.TickLabelInterpreter = 'latex';
 fold = "./figures/";
 name = "Meas_examples.pdf";
 %exportgraphics(fig,fold+name)
-axes(ha(2));
-imshow(255);
-axes(ha(4));
-imshow(255)
+
+
+
+%%

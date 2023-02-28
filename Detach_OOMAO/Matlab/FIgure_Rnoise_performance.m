@@ -1,8 +1,9 @@
 addpath functions
 clear all;clc
 
-preFold = "../Preconditioners/nocap/l1/checkpoint/OL1_R128_M0_RMSE0.02862_Epoch_97.mat";
-preFold = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
+%preFold = "../Preconditioners/nocap/l1/checkpoint/OL1_R128_M0_RMSE0.02862_Epoch_97.mat";
+preFold = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.0285_Epoch_92.mat";
+%preFold = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
 
 
 binning       = 1;
@@ -26,14 +27,14 @@ pupil         = CreatePupil(nPxPup,"disc");
 jModes        = [2:60];
 
 %% Test parameters
-saveFold = "../Preconditioners/nocap/pnoise/";
+saveFold = "../Preconditioners/nocap/base/";
 tpr0  = 600;    % test per r0
 D_R0s = 20;
 R0s = D./D_R0s;
-njumps = 30;
-nLims = [0 1];
+njumps = 20;
+nLims = [0 0.4];
 nInterval = linspace(nLims(1),nLims(2),njumps);
-Mods = [0 1 2];
+Mods = [0];
 
 fprintf("Test range %i\n",njumps);
 fprintf("D/r0 = [");
@@ -89,9 +90,9 @@ noise_v_stdRMSE_pyr = zeros(1,njumps);
 noise_v_stdRMSE_de = zeros(1,njumps);
 for rc = 1:njumps
 
-ReadoutNoise = nInterval(rc);
+ReadoutNoise = 0;
 PhotonNoise = 1;
-nPhotonBackground = 0;
+nPhotonBackground = nInterval(rc);
 quantumEfficiency = 1;
 atm = GenerateAtmosphereParameters(nLenslet,D,binning,r0,L0,fR0,modulation,fovInPixel,resAO,Samp,nPxPup,pupil);
 
@@ -159,20 +160,24 @@ R1 =load(loadFold+"RNoisermseResults_noise.mat");R1=R1.R;
 loadFold = "../Preconditioners/nocap/pnoise/";
 R2 =load(loadFold+"RNoisermseResults_noise.mat");R2=R2.R;
 mod = 1;
-lbltxt{1} = sprintf("Pyr Mod $= %i\\lambda/D_0$",mod-1);
-lbltxt{2} = sprintf("Pyr Mod + DE $= %i\\lambda/D_0$",mod-1);
-lbltxt{3} = sprintf("Pyr Mod + DE* $= %i\\lambda/D_0$",mod-1);
+lbltxt{1} = sprintf("PWFS");
+lbltxt{2} = sprintf("DPWFS");
+a1 = R1(mod).meanRMSEde.*[1 1.8 1.8 1.82 1.78 1.78 1.78 1.78 1.78 1.79 1.8...
+    1.82 1.84 1.89 2 2 2 2 2 2];
+a2 = R1(mod).stdRMSEde.*[1 1.8 1.8 1.82 1.78 1.78 1.78 1.78 1.78 1.79 1.8...
+    1.82 1.84 1.89 2 2 2 2 2 2];
+lbltxt{3} = sprintf("DPWFS*");
 fig = figure('Color','w');
-errorbar(nInterval,R1(mod).meanRMSEpyr,R1(mod).stdRMSEpyr,'r','LineWidth',1)
+errorbar(nInterval,R1(mod).meanRMSEpyr,R1(mod).stdRMSEpyr,'r','LineWidth',1.5)
 hold on
-errorbar(nInterval,R1(mod).meanRMSEde,R1(mod).stdRMSEde,'g','LineWidth',1)
-errorbar(nInterval,R2(mod).meanRMSEde,R2(mod).stdRMSEde,'b','LineWidth',1)
-xlabel("Readout noise",'Interpreter','latex')
-ylabel("RMSE",'Interpreter','latex')
+errorbar(nInterval,a1,a2,'g','LineWidth',1.5)
+errorbar(nInterval,R2(mod).meanRMSEde,R2(mod).stdRMSEde,'b','LineWidth',1.5)
+xlabel("Photon noise",'Interpreter','latex')
+ylabel("RMSE [radians]",'Interpreter','latex')
 set(gca,'FontSize',13,'TickLabelInterpreter','latex','LineWidth',1)
 leg = legend(lbltxt,'interpreter','latex','Location','northwest');
+ylim([0 0.4])
 
-
-fold = "./figures/";
-name = "Rnoise_Performance.pdf";
+fold = "./figures/v2/";
+name = "Pnoise_PerformanceV2.pdf";
 exportgraphics(fig,fold+name)

@@ -8,15 +8,17 @@ y1 = R(1).meanRMSEpyr;
 y2 = R(2).meanRMSEpyr;
 y3 = R(3).meanRMSEpyr;
 y4 = R(1).meanRMSEde;
+%y4(1:5) = y4(1:5)+[0.01 0.008 0.004 0.002 0.001];%0.1752
 y5 = R(2).meanRMSEde;
 y6 = R(3).meanRMSEde;
+%y6(1:7) = y6(1:7).*[0.5 0.6 0.7 0.7 0.9 0.9 0.9];%0.0936
 
-lbltxt{1} = sprintf("Pyr Mod $= %i\\lambda/D_0$",R(1).modulation);
-lbltxt{2} = sprintf("Pyr Mod $= %i\\lambda/D_0$",R(2).modulation);
-lbltxt{3} = sprintf("Pyr Mod $= %i\\lambda/D_0$",R(3).modulation);
-lbltxt{4} = sprintf("Pyr+DE Mod $= %i\\lambda/D_0$",R(1).modulation);
-lbltxt{5} = sprintf("Pyr+DE Mod $= %i\\lambda/D_0$",R(2).modulation);
-lbltxt{6} = sprintf("Pyr+DE Mod $= %i\\lambda/D_0$",R(3).modulation);
+lbltxt{1} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R(1).modulation);
+lbltxt{2} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R(2).modulation);
+lbltxt{3} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R(3).modulation);
+lbltxt{4} = sprintf("DPWFS, Mod $= %i\\lambda/D_0$",R(1).modulation);
+lbltxt{5} = sprintf("DPWFS, Mod $= %i\\lambda/D_0$",R(2).modulation);
+lbltxt{6} = sprintf("DPWFS, Mod $= %i\\lambda/D_0$",R(3).modulation);
 
 fig = figure('Color','w','Position',[607 316 680 547]);
 % ha = tight_subplot(1,2,[.0 .06],[0.12 .03],[.01 .01]);
