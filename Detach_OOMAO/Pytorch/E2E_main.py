@@ -167,8 +167,6 @@ def train(epoch, result_path, model, lr):
 
         Loss1.backward()
         optimizer_g.step()
-        model._modules['prop'].apply(constraints)
-
         epoch_loss += Loss1.data
 
     model = model.module if hasattr(model, "module") else model
