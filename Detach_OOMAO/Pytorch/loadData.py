@@ -3,7 +3,7 @@ import os
 import torch
 import scipy.io as scio
 
-
+## Loader for training, uses one mat file per datapoint
 class Imgdataset(Dataset):
 
     def __init__(self, path):

@@ -32,22 +32,23 @@ print('The number of GPU is {}'.format(n_gpu))
 
 
 
-parser = argparse.ArgumentParser(description='Setting, Pyramid Wavefron Sensor parameters')
+parser = argparse.ArgumentParser(description='Settings, Training and Pyramid Wavefron Sensor parameters')
 
 parser.add_argument('--modulation', default=0, type=int, help='Pyramid modulation')
-parser.add_argument('--samp', default=2, type=int, help='Sampling')
+parser.add_argument('--samp', default=2, type=int, help='Over sampling for fourier')
 parser.add_argument('--D', default=3, type=int, help='Telescope Diameter [m]')
 parser.add_argument('--nPxPup', default=64, type=int, help='Pupil Resolution')
-parser.add_argument('--rooftop', default=[0,0], type=float)
-parser.add_argument('--alpha', default=pi/2, type=float)
+parser.add_argument('--rooftop', default=[0,0], type=float,help='Pyramid rooftop (as in OOMAO)')
+parser.add_argument('--alpha', default=pi/2, type=float,help='Pyramid angle (as in OOMAO)')
 parser.add_argument('--zModes', default=[2,36], type=int, help='Reconstruction Zernikes')
-parser.add_argument('--batchSize', default=1, type=int, help='Pupil Resolution')
-parser.add_argument('--PupilConstrain', default=0, type=int, help='Limit information only on pupils of PyrWFS')
+parser.add_argument('--batchSize', default=1, type=int, help='Batch size for training')
 parser.add_argument('--ReadoutNoise', default=0, type=float)
 parser.add_argument('--PhotonNoise', default=0, type=float)
 parser.add_argument('--nPhotonBackground', default=0, type=float)
 parser.add_argument('--quantumEfficiency', default=1, type=float)
 
+
+# Precalculations
 wfs = parser.parse_args()
 wfs.fovInPixel    = wfs.nPxPup*2*wfs.samp 
 wfs.pupil = CreateTelescopePupil(wfs.nPxPup,"disc")
@@ -68,12 +69,12 @@ model_path = "./model/nocap/" + sub_fold + "/checkpoint"
 result_path = "./results"
 log_path   = "./model/nocap/" + sub_fold + "/"
 load_train = 0
-nEpochs    = 120
+nEpochs    = 100
 lr         = 0.008
 
-PyrNet = PyrModell(wfs)              
-constraints=PhaseConstraint()
-PyrNet._modules['prop'].apply(constraints)
+
+# Model definition
+PyrNet = PyrModel(wfs)              
 PyrNet = PyrModel(wfs).cuda()
 
 
@@ -84,6 +85,8 @@ train_data_loader = DataLoader(dataset=dataset, batch_size=wfs.batchSize, shuffl
 loss = RMSE()
 loss.cuda()            
 
+
+# Enable dataparallelism (if mor that 1 GPU available)
 if n_gpu > 1:
     PyrNet = torch.nn.DataParallel(PyrNet)
 if load_train != 0:
@@ -93,6 +96,7 @@ if load_train != 0:
     
 ## Train
 
+# testing loop
 def test(test_path, epoch, result_path, model):
     test_list = os.listdir(test_path)
     rmse_cnn = torch.zeros(len(test_list))
@@ -142,7 +146,7 @@ def test(test_path, epoch, result_path, model):
 
 
 
-
+# training loop
 def train(epoch, result_path, model, lr):
     epoch_loss = 0
     begin = time.time()
