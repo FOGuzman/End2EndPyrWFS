@@ -1,7 +1,7 @@
 # End2EndPyrWFS
 Official implementation for Deep Optics Preconditioner for Enhanced Pyramid Wavefront Sensing
 
-![ ](Overview.png)
+![ ](end2end_scheme.png)
 
 # Installation
 - install anaconda (https://www.anaconda.com/products/distribution)
