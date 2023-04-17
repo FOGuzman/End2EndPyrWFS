@@ -280,7 +280,7 @@ leg = legend(lbltxt,'FontSize',14,'interpreter','latex','NumColumns',2,'Position
 
 
 fold = "./figures/";
-name = "SD_Performance.pdf";
+name = "SD_Performance_noise.pdf";
 exportgraphics(fig,fold+name)
 %% FUNCTIONS
 unwraper = @(x) unwrap(unwrap(x,[],2),[],1);
