@@ -1,7 +1,7 @@
 addpath tools/functions
 clear all;clc
 
-%% Preconditioners paths
+%% Preconditioners paths (Compute true to recalculate)
 DPWFS_path = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.0285_Epoch_92.mat";
 DPWFSn_path = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
 savePath = "./ComputeResults/Fig8B/";if ~exist(savePath, 'dir'), mkdir(savePath); end
