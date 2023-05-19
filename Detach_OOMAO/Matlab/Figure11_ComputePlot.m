@@ -8,6 +8,7 @@ DPWFS_path = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.02807_E
 %DPWFS_path = "../Preconditioners/nocap/mod/OL1_R64_M2_RMSE0.03355_Epoch_70.mat";
 
 FigurePath = "./figures/Figure11/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
+FramesPath = "./figures/Figure11/frames/";if ~exist(FramesPath, 'dir'), mkdir(FramesPath); end
 FigureName = "ElementA.pdf";
 VidName = "Media_1.mp4";
 saveVid = true;
@@ -163,7 +164,14 @@ str={'Atmosphere parameters:',...
     };
 Tx = annotation('textbox','interpreter'...
     ,'latex','String',str,'FitBoxToText','on');
-set(Tx,'Position',[0.12 0.38 0.154 0.3],'FontSize',12)
+
+set(0,'units','pixels')
+screenSize = get(0,'ScreenSize');
+screenMag = sqrt(screenSize*screenSize');
+Magx = 0.005447345;
+FontSize = round(screenMag*Magx,1);
+
+set(Tx,'Position',[0.12 0.38 0.154 0.3],'FontSize',FontSize)
 %%
 if saveVid
 vidTime = 20;
@@ -279,7 +287,7 @@ drawnow
 if saveVid
 frame = getframe(fig); %get frame
 writeVideo(vid, imresize(frame.cdata,[959 1930]));
-
+exportgraphics(fig,FramesPath+"f_"+k+".png",'resolution',320)
 end
 
 end
