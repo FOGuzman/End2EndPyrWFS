@@ -1,4 +1,19 @@
-function [atm] = GenerateAtmosphereParameters(nLenslet,D,binning,r0,L0,fR0,modulation,fovInPixel,resAO,Samp,nPxPup,pupil)
+function [atm] = GenerateAtmosphereParameters(params)
+nLenslet        = params.nLenslet;
+D               = params.D;
+binning         = params.binning;
+r0              = params.r0;
+L0              = params.L0;
+fR0             = params.fR0;
+modulation      = params.modulation;
+fovInPixel      = params.fovInPixel;
+resAO           = params.resAO;
+Samp            = params.Samp;
+nPxPup          = params.nPxPup;
+pupil           = params.pupil;
+
+
+
 noiseVariance = 0.7;
 n_lvl         = 0.2;             % noise level in rad^2
 
