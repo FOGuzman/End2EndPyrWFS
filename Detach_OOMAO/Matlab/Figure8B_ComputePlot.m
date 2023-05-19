@@ -14,7 +14,7 @@ run("./tools/experiments_settings/F8B_settings.m")
 
 if Compute
 %% Testing parameters
-tpr0  = 10;    % test per r0
+tpr0  = 5000;    % test per r0
 njumps = 20;
 nLims = [0 2];
 nInterval = linspace(nLims(1),nLims(2),njumps);
@@ -60,10 +60,11 @@ load(DPWFSn_path);DPWFSn_DE = OL1;
 RMSEpyr    = zeros(2,njumps);
 RMSEdpwfs  = zeros(2,njumps);
 RMSEdpwfsn = zeros(2,njumps);
+rng(RandNumberSeed)
 
+atm = GenerateAtmosphereParameters(physicalParams);
 for rc = 1:njumps
 physicalParams.ReadoutNoise = nInterval(rc);
-atm = GenerateAtmosphereParameters(physicalParams);
 
 %
 v_RMSE_pyr     = zeros(1,tpr0);
@@ -150,7 +151,7 @@ y = PropagatePyr(params,x,DE,flag);
 if params.PhotonNoise
 y = AddPhotonNoise(y,params.nPhotonBackground,params.quantumEfficiency);
 end
-y = y +randn(size(y)).*params.ReadoutNoise;
+y = y + randn(size(y)).*params.ReadoutNoise;
 y_noise = y/sum(y(:))-I0;
 % Estimation
 Ze = CM*y_noise(:);
