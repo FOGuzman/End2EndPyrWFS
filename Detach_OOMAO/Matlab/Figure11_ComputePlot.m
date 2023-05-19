@@ -1,99 +1,72 @@
-close all;clear all; 
-addpath functions
+addpath tools/functions
+clear all;clc;close all
+
+
 oomao_path = "D:/OOMAO/";
-%preFold = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
-preFold = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.02807_Epoch_91.mat";
-%preFold = "../Preconditioners/nocap/mod/OL1_R64_M2_RMSE0.03355_Epoch_70.mat";
+%DPWFS_path = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
+DPWFS_path = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.02807_Epoch_91.mat";
+%DPWFS_path = "../Preconditioners/nocap/mod/OL1_R64_M2_RMSE0.03355_Epoch_70.mat";
 
+savePath = "./ComputeResults/Fig10B/";if ~exist(savePath, 'dir'), mkdir(savePath); end
+matName = "r0PerformanceFig10B";
+FigurePath = "./figures/Figure10/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
+FigureName = "ElementB.pdf";
+VidName = "TEST.mp4";
+saveVid = false;
 addpath(genpath(oomao_path))
-vidFold = "./loop_videos/";
-vidName = "TEST.mp4";
-saveVid = 1;
-%%
-binning       = 1;
-D             = 16;
-modulation    = 0;
-nLenslet      = 16;
-resAO         = 2*nLenslet+1;
-L0            = 20;
-r0            = 1.3;
-fR0           = 1;
-noiseVariance = 0.7;
-n_lvl         = 0.1;             % noise level in rad^2
-Samp          = 2;                % OVer-sampling factor
-nPxPup        = 128;               % number of pixels to describe the pupil
-alpha         = pi/2;
-rooftop       = [0,0]; 
-fovInPixel    = nPxPup*2*Samp;    % number of pixel to describe the PSD
-PyrQ          = zeros(fovInPixel,fovInPixel);
-I4Q4 = PyrQ;
-nTimes        = fovInPixel/resAO;
-
-N             = 2*Samp*nPxPup;
-L             = (N-1)*D/(nPxPup-1);
-pupil         = CreatePupil(nPxPup,"disc");
-
-jModes = [2:60];
-
-%% Pyramid calibration
-modes = CreateZernikePolynomials(nPxPup,jModes,pupil~=0);
-flatMode = CreateZernikePolynomials(nPxPup,1,pupil~=0);
-
+%% Phisycal parameters
+run("./tools/experiments_settings/F11_settings.m")
 
 %% Test
 % Phase inversion
-PhaseCM = pinv(modes);
+PhaseCM = pinv(physicalParams.modes);
 
-load(preFold);OL1_trained = OL1;
-%OL1_trained = 20*rand(512,512);
+load(DPWFS_path);DPWFS_DE = OL1;
 
-[NetCM,NetI_0] = PyrCalibration(jModes,modes,flatMode,fovInPixel,nPxPup,Samp...
-    ,modulation,rooftop,alpha,pupil,OL1_trained,1);
-
-[PyrCM,PyrI_0,PyrIM] = PyrCalibration(jModes,modes,flatMode,fovInPixel,nPxPup,Samp...
-    ,modulation,rooftop,alpha,pupil,OL1_trained,0);
+[PyrCM,PyrI_0,PyrIM]   = PyrCalibration(physicalParams,DPWFS_DE,0);
+[DPWFS_CM,DPWFS_I0]    = PyrCalibration(physicalParams,DPWFS_DE,1);
         
 %% Loop parameters
 intMode = 1;
 numIter = 100;
 gain = 0.9;
 stroke = 10;
-
+RandNumberSeed = 666;
 cmos.resolution = 256;
 cmos.nyquistSampling = 16;
 cmos.fieldStopSize = 8;
 
-ReadoutNoise = 0.;
-PhotonNoise = 0;
-nPhotonBackground = 0;
-quantumEfficiency = 1;
+physicalParams.ReadoutNoise = 0.;
+physicalParams.PhotonNoise = 0;
+physicalParams.nPhotonBackground = 0;
+physicalParams.quantumEfficiency = 1;
 
-ref_psf = DetachImager(cmos,reshape(flatMode,[nPxPup nPxPup]));
+ref_psf = DetachImager(cmos,reshape(physicalParams.flatMode,[physicalParams.nPxPup physicalParams.nPxPup]));
 %% OOMAO parameters
 Alts = [2,3 7]*1e3;
 FR0s = [0.4,0.3 0.3];
 WS = [2,6 8];
 WD = [0,pi/4 pi/2];
-s = RandStream('mt19937ar','Seed',666);
+s = RandStream('mt19937ar','Seed',RandNumberSeed);
 ngs = source('wavelength',photometry.R);
-atm = atmosphere(photometry.R,r0,L0,'altitude',Alts,...
+atm = atmosphere(photometry.R,physicalParams.r0,physicalParams.L0,'altitude',Alts,...
     'fractionnalR0',FR0s,...
     'windSpeed',WS,...
     'randStream',s,...
     'windDirection',WD);
 
 wvlf = atm.wavelength/(2*pi)/1e-6;
-tel = telescope(D,...
+tel = telescope(physicalParams.D,...
     'fieldOfViewInArcMin',10,...
-    'resolution',nPxPup,...
+    'resolution',physicalParams.nPxPup,...
     'samplingTime',1/30);
 tel = tel + atm;
 ngs = ngs.*tel;
 +tel;
 %% Loop
 % preconf fig
-phi_buffer1 = reshape(flatMode,[nPxPup nPxPup])*0;
-phi_buffer2 = reshape(flatMode,[nPxPup nPxPup])*0;
+phi_buffer1 = reshape(physicalParams.flatMode,[physicalParams.nPxPup physicalParams.nPxPup])*0;
+phi_buffer2 = reshape(physicalParams.flatMode,[physicalParams.nPxPup physicalParams.nPxPup])*0;
 we_openloop = 0;
 we1 = 0;
 we2 = 0;
@@ -103,19 +76,19 @@ midL = round(size(ref_psf,1)/2);
 fig = figure('Color','w','Position',[1 42 1920 957]);
 
 subplot(3,5,1)
-ha_phi.img = imagesc(phi_buffer1,'AlphaData',pupil);axis off;colormap jet;axis image
+ha_phi.img = imagesc(phi_buffer1,'AlphaData',physicalParams.pupil);axis off;colormap jet;axis image
 ha_phi.cb = colorbar();
 ha_phi.cl = gca;
 ha_phi.title = title("$\phi_i^t$",'interpreter','latex','FontSize',16);
 
 subplot(3,5,2)
-ha_phi1a.img = imagesc(phi_buffer1,'AlphaData',pupil);axis off;colormap jet;axis image
+ha_phi1a.img = imagesc(phi_buffer1,'AlphaData',physicalParams.pupil);axis off;colormap jet;axis image
 ha_phi1a.cb = colorbar();
 ha_phi1a.cl = gca;
 ha_phi1a.title = title("$\phi_i^t - \phi_{PWFS}^{t-1}$",'interpreter','latex','FontSize',16);
 
 subplot(3,5,3)
-ha_phi1b.img = imagesc(phi_buffer1,'AlphaData',pupil);axis off;colormap jet;axis image
+ha_phi1b.img = imagesc(phi_buffer1,'AlphaData',physicalParams.pupil);axis off;colormap jet;axis image
 ha_phi1b.cb = colorbar();
 ha_phi1b.cl = gca;
 ha_phi1b.title = title("$\phi_{PWFS}^{t}$",'interpreter','latex','FontSize',16);
@@ -137,13 +110,13 @@ set(gca,'FontSize',14,'TickLabelInterpreter','latex')
 legend("Ideal","PWFS","DPWFS",'interpreter','latex','FontSize',8)
 
 subplot(3,5,7)
-ha_phi2a.img = imagesc(phi_buffer1,'AlphaData',pupil);axis off;colormap jet;axis image
+ha_phi2a.img = imagesc(phi_buffer1,'AlphaData',physicalParams.pupil);axis off;colormap jet;axis image
 ha_phi2a.cb = colorbar();
 ha_phi2a.cl = gca;
 ha_phi2a.title = title("$\phi_i^t - \phi_{DPWFS}^{t-1}$",'interpreter','latex','FontSize',16);
 
 subplot(3,5,8)
-ha_phi2b.img = imagesc(phi_buffer1,'AlphaData',pupil);axis off;colormap jet;axis image
+ha_phi2b.img = imagesc(phi_buffer1,'AlphaData',physicalParams.pupil);axis off;colormap jet;axis image
 ha_phi2b.cb = colorbar();
 ha_phi2b.cl = gca;
 ha_phi2b.title = title("$\phi_{DPWFS}^{t}$",'interpreter','latex','FontSize',16);
@@ -179,7 +152,7 @@ str={'Atmosphere parameters:',...
     "Von Karman atmospheric turbulence",...   
     sprintf("$$\\lambda = %.2f [\\mu m]$$",atm.wavelength*1e6),...
     sprintf("$$r_0 = %.2f [cm]$$",atm.r0*100),...
-    sprintf("$$D= %.2f [m]$$",D),...
+    sprintf("$$D= %.2f [m]$$",physicalParams.D),...
     sprintf("$$L_0 = %.2f [m]$$",atm.L0),...
     sprintf("seeing $$ = %.2f [arcsec]$$",atm.seeingInArcsec),...
     sprintf("$$\\theta_0 = %.2f [arcsec]$$",atm.theta0InArcsec),...
@@ -203,8 +176,8 @@ mkdir(vidFold+"frames/")
 open(vid)
 end
 
-phi_buffer1 = reshape(flatMode,[nPxPup nPxPup])*0;
-phi_buffer2 = reshape(flatMode,[nPxPup nPxPup])*0;
+phi_buffer1 = reshape(physicalParams.flatMode,[physicalParams.nPxPup physicalParams.nPxPup])*0;
+phi_buffer2 = reshape(physicalParams.flatMode,[physicalParams.nPxPup physicalParams.nPxPup])*0;
 phi_res1 = phi_buffer1;
 phi_res2 = phi_res1;
 we_openloop = [];
@@ -220,25 +193,25 @@ for k = 1:numIter
 phi =    ngs.meanRmPhase;
 
 %props
-y = PropagatePyr(fovInPixel,phi_res1,Samp,modulation,rooftop,alpha,pupil,nPxPup,OL1_trained,0);
-if PhotonNoise
-y = AddPhotonNoise(y,nPhotonBackground,quantumEfficiency);
+y = PropagatePyr(physicalParams,phi_res1,DPWFS_DE,0);
+if physicalParams.PhotonNoise
+y = AddPhotonNoise(y,physicalParams.nPhotonBackground,physicalParams.quantumEfficiency);
 end
-y = y +randn(size(y)).*ReadoutNoise;
+y = y +randn(size(y)).*physicalParams.ReadoutNoise;
 Pyr_y = y/sum(y(:))-PyrI_0;
 % Estimation
 PyrZe = PyrCM*Pyr_y(:);
-phi_hat1 = reshape(modes*PyrZe*gain,[nPxPup nPxPup]);
+phi_hat1 = reshape(physicalParams.modes*PyrZe*gain,[physicalParams.nPxPup physicalParams.nPxPup]);
 
-y = PropagatePyr(fovInPixel,phi_res2,Samp,modulation,rooftop,alpha,pupil,nPxPup,OL1_trained,1);
-if PhotonNoise
-y = AddPhotonNoise(y,nPhotonBackground,quantumEfficiency);
+y = PropagatePyr(physicalParams,phi_res2,DPWFS_DE,1);
+if physicalParams.PhotonNoise
+y = AddPhotonNoise(y,physicalParams.nPhotonBackground,physicalParams.quantumEfficiency);
 end
-y = y +randn(size(y)).*ReadoutNoise;
-Net_y = y/sum(y(:))-NetI_0;
+y = y +randn(size(y)).*physicalParams.ReadoutNoise;
+Net_y = y/sum(y(:))-DPWFS_I0;
 % Estimation
-NetZe = NetCM*Net_y(:);
-phi_hat2 = reshape(modes*NetZe*gain,[nPxPup nPxPup]);
+NetZe = DPWFS_CM*Net_y(:);
+phi_hat2 = reshape(physicalParams.modes*NetZe*gain,[physicalParams.nPxPup physicalParams.nPxPup]);
 
 
 phi_res1 = phi+phi_buffer1;% - phi_hat1;
@@ -259,9 +232,9 @@ sc2 = DetachImager(cmos,phi_res2);
 srm = max(ref_psf(:));
 end
 
-we_openloop = [we_openloop sqrt(mse(phi(pupil==1)))];
-we1 = [we1 sqrt(mse(phi_res1(pupil==1)))];
-we2 = [we2 sqrt(mse(phi_res2(pupil==1)))];
+we_openloop = [we_openloop sqrt(mse(phi(physicalParams.pupil==1)))];
+we1 = [we1 sqrt(mse(phi_res1(physicalParams.pupil==1)))];
+we2 = [we2 sqrt(mse(phi_res2(physicalParams.pupil==1)))];
 itx = [itx k];
 
 sr1 = max(sc1(:))/srm;

@@ -1,15 +1,17 @@
 physicalParams = struct();
 
 % Pyramid propeties
-physicalParams.D                    = 8;             % Telescope diameter [m]
+physicalParams.D                    = 16;             % Telescope diameter [m]
 physicalParams.nLenslet             = 16;            % Equivalent SH resolution lenslet
 physicalParams.binning              = 1;             % Binning in phase sampling
 physicalParams.Samp                 = 2;             % Oversampling factor
-physicalParams.nPxPup               = 64;           % number of pixels to describe the pupil
+physicalParams.nPxPup               = 128;           % number of pixels to describe the pupil
 physicalParams.alpha                = pi/2;          % Pyramid shape
 physicalParams.rooftop              = [0,0];         % Pyramid roftop imperfection
+physicalParams.modulation           = 0;
 % Atmosphere propeties
-physicalParams.L0                   = 25;            % Outer scale [m]
+physicalParams.L0                   = 20;            % Outer scale [m]
+physicalParams.r0                   = 1.3;
 physicalParams.fR0                  = 1;             % Fracional r0 (for multi layer - not implemented)
 % indecies for Zernike decomposition 
 physicalParams.jModes               = 2:60;
@@ -32,4 +34,3 @@ physicalParams.I4Q4                 = physicalParams.PyrQ;
 
 physicalParams.modes = CreateZernikePolynomials(physicalParams.nPxPup,physicalParams.jModes,physicalParams.pupil~=0);
 physicalParams.flatMode = CreateZernikePolynomials(physicalParams.nPxPup,1,physicalParams.pupil~=0);
-
