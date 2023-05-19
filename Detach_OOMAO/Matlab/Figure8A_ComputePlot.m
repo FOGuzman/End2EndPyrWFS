@@ -8,7 +8,7 @@ savePath = "./ComputeResults/Fig8A/";if ~exist(savePath, 'dir'), mkdir(savePath)
 matName = "PhothonNoiseFigA";
 FigurePath = "./figures/Figure8/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
 FigureName = "ElementA.pdf";
-Compute = true;
+Compute = false;
 %% Phisycal parameters
 run("./tools/experiments_settings/F8A_settings.m")
 
@@ -133,12 +133,10 @@ ylabel("RMSE [radians]",'Interpreter','latex')
 set(gca,'FontSize',13,'TickLabelInterpreter','latex','LineWidth',1)
 leg = legend(lbltxt,'interpreter','latex','Location','northwest');
 
-lims = [min([min(RMSEpyr(:)) min(RMSEdpwfs(:)) min(RMSEdpwfsn(:))]),...
-    max([max(RMSEpyr(:)) max(RMSEdpwfs(:)) max(RMSEdpwfsn(:))])];
-%ylim([0 lims(2)+0.2])
+ylim([0 0.6])
 
 
-exportgraphics(fig,fold+FigureName)
+exportgraphics(fig,FigurePath+FigureName)
 
 
 
