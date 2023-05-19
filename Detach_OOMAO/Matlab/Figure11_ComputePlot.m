@@ -7,12 +7,10 @@ oomao_path = "D:/OOMAO/";
 DPWFS_path = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.02807_Epoch_91.mat";
 %DPWFS_path = "../Preconditioners/nocap/mod/OL1_R64_M2_RMSE0.03355_Epoch_70.mat";
 
-savePath = "./ComputeResults/Fig10B/";if ~exist(savePath, 'dir'), mkdir(savePath); end
-matName = "r0PerformanceFig10B";
-FigurePath = "./figures/Figure10/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
-FigureName = "ElementB.pdf";
-VidName = "TEST.mp4";
-saveVid = false;
+FigurePath = "./figures/Figure11/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
+FigureName = "ElementA.pdf";
+VidName = "Media_1.mp4";
+saveVid = true;
 addpath(genpath(oomao_path))
 %% Phisycal parameters
 run("./tools/experiments_settings/F11_settings.m")
@@ -73,7 +71,7 @@ we2 = 0;
 midL = round(size(ref_psf,1)/2);
 
 
-fig = figure('Color','w','Position',[1 42 1920 957]);
+fig = figure('Color','w','Units','normalized','Position',[0 0.0370 1 0.8861]);
 
 subplot(3,5,1)
 ha_phi.img = imagesc(phi_buffer1,'AlphaData',physicalParams.pupil);axis off;colormap jet;axis image
@@ -169,10 +167,9 @@ set(Tx,'Position',[0.12 0.38 0.154 0.3],'FontSize',12)
 %%
 if saveVid
 vidTime = 20;
-vid = VideoWriter(vidFold+vidName);
+vid = VideoWriter(FigurePath+VidName);
 vid.FrameRate = round(numIter/vidTime);
 vid.Quality = 100;
-mkdir(vidFold+"frames/")
 open(vid)
 end
 
@@ -282,15 +279,10 @@ drawnow
 if saveVid
 frame = getframe(fig); %get frame
 writeVideo(vid, imresize(frame.cdata,[959 1930]));
-exportgraphics(fig,vidFold+"frames/f_"+k+".png",'resolution',320)
+
 end
 
 end
 if saveVid;close(vid);end
 
-
-% cmos.resolution = 124;
-% cmos.nyquistSampling = 16;
-% cmos.fieldStopSize = 20;
-% sc1 = DetachImager(cmos,phi_res1);
-% imagesc(sc1)
+exportgraphics(fig,FigurePath+FigureName)
