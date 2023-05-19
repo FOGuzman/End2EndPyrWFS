@@ -14,7 +14,7 @@ run("./tools/experiments_settings/F8A_settings.m")
 
 if Compute
 %% Testing parameters
-tpr0  = 10;    % test per r0
+tpr0  = 5000;    % test per r0
 njumps = 20;
 nLims = [0 0.4];
 nInterval = linspace(nLims(1),nLims(2),njumps);
@@ -71,7 +71,7 @@ v_RMSE_dpwfs  = zeros(1,tpr0);
 v_RMSE_dpwfsn  = zeros(1,tpr0);
 
 tic
-for tc = 1:tpr0
+parfor tc = 1:tpr0
 [x,Zg] = ComputePhaseScreen(atm,PhaseCM);
 
 [Zpyr]    = PropAndSamp(physicalParams,x,DPWFS_DE ,PyrI_0   ,PyrCM    ,0);
@@ -138,7 +138,7 @@ lims = [min([min(RMSEpyr(:)) min(RMSEdpwfs(:)) min(RMSEdpwfsn(:))]),...
 %ylim([0 lims(2)+0.2])
 
 
-%exportgraphics(fig,fold+FigureName)
+exportgraphics(fig,fold+FigureName)
 
 
 
