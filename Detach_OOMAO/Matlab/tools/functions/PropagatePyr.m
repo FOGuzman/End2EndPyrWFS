@@ -1,6 +1,11 @@
-function [I4Q] = PropagatePyr(fovInPixel,phaseMap,Samp,modulation,rooftop,alpha,pupil,nPxPup,PreC,flag)
-
-
+function [I4Q] = PropagatePyr(params,phaseMap,PreC,flag)
+fovInPixel      = params.fovInPixel;
+nPxPup          = params.nPxPup;
+pupil           = params.pupil;
+Samp            = params.Samp;
+modulation      = params.modulation;
+rooftop         = params.rooftop;
+alpha           = params.alpha;
 
 [uu,vv]       = ndgrid((0:(fovInPixel-1))./fovInPixel);
 [o,r]         = cart2pol(uu,vv);

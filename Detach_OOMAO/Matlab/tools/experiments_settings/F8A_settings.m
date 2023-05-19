@@ -31,3 +31,6 @@ physicalParams.fovInPixel           = physicalParams.nPxPup*2*physicalParams.Sam
 physicalParams.nTimes               = physicalParams.fovInPixel/physicalParams.resAO;
 physicalParams.PyrQ                 = zeros(physicalParams.fovInPixel);
 physicalParams.I4Q4                 = physicalParams.PyrQ;
+
+physicalParams.modes = CreateZernikePolynomials(physicalParams.nPxPup,physicalParams.jModes,physicalParams.pupil~=0);
+physicalParams.flatMode = CreateZernikePolynomials(physicalParams.nPxPup,1,physicalParams.pupil~=0);

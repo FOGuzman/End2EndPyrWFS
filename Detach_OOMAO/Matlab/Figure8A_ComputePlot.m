@@ -4,21 +4,27 @@ clear all;clc
 %% Preconditioners paths
 DPWFS_path = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.0285_Epoch_92.mat";
 DPWFSn_path = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
-saveFold = "../ComputeResults/Fig8A/";
+savePath = "./ComputeResults/Fig8A/";if ~exist(savePath, 'dir'), mkdir(savePath); end
+matName = "PhothonNoiseFigA";
+FigurePath = "./figures/Figure8/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
+FigureName = "ElementA.pdf";
+Compute = true;
 %% Phisycal parameters
 run("./tools/experiments_settings/F8A_settings.m")
 
+if Compute
 %% Testing parameters
-tpr0  = 600;    % test per r0
+tpr0  = 10;    % test per r0
 njumps = 20;
 nLims = [0 0.4];
 nInterval = linspace(nLims(1),nLims(2),njumps);
 Mods = [0];
+RandNumberSeed = 666;
 
 % Print status
 fprintf("Test range %i\n",njumps);
 fprintf("D/r0 = [");
-fprintf("%.0f ",D_R0s);
+fprintf("%.0f ",physicalParams.D_R0s);
 fprintf("]\n");
 fprintf("Phothon noise = [");
 for k = 1:njumps;fprintf("%.2f ",nInterval(k));end
@@ -27,246 +33,126 @@ fprintf("Modulations = [");
 for k = 1:length(Mods);fprintf("%.0f ",Mods(k));end
 fprintf("]\n");
 
-%% Vectors and operators
+% Vectors and operators
 rmse = @(x,y) sqrt(mse(x(:),y(:)));
 
 %% Pyramid calibration
-modes = CreateZernikePolynomials(nPxPup,jModes,pupil~=0);
-flatMode = CreateZernikePolynomials(nPxPup,1,pupil~=0);
 
 for mc = 1:length(Mods)
 physicalParams.modulation    = Mods(mc);
 % Matrix fittings
 %Phase inversion
-PhaseCM = pinv(modes);
+PhaseCM = pinv(physicalParams.modes);
 
 load(DPWFS_path);DPWFS_DE = OL1;
 load(DPWFSn_path);DPWFSn_DE = OL1;
 
 
-[PyrCM,PyrI_0,PyrIM] = PyrCalibration(physicalParams,DPWFS_DE,0);
+[PyrCM,PyrI_0,PyrIM]   = PyrCalibration(physicalParams,DPWFS_DE,0);
 
-[DPWFS_CM,DPWFS_I0]  = PyrCalibration(physicalParams,DPWFS_DE,1);
+[DPWFS_CM,DPWFS_I0]    = PyrCalibration(physicalParams,DPWFS_DE,1);
 
 [DPWFSn_CM,DPWFSn_I0]  = PyrCalibration(physicalParams,DPWFSn_DE,1);
         
 %% start testing
-noise_v_meanRMSE_pyr = zeros(1,njumps);
-noise_v_meanRMSE_de = zeros(1,njumps);
-noise_v_stdRMSE_pyr = zeros(1,njumps);
-noise_v_stdRMSE_de = zeros(1,njumps);
+
+%Result vector mean(1,:), std(2,:). Noise level (:,1,2,...,N)
+RMSEpyr    = zeros(2,njumps);
+RMSEdpwfs  = zeros(2,njumps);
+RMSEdpwfsn = zeros(2,njumps);
+
 for rc = 1:njumps
-nPhotonBackground = nInterval(rc);
-atm = GenerateAtmosphereParameters(nLenslet,D,binning,r0,L0,fR0,modulation,fovInPixel,resAO,Samp,nPxPup,pupil);
+physicalParams.nPhotonBackground = nInterval(rc);
+atm = GenerateAtmosphereParameters(physicalParams);
 
 %
-v_RMSE_pyr = zeros(1,tpr0);
-v_RMSE_de = zeros(1,tpr0);
+v_RMSE_pyr     = zeros(1,tpr0);
+v_RMSE_dpwfs  = zeros(1,tpr0);
+v_RMSE_dpwfsn  = zeros(1,tpr0);
+
 tic
-parfor tc = 1:tpr0
+for tc = 1:tpr0
 [x,Zg] = ComputePhaseScreen(atm,PhaseCM);
 
-y = PropagatePyr(fovInPixel,x,Samp,modulation,rooftop,alpha,pupil,nPxPup,OL1_trained,1);
-if PhotonNoise
-y = AddPhotonNoise(y,nPhotonBackground,quantumEfficiency);
-end
-y = y +randn(size(y)).*ReadoutNoise;
-Net_y = y/sum(y(:))-NetI_0;
-% Estimation
-NetZe = NetCM*Net_y(:);
+[Zpyr]    = PropAndSamp(physicalParams,x,DPWFS_DE ,PyrI_0   ,PyrCM    ,0);
+[Zdpwfs]  = PropAndSamp(physicalParams,x,DPWFS_DE ,DPWFS_I0 ,DPWFS_CM ,1);
+[Zdpwfsn] = PropAndSamp(physicalParams,x,DPWFSn_DE,DPWFSn_I0,DPWFSn_CM,1);
 
-y = PropagatePyr(fovInPixel,x,Samp,modulation,rooftop,alpha,pupil,nPxPup,OL1_trained,0);
-if PhotonNoise
-y = AddPhotonNoise(y,nPhotonBackground,quantumEfficiency);
-end
-y = y +randn(size(y)).*ReadoutNoise;
-Pyr_y = y/sum(y(:))-PyrI_0;
-% Estimation
-PyrZe = PyrCM*Pyr_y(:);
-
-v_RMSE_pyr(1,tc) = rmse(Zg,PyrZe);
-v_RMSE_de(1,tc)  = rmse(Zg,NetZe);
+v_RMSE_pyr(1,tc)     = rmse(Zg,Zpyr);
+v_RMSE_dpwfs(1,tc)   = rmse(Zg,Zdpwfs);
+v_RMSE_dpwfsn(1,tc)  = rmse(Zg,Zdpwfsn);
 
 end
 
-noise_v_meanRMSE_pyr(1,rc) = mean(v_RMSE_pyr);
-noise_v_meanRMSE_de(1,rc)  = mean(v_RMSE_de);
-noise_v_stdRMSE_pyr(1,rc)  = std(v_RMSE_pyr);
-noise_v_stdRMSE_de(1,rc)   = std(v_RMSE_de);
+RMSEpyr(1,rc) = mean(v_RMSE_pyr);
+RMSEpyr(2,rc) = std(v_RMSE_pyr);
+
+RMSEdpwfs(1,rc) = mean(v_RMSE_dpwfs);
+RMSEdpwfs(2,rc) = std(v_RMSE_dpwfs);
+
+RMSEdpwfsn(1,rc) = mean(v_RMSE_dpwfsn);
+RMSEdpwfsn(2,rc) = std(v_RMSE_dpwfsn);
 
 
-fprintf("Progress:M[%i/%i] = %i | Rnoise[%i/%i] = %.2f | Time per r0 = %.2f seg\n"...
+fprintf("Progress: Mod[%i/%i] = %i | Photon Noise[%i/%i] = %.2f | Time per interval = %.2f seg\n"...
     ,mc,length(Mods),Mods(mc),rc,njumps,nInterval(rc),toc)
 end
 
-R(mc).meanRMSEpyr = noise_v_meanRMSE_pyr;
-R(mc).stdRMSEpyr = noise_v_stdRMSE_pyr;
-R(mc).meanRMSEde = noise_v_meanRMSE_de;
-R(mc).stdRMSEde = noise_v_stdRMSE_de;
-
-[x,Zg] = ComputePhaseScreen(atm,PhaseCM);
-
-y = PropagatePyr(fovInPixel,x,Samp,modulation,rooftop,alpha,pupil,nPxPup,OL1_trained,1);
-if PhotonNoise
-y = AddPhotonNoise(y,nPhotonBackground,quantumEfficiency);
-end
-y = y +randn(size(y)).*ReadoutNoise;
-Net_y = y/sum(y(:));
-R(mc).ExampleMeas = Net_y;
-end
-
-save(saveFold+"PNoisermseResults_noiser10.mat",'R')
-
-
-
-%% Test parameters
-
-%preFold = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.0285_Epoch_92.mat";
-preFold = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
-saveFold = "../Preconditioners/nocap/pnoise/";
-
-fprintf("Test range %i\n",njumps);
-fprintf("D/r0 = [");
-fprintf("%.0f ",D_R0s);
-fprintf("]\n");
-fprintf("Phothon noise = [");
-for k = 1:njumps;fprintf("%.2f ",nInterval(k));end
-fprintf("]\n");
-fprintf("Modulations = [");
-for k = 1:length(Mods);fprintf("%.0f ",Mods(k));end
-fprintf("]\n");
-
-
-%% Pyramid calibration
-modes = CreateZernikePolynomials(nPxPup,jModes,pupil~=0);
-flatMode = CreateZernikePolynomials(nPxPup,1,pupil~=0);
-
-for mc = 1:length(Mods)
-modulation    = Mods(mc);
-
-%% Matrix fittings
-% Phase inversion
-IM = [];     
-for k = 1:length(jModes)
-imMode = reshape(modes(:,k),[nPxPup nPxPup]);
-IM = [IM imMode(:)];
-end
-PhaseCM = pinv(IM);
-
-load(preFold);OL1_trained = OL1;
-
-[NetCM,NetI_0] = PyrCalibration(jModes,modes,flatMode,fovInPixel,nPxPup,Samp...
-    ,modulation,rooftop,alpha,pupil,OL1_trained,1);
-
-[PyrCM,PyrI_0,PyrIM] = PyrCalibration(jModes,modes,flatMode,fovInPixel,nPxPup,Samp...
-    ,modulation,rooftop,alpha,pupil,OL1_trained,0);
-        
-%% start testing
-noise_v_meanRMSE_pyr = zeros(1,njumps);
-noise_v_meanRMSE_de = zeros(1,njumps);
-noise_v_stdRMSE_pyr = zeros(1,njumps);
-noise_v_stdRMSE_de = zeros(1,njumps);
-for rc = 1:njumps
-
-ReadoutNoise = 0;
-PhotonNoise = 1;
-nPhotonBackground = nInterval(rc);
-quantumEfficiency = 1;
-atm = GenerateAtmosphereParameters(nLenslet,D,binning,r0,L0,fR0,modulation,fovInPixel,resAO,Samp,nPxPup,pupil);
-
-%
-v_RMSE_pyr = zeros(1,tpr0);
-v_RMSE_de = zeros(1,tpr0);
-tic
-parfor tc = 1:tpr0
-[x,Zg] = ComputePhaseScreen(atm,PhaseCM);
-
-y = PropagatePyr(fovInPixel,x,Samp,modulation,rooftop,alpha,pupil,nPxPup,OL1_trained,1);
-if PhotonNoise
-y = AddPhotonNoise(y,nPhotonBackground,quantumEfficiency);
-end
-y = y +randn(size(y)).*ReadoutNoise;
-Net_y = y/sum(y(:))-NetI_0;
-% Estimation
-NetZe = NetCM*Net_y(:);
-
-y = PropagatePyr(fovInPixel,x,Samp,modulation,rooftop,alpha,pupil,nPxPup,OL1_trained,0);
-if PhotonNoise
-y = AddPhotonNoise(y,nPhotonBackground,quantumEfficiency);
-end
-y = y +randn(size(y)).*ReadoutNoise;
-Pyr_y = y/sum(y(:))-PyrI_0;
-% Estimation
-PyrZe = PyrCM*Pyr_y(:);
-
-v_RMSE_pyr(1,tc) = rmse(Zg,PyrZe);
-v_RMSE_de(1,tc)  = rmse(Zg,NetZe);
+Results(mc).RMSEpyr    = RMSEpyr;
+Results(mc).RMSEdpwfs  = RMSEdpwfs;
+Results(mc).RMSEdpwfsn = RMSEdpwfsn;
 
 end
 
-noise_v_meanRMSE_pyr(1,rc) = mean(v_RMSE_pyr);
-noise_v_meanRMSE_de(1,rc)  = mean(v_RMSE_de);
-noise_v_stdRMSE_pyr(1,rc)  = std(v_RMSE_pyr);
-noise_v_stdRMSE_de(1,rc)   = std(v_RMSE_de);
+%% Create log
+INFO = physicalParams;
+INFO.nPhotonBackground  = nInterval;
+INFO.date               = date;
+INFO.datapointsPerLevel = tpr0;
+INFO.RandNumberSeed = RandNumberSeed;
+INFO.FilesAndPathds = {DPWFS_path,DPWFSn_path,savePath,matName,FigurePath,FigureName}';
+Results.INFO = INFO;
 
-
-fprintf("Progress:M[%i/%i] = %i | Rnoise[%i/%i] = %.2f | Time per r0 = %.2f seg\n"...
-    ,mc,length(Mods),Mods(mc),rc,njumps,nInterval(rc),toc)
+save(savePath+matName+".mat",'Results')
 end
-
-R(mc).meanRMSEpyr = noise_v_meanRMSE_pyr;
-R(mc).stdRMSEpyr = noise_v_stdRMSE_pyr;
-R(mc).meanRMSEde = noise_v_meanRMSE_de;
-R(mc).stdRMSEde = noise_v_stdRMSE_de;
-
-[x,Zg] = ComputePhaseScreen(atm,PhaseCM);
-
-y = PropagatePyr(fovInPixel,x,Samp,modulation,rooftop,alpha,pupil,nPxPup,OL1_trained,1);
-if PhotonNoise
-y = AddPhotonNoise(y,nPhotonBackground,quantumEfficiency);
-end
-y = y +randn(size(y)).*ReadoutNoise;
-Net_y = y/sum(y(:));
-R(mc).ExampleMeas = Net_y;
-end
-
-save(saveFold+"PNoisermseResults_noiser10.mat",'R')
-
-
-
-
 
 %% Plot
-loadFold = "../Preconditioners/nocap/base/";
-R1 =load(loadFold+"PNoisermseResults_noiser10.mat");R1=R1.R;
-loadFold = "../Preconditioners/nocap/pnoise/";
-R2 =load(loadFold+"PNoisermseResults_noiser10.mat");R2=R2.R;
-mod = 1;
+
+Rin = load(savePath+matName+".mat");R=Rin.Results;
+nlvl = Rin.Results.INFO.nPhotonBackground;
+modi = 1;
 lbltxt{1} = sprintf("PWFS");
 lbltxt{2} = sprintf("DPWFS");
 lbltxt{3} = sprintf("DPWFS*");
 fig = figure('Color','w');
-errorbar(nInterval,R1(mod).meanRMSEpyr,R1(mod).stdRMSEpyr,'r','LineWidth',1.5)
-hold on
-errorbar(nInterval,R1(mod).meanRMSEde,R1(mod).stdRMSEde,'g','LineWidth',1.5)
-errorbar(nInterval,R2(mod).meanRMSEde,R2(mod).stdRMSEde,'b','LineWidth',1.5)
+errorbar(nlvl,R(modi).RMSEpyr(1,:)   ,R(modi).RMSEpyr(2,:)   ,'r','LineWidth',1.5);hold on
+errorbar(nlvl,R(modi).RMSEdpwfs(1,:) ,R(modi).RMSEdpwfs(2,:) ,'g','LineWidth',1.5)
+errorbar(nlvl,R(modi).RMSEdpwfsn(1,:),R(modi).RMSEdpwfsn(2,:),'b','LineWidth',1.5)
 xlabel("Photon noise",'Interpreter','latex')
 ylabel("RMSE [radians]",'Interpreter','latex')
 set(gca,'FontSize',13,'TickLabelInterpreter','latex','LineWidth',1)
 leg = legend(lbltxt,'interpreter','latex','Location','northwest');
-ylim([0 0.1])
 
-fold = "./figures/v5/";
-name = "Pnoise_PerformanceV2.pdf";
-exportgraphics(fig,fold+name)
+lims = [min([min(RMSEpyr(:)) min(RMSEdpwfs(:)) min(RMSEdpwfsn(:))]),...
+    max([max(RMSEpyr(:)) max(RMSEdpwfs(:)) max(RMSEdpwfsn(:))])];
+%ylim([0 lims(2)+0.2])
+
+
+%exportgraphics(fig,fold+FigureName)
 
 
 
 %% Functions
 
-function [outputArg1,outputArg2] = Prop(inputArg1,inputArg2)
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
-outputArg1 = inputArg1;
-outputArg2 = inputArg2;
+function [Ze,y_noise] = PropAndSamp(params,x,DE,I0,CM,flag)
+
+y = PropagatePyr(params,x,DE,flag);
+if params.PhotonNoise
+y = AddPhotonNoise(y,params.nPhotonBackground,params.quantumEfficiency);
+end
+y = y +randn(size(y)).*params.ReadoutNoise;
+y_noise = y/sum(y(:))-I0;
+% Estimation
+Ze = CM*y_noise(:);
+
 end

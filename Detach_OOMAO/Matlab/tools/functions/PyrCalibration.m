@@ -18,7 +18,7 @@ I4Q = PropagatePyr(params,z,PreC,flag);
 sp = I4Q/sum(I4Q,'all')-I_0;
 
 %pull
-I4Q = PropagatePyr(params,-z,flag);
+I4Q = PropagatePyr(params,-z,PreC,flag);
 sm = I4Q/sum(I4Q,'all')-I_0;
 
 MZc = 0.5*(sp-sm)/amp;
