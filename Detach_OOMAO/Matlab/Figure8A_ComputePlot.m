@@ -1,4 +1,4 @@
-addpath functions
+addpath tools/functions
 clear all;clc
 
 %% Preconditioners paths
@@ -6,30 +6,7 @@ DPWFS_path = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.0285_Ep
 DPWFSn_path = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
 saveFold = "../ComputeResults/Fig8A/";
 %% Phisycal parameters
-binning       = 1;
-D             = 8;
-nLenslet      = 16;
-resAO         = 2*nLenslet+1;
-L0            = 25;
-D_R0s         = 40;
-R0s           = D./D_R0s;
-r0            = R0s;
-fR0           = 1;
-Samp          = 2;                % OVer-sampling factor
-nPxPup        = 128;               % number of pixels to describe the pupil
-alpha         = pi/2;
-rooftop       = [0,0]; 
-fovInPixel    = nPxPup*2*Samp;    % number of pixel to describe the PSD
-PyrQ          = zeros(fovInPixel,fovInPixel);
-I4Q4          = PyrQ;
-nTimes        = fovInPixel/resAO;
-N             = 2*Samp*nPxPup;
-L             = (N-1)*D/(nPxPup-1);
-pupil         = CreatePupil(nPxPup,"disc");
-jModes        = 2:60;
-ReadoutNoise  = 0;
-PhotonNoise   = 1;
-quantumEfficiency = 1;
+run("./tools/experiments_settings/F8A_settings.m")
 
 %% Testing parameters
 tpr0  = 600;    % test per r0
@@ -38,6 +15,7 @@ nLims = [0 0.4];
 nInterval = linspace(nLims(1),nLims(2),njumps);
 Mods = [0];
 
+% Print status
 fprintf("Test range %i\n",njumps);
 fprintf("D/r0 = [");
 fprintf("%.0f ",D_R0s);
@@ -57,7 +35,7 @@ modes = CreateZernikePolynomials(nPxPup,jModes,pupil~=0);
 flatMode = CreateZernikePolynomials(nPxPup,1,pupil~=0);
 
 for mc = 1:length(Mods)
-modulation    = Mods(mc);
+physicalParams.modulation    = Mods(mc);
 % Matrix fittings
 %Phase inversion
 PhaseCM = pinv(modes);
@@ -66,14 +44,11 @@ load(DPWFS_path);DPWFS_DE = OL1;
 load(DPWFSn_path);DPWFSn_DE = OL1;
 
 
-[PyrCM,PyrI_0,PyrIM] = PyrCalibration(jModes,modes,flatMode,fovInPixel,nPxPup,Samp...
-    ,modulation,rooftop,alpha,pupil,DPWFS_DE,0);
+[PyrCM,PyrI_0,PyrIM] = PyrCalibration(physicalParams,DPWFS_DE,0);
 
-[DPWFS_CM,DPWFS_I0]  = PyrCalibration(jModes,modes,flatMode,fovInPixel,nPxPup,Samp...
-    ,modulation,rooftop,alpha,pupil,DPWFS_DE,1);
+[DPWFS_CM,DPWFS_I0]  = PyrCalibration(physicalParams,DPWFS_DE,1);
 
-[DPWFSn_CM,DPWFSn_I0]  = PyrCalibration(jModes,modes,flatMode,fovInPixel,nPxPup,Samp...
-    ,modulation,rooftop,alpha,pupil,DPWFSn_DE,1);
+[DPWFSn_CM,DPWFSn_I0]  = PyrCalibration(physicalParams,DPWFSn_DE,1);
         
 %% start testing
 noise_v_meanRMSE_pyr = zeros(1,njumps);
