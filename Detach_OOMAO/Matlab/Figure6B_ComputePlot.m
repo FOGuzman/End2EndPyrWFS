@@ -2,15 +2,16 @@ addpath tools/functions
 clear all;clc
 
 %% Preconditioners paths
-DPWFS_path = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.0285_Epoch_92.mat";
-savePath = "./ComputeResults/Fig4B/";if ~exist(savePath, 'dir'), mkdir(savePath); end
-matName = "r0PerformanceFig4B";
-FigurePath = "./figures/Figure4/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
+DPWFS_path = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
+savePath = "./ComputeResults/Fig6B/";if ~exist(savePath, 'dir'), mkdir(savePath); end
+matName = "r0PerformanceFig6B";
+FigurePath = "./figures/Figure6/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
 FigureName = "ElementB.pdf";
 Compute = true;
 
+
 %% Phisycal parameters
-run("./tools/experiments_settings/F4_settings.m")
+run("./tools/experiments_settings/F6_settings.m")
 
 %% Test parameters
 if Compute

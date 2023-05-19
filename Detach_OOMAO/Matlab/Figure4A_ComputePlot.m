@@ -3,7 +3,6 @@ clear all;clc
 
 %% Preconditioners paths
 DPWFS_path = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.0285_Epoch_92.mat";
-DPWFSn_path = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
 savePath = "./ComputeResults/Fig4A/";if ~exist(savePath, 'dir'), mkdir(savePath); end
 matName = "r0PerformanceFig4A";
 FigurePath = "./figures/Figure4/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
@@ -49,7 +48,6 @@ physicalParams.modulation    = Mods(mc);
 PhaseCM = pinv(physicalParams.modes);
 
 load(DPWFS_path);DPWFS_DE = OL1;
-load(DPWFSn_path);DPWFSn_DE = OL1;
 
 [PyrCM,PyrI_0,PyrIM]   = PyrCalibration(physicalParams,DPWFS_DE,0);
 [DPWFS_CM,DPWFS_I0]    = PyrCalibration(physicalParams,DPWFS_DE,1);
@@ -102,7 +100,7 @@ INFO.r0s  = physicalParams.D_R0s;
 INFO.date               = date;
 INFO.datapointsPerLevel = tpr0;
 INFO.RandNumberSeed = RandNumberSeed;
-INFO.FilesAndPathds = {DPWFS_path,DPWFSn_path,savePath,matName,FigurePath,FigureName}';
+INFO.FilesAndPathds = {DPWFS_path,savePath,matName,FigurePath,FigureName}';
 for k = 1:length(Mods);Results(k).INFO = INFO;Results(k).INFO.modulation = Mods(k);end
 
 save(savePath+matName+".mat",'Results')

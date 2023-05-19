@@ -2,20 +2,20 @@ addpath tools/functions
 clear all;clc
 
 %% Preconditioners paths
-DPWFS_path = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.0285_Epoch_92.mat";
-savePath = "./ComputeResults/Fig4B/";if ~exist(savePath, 'dir'), mkdir(savePath); end
-matName = "r0PerformanceFig4B";
-FigurePath = "./figures/Figure4/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
-FigureName = "ElementB.pdf";
+DPWFS_path = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
+savePath = "./ComputeResults/Fig6A/";if ~exist(savePath, 'dir'), mkdir(savePath); end
+matName = "r0PerformanceFig6A";
+FigurePath = "./figures/Figure6/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
+FigureName = "ElementA.pdf";
 Compute = true;
 
 %% Phisycal parameters
-run("./tools/experiments_settings/F4_settings.m")
+run("./tools/experiments_settings/F6_settings.m")
 
 %% Test parameters
 if Compute
 tpr0  = 5000;    % test per r0
-physicalParams.D_R0s = [30 25 20 15 10 8 5 3 1];%[30 25 20 15 10 8 5 3 1]
+physicalParams.D_R0s = [90 80 70 60 50 40 30 20 10 1];%[30 25 20 15 10 8 5 3 1]
 physicalParams.R0s = physicalParams.D./physicalParams.D_R0s;
 rjumps = length(physicalParams.R0s);
 Mods = [0 1 2];
