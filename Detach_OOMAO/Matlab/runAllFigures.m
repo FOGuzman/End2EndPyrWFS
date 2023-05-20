@@ -1,0 +1,16 @@
+% This script run all the Figures of the paper Deep Optics Preconditioner 
+%for Enhanced Pyramid Wavefront Sensing
+% Felipe Guzman
+
+Figure4A_Computeplot
+Figure4B_Computeplot
+Figure5_Computeplot
+Figure6A_Computeplot
+Figure6B_Computeplot
+Figure7_Computeplot
+Figure8A_Computeplot
+Figure8B_Computeplot
+Figure9_Computeplot
+Figure10A_Computeplot
+Figure10B_Computeplot
+Figure11_Computeplot

@@ -1,5 +1,5 @@
 addpath tools/functions
-clear all;clc
+clear all;clc;close all
 
 %% Preconditioners paths (Compute true to recalculate)
 DPWFS_path = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.0285_Epoch_92.mat";
@@ -14,7 +14,7 @@ run("./tools/experiments_settings/F8B_settings.m")
 
 if Compute
 %% Testing parameters
-tpr0  = 5000;    % test per r0
+tpr0  = 50000;    % test per r0
 njumps = 20;
 nLims = [0 2];
 nInterval = linspace(nLims(1),nLims(2),njumps);

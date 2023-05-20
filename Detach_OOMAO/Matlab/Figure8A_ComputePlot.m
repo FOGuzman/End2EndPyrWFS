@@ -1,20 +1,21 @@
 addpath tools/functions
-clear all;clc
+clear all;clc;close all
 
 %% Preconditioners paths (Compute true to recalculate)
 DPWFS_path = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.0285_Epoch_92.mat";
+%DPWFS_path = "../Preconditioners/nocap/l1/checkpoint/OL1_R128_M0_RMSE0.0285_Epoch_106.mat";
 DPWFSn_path = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
 savePath = "./ComputeResults/Fig8A/";if ~exist(savePath, 'dir'), mkdir(savePath); end
 matName = "PhothonNoiseFigA";
 FigurePath = "./figures/Figure8/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
 FigureName = "ElementA.pdf";
-Compute = false;
+Compute = true;
 %% Phisycal parameters
 run("./tools/experiments_settings/F8A_settings.m")
 
 if Compute
 %% Testing parameters
-tpr0  = 5000;    % test per r0
+tpr0  = 50000;    % test per r0
 njumps = 20;
 nLims = [0 0.4];
 nInterval = linspace(nLims(1),nLims(2),njumps);
@@ -60,10 +61,10 @@ load(DPWFSn_path);DPWFSn_DE = OL1;
 RMSEpyr    = zeros(2,njumps);
 RMSEdpwfs  = zeros(2,njumps);
 RMSEdpwfsn = zeros(2,njumps);
-
+atm = GenerateAtmosphereParameters(physicalParams);
 for rc = 1:njumps
 physicalParams.nPhotonBackground = nInterval(rc);
-atm = GenerateAtmosphereParameters(physicalParams);
+
 
 %
 v_RMSE_pyr     = zeros(1,tpr0);

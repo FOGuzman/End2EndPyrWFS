@@ -1,5 +1,5 @@
 addpath tools/functions
-clear all;clc
+clear all;clc;close all
 
 %% Preconditioners paths
 DPWFS_path = "../Preconditioners/nocap/mod/OL1_R64_M2_RMSE0.005704_Epoch_109.mat";
@@ -14,7 +14,7 @@ run("./tools/experiments_settings/F10_settings.m")
 
 %% Test parameters
 if Compute
-tpr0  = 5000;    % test per r0
+tpr0  = 50000;    % test per r0
 physicalParams.D_R0s = [90 80 70 60 50 40 30 20 10 1];%[30 25 20 15 10 8 5 3 1]
 physicalParams.R0s = physicalParams.D./physicalParams.D_R0s;
 rjumps = length(physicalParams.R0s);

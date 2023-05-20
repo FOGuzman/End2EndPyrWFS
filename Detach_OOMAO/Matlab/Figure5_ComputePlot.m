@@ -1,5 +1,5 @@
 addpath tools/functions
-clear all;clc
+clear all;clc;close all
 
 %% Preconditioners paths
 DPWFS_path = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.0285_Epoch_92.mat";
