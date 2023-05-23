@@ -15,7 +15,7 @@ run("./tools/experiments_settings/F6_settings.m")
 
 %% Test parameters
 if Compute
-tpr0  = 50000;    % test per r0
+tpr0  = 10000;    % test per r0
 physicalParams.D_R0s = [30 25 20 15 10 8 5 3 1];%[30 25 20 15 10 8 5 3 1]
 physicalParams.R0s = physicalParams.D./physicalParams.D_R0s;
 rjumps = length(physicalParams.R0s);

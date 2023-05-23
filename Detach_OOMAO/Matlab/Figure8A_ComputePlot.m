@@ -15,7 +15,7 @@ run("./tools/experiments_settings/F8A_settings.m")
 
 if Compute
 %% Testing parameters
-tpr0  = 50000;    % test per r0
+tpr0  = 10000;    % test per r0
 njumps = 20;
 nLims = [0 0.4];
 nInterval = linspace(nLims(1),nLims(2),njumps);

@@ -2,15 +2,15 @@
 %for Enhanced Pyramid Wavefront Sensing
 % Felipe Guzman
 
-Figure4A_Computeplot
-Figure4B_Computeplot
-Figure5_Computeplot
-Figure6A_Computeplot
-Figure6B_Computeplot
-Figure7_Computeplot
-Figure8A_Computeplot
-Figure8B_Computeplot
-Figure9_Computeplot
-Figure10A_Computeplot
-Figure10B_Computeplot
-Figure11_Computeplot
+Figure4A_ComputePlot
+Figure4B_ComputePlot
+Figure5_ComputePlot
+Figure6A_ComputePlot
+Figure6B_ComputePlot
+Figure7_ComputePlot
+Figure8A_ComputePlot
+Figure8B_ComputePlot
+Figure9_ComputePlot
+Figure10A_ComputePlot
+Figure10B_ComputePlot
+Figure11_ComputePlot
