@@ -2,7 +2,7 @@ addpath tools/functions
 clear all;clc;close all
 
 
-oomao_path = "D:/OOMAO/";
+oomao_path = "/home/fg/Desktop/OOMAO/";
 %DPWFS_path = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
 DPWFS_path = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.02807_Epoch_91.mat";
 %DPWFS_path = "../Preconditioners/nocap/mod/OL1_R64_M2_RMSE0.03355_Epoch_70.mat";
