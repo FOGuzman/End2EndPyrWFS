@@ -41,6 +41,24 @@ To train a diffractive element, an implementation of the same equations in Pytor
   check the script help for extra parameters like noise and pyramid shape
   
 Once the training is finished, and for each epoch, a phase matrix of size nPxPup x samp, with the extension .mat is created. This can be loaded directly to matlab  
+# Reproducing Results
+All the figures generated in the research paper were obtained using the scripts in the MATLAB folder. Please ensure that you set up the path to the Diffractive Element (saved as a .mat file) in the first lines of each script you wish to run. Here is a list of available figures that can be reproduced:
+
+```
+Figure4A_ComputePlot.m
+Figure4B_ComputePlot.m
+Figure5_ComputePlot.m
+Figure6A_ComputePlot.m
+Figure6B_ComputePlot.m
+Figure7_ComputePlot.m
+Figure8A_ComputePlot.m
+Figure8B_ComputePlot.m
+Figure9_ComputePlot.m
+Figure10A_ComputePlot.m
+Figure10B_ComputePlot.m
+Figure11_ComputePlot.m
+
+```
 
 
 # Citation
