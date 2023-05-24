@@ -2,7 +2,7 @@ addpath tools/functions
 clear all;clc;close all
 
 %% Preconditioners paths
-DPWFS_path = "../Preconditioners/nocap/mod/OL1_R64_M2_RMSE0.005704_Epoch_109.mat";
+DPWFS_path = "../Preconditioners/nocap/mod/OL1_R64_M2_RMSE0.03355_Epoch_70.mat";
 savePath = "./ComputeResults/Fig10A/";if ~exist(savePath, 'dir'), mkdir(savePath); end
 matName = "r0PerformanceFig10A";
 FigurePath = "./figures/Figure10/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
