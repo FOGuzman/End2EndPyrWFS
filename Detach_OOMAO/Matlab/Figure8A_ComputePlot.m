@@ -135,7 +135,7 @@ errorbar(nlvl,R(modi).RMSEdpwfs(1,:) ,R(modi).RMSEdpwfs(2,:) ,'g','LineWidth',1.
 errorbar(nlvl,R(modi).RMSEdpwfsn(1,:),R(modi).RMSEdpwfsn(2,:),'b','LineWidth',1.5)
 xlabel("Photon noise",'Interpreter','latex')
 ylabel("RMSE [radians]",'Interpreter','latex')
-set(gca,'FontSize',13,'TickLabelInterpreter','latex','LineWidth',1)
+set(gca,'FontSize',14,'TickLabelInterpreter','latex','LineWidth',1)
 leg = legend(lbltxt,'interpreter','latex','Location','northwest');
 
 ylim([0 0.6])

@@ -8,7 +8,7 @@ savePath = "./ComputeResults/Fig8B/";if ~exist(savePath, 'dir'), mkdir(savePath)
 matName = "ReadoutNoiseFigB";
 FigurePath = "./figures/Figure8/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
 FigureName = "ElementB.pdf";
-Compute = true;
+Compute = false;
 %% Phisycal parameters
 run("./tools/experiments_settings/F8B_settings.m")
 
@@ -118,6 +118,10 @@ save(savePath+matName+".mat",'Results')
 end
 
 %% Plot
+if ~exist(savePath+matName+".mat", 'file')
+    warning('There is no computed files on the folder: Change "Compute" to false and recalculate');
+    return;  % Finish the script
+end
 
 Rin = load(savePath+matName+".mat");R=Rin.Results;
 nlvl = Rin.Results.INFO.ReadoutNoise;
@@ -125,18 +129,14 @@ modi = 1;
 lbltxt{1} = sprintf("PWFS");
 lbltxt{2} = sprintf("DPWFS");
 lbltxt{3} = sprintf("DPWFS*");
-fig = figure('Color','w');
+fig = figure('Color','w','Units','normalized','Position',[0.6745 0.1528 0.3118 0.4648]);
 errorbar(nlvl,R(modi).RMSEpyr(1,:)   ,R(modi).RMSEpyr(2,:)   ,'r','LineWidth',1.5);hold on
 errorbar(nlvl,R(modi).RMSEdpwfs(1,:) ,R(modi).RMSEdpwfs(2,:) ,'g','LineWidth',1.5)
 errorbar(nlvl,R(modi).RMSEdpwfsn(1,:),R(modi).RMSEdpwfsn(2,:),'b','LineWidth',1.5)
 xlabel("Readout noise",'Interpreter','latex')
 ylabel("RMSE [radians]",'Interpreter','latex')
-set(gca,'FontSize',13,'TickLabelInterpreter','latex','LineWidth',1)
+set(gca,'FontSize',14,'TickLabelInterpreter','latex','LineWidth',1)
 leg = legend(lbltxt,'interpreter','latex','Location','northwest');
-
-lims = [min([min(RMSEpyr(:)) min(RMSEdpwfs(:)) min(RMSEdpwfsn(:))]),...
-    max([max(RMSEpyr(:)) max(RMSEdpwfs(:)) max(RMSEdpwfsn(:))])];
-%ylim([0 lims(2)+0.2])
 drawnow
 
 exportgraphics(fig,FigurePath+FigureName)
