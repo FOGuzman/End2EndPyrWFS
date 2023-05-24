@@ -7,7 +7,7 @@ savePath = "./ComputeResults/Fig4B/";if ~exist(savePath, 'dir'), mkdir(savePath)
 matName = "r0PerformanceFig4B";
 FigurePath = "./figures/Figure4/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
 FigureName = "ElementB.pdf";
-Compute = true;
+Compute = false;
 
 %% Phisycal parameters
 run("./tools/experiments_settings/F4_settings.m")
@@ -105,6 +105,12 @@ for k = 1:length(Mods);Results(k).INFO = INFO;Results(k).INFO.modulation = Mods(
 save(savePath+matName+".mat",'Results')
 end
 %% Plot
+
+if ~exist(savePath+matName+".mat", 'file')
+    warning('There is no computed files on the folder: Change "Compute" to false and recalculate');
+    return;  % Finish the script
+end
+
 Rin = load(savePath+matName+".mat");R=Rin.Results;
 
 r0s = R(1).INFO.D_R0s;
@@ -118,7 +124,7 @@ lbltxt{2} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R(2).INFO.modulation);
 lbltxt{3} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R(3).INFO.modulation);
 lbltxt{4} = sprintf("DPWFS, Mod $= %i\\lambda/D_0$",R(1).INFO.modulation);
 
-fig = figure('Color','w','Position',[836 133 680 547]);
+fig = figure('Color','w','Units','normalized','Position',[0.5436 0.1528 0.4427 0.6331]);
 
 plot(r0s,y1,'--dr','LineWidth',1.5,'MarkerFaceColor','r')
 hold on
@@ -128,7 +134,7 @@ plot(r0s,y4,'-or','LineWidth',1.5,'MarkerFaceColor','r')
 set(gca,'XDir','reverse','FontSize',22,'TickLabelInterpreter','latex')
 xlabel('$D/r_0$','interpreter','latex','FontSize',22)
 ylabel('RMSE','interpreter','latex','FontSize',22)
-legend(lbltxt,'interpreter','latex','FontSize',16)
+legend(lbltxt,'interpreter','latex','FontSize',19)
 xlim([min(r0s) max(r0s)])
 
 
