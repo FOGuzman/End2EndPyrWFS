@@ -15,10 +15,10 @@ physicalParams.fR0                  = 1;             % Fracional r0 (for multi l
 physicalParams.jModes               = 2:60;
 
 %Camera parameters
-physicalParams.ReadoutNoise         = 0;
-physicalParams.PhotonNoise          = 0;
+physicalParams.ReadoutNoise         = 1;
+physicalParams.PhotonNoise          = 1;
 physicalParams.quantumEfficiency    = 1;
-physicalParams.nPhotonBackground    = 0;
+physicalParams.nPhotonBackground    = 0.1;
 
 % Precomp aditional parameters
 physicalParams.resAO                = 2*physicalParams.nLenslet+1;

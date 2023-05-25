@@ -3,10 +3,28 @@ Official implementation for Deep Optics Preconditioner for Enhanced Pyramid Wave
 
 ![ ](end2end_scheme.png)
 
+# Requirements
+
+* Python 3.9
+* Pytorch 1.10+
+* Numpy
+* Scikit-image
+* Scikit-learn
+* tqdm
+* scipy
+* mpmath
+
 # Installation
 - install anaconda (https://www.anaconda.com/products/distribution)
-- if windows: anaconda promprt
-conda env create -f env.yml
+- on anaconda prompt (windows) or terminal (linux) create enviroment:
+```
+conda create -n dpwfs python=3.9
+conda activate dpwfs
+```
+- Install pytorch + cuda:
+```
+conda install pytorch==1.10.1 torchvision==0.11.2 torchaudio==0.10.1 cudatoolkit=10.2 -c pytorch
+```
 
 # Description
 This repository contains two main codes. The MATLAB code includes the basic functions extracted from [OOMAO](https://github.com/rconan/OOMAO), which are used for the analysis of results.
