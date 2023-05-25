@@ -39,7 +39,7 @@ parser.add_argument('--D', default=8, type=int, help='Telescope Diameter [m]')
 parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=float)
 parser.add_argument('--alpha', default=pi/2, type=float)
-parser.add_argument('--zModes', default=[2,64], type=int, help='Reconstruction Zernikes')
+parser.add_argument('--zModes', default=[2,128], type=int, help='Reconstruction Zernikes')
 parser.add_argument('--PupilConstrain', default=0, type=int, help='Limit information only on pupils of PyrWFS')
 parser.add_argument('--ReadoutNoise', default=0, type=float)
 parser.add_argument('--PhotonNoise', default=0, type=float)
@@ -119,7 +119,7 @@ from phaseGenerators import *
 
 nLenslet      = 16                 # plens res
 resAO         = 2*nLenslet+1       # AO resolution
-r0            = 0.2            
+r0            = 0.11           
 L0            = 25
 fR0           = 1.2
 noiseVariance = 0.7

@@ -81,7 +81,7 @@ def Prop2OptimizePyrWFS_torch(phaseMap,DE,wfs):
         I4Q4 = torch.sum(torch.abs(buf)**2 ,1) 
         I4Q = I4Q4/nTheta
     else:
-        buf = torch.fft.fft2(PyrQ)*DE
+        buf = torch.fft.fft2(PyrQ)*pyrMask*DE
         I4Q = torch.abs(torch.fft.fft2(buf))**2
     I4Q = F.resize(I4Q,(sx,sx))*2*wfs.samp
     return(I4Q)

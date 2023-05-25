@@ -38,7 +38,7 @@ parser = argparse.ArgumentParser(description='Setting, compressive rate, size, a
 parser.add_argument('--modulation', default=0, type=int, help='Pyramid modulation')
 parser.add_argument('--samp', default=2, type=int, help='Sampling')
 parser.add_argument('--D', default=8, type=int, help='Telescope Diameter [m]')
-parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
+parser.add_argument('--nPxPup', default=64, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=float)
 parser.add_argument('--alpha', default=pi/2, type=float)
 parser.add_argument('--zModes', default=[2,16], type=int, help='Reconstruction Zernikes')
