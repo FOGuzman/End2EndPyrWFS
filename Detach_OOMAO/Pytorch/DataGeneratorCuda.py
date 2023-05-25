@@ -26,9 +26,9 @@ n_gpu = torch.cuda.device_count()
 print(torch.cuda.is_available())
 print('The number of GPU is {}'.format(n_gpu))
 
-tData = 5000
-vData = 500
-Rs = [0.08,0.2]
+tData = 1000
+vData = 100
+Rs = [0.11,0.26]
 main_fold = "./dataset/"
 
 
@@ -37,11 +37,11 @@ parser = argparse.ArgumentParser(description='Setting, compressive rate, size, a
 
 parser.add_argument('--modulation', default=0, type=int, help='Pyramid modulation')
 parser.add_argument('--samp', default=2, type=int, help='Sampling')
-parser.add_argument('--D', default=3, type=int, help='Telescope Diameter [m]')
+parser.add_argument('--D', default=8, type=int, help='Telescope Diameter [m]')
 parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=float)
 parser.add_argument('--alpha', default=pi/2, type=float)
-parser.add_argument('--zModes', default=[2,100], type=int, help='Reconstruction Zernikes')
+parser.add_argument('--zModes', default=[2,36], type=int, help='Reconstruction Zernikes')
 wfs = parser.parse_args()
 
 wfs.fovInPixel    = wfs.nPxPup*2*wfs.samp 

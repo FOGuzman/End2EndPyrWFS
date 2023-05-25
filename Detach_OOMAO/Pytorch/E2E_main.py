@@ -36,8 +36,8 @@ parser = argparse.ArgumentParser(description='Settings, Training and Pyramid Wav
 
 parser.add_argument('--modulation', default=0, type=int, help='Pyramid modulation')
 parser.add_argument('--samp', default=2, type=int, help='Over sampling for fourier')
-parser.add_argument('--D', default=3, type=int, help='Telescope Diameter [m]')
-parser.add_argument('--nPxPup', default=64, type=int, help='Pupil Resolution')
+parser.add_argument('--D', default=8, type=int, help='Telescope Diameter [m]')
+parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=float,help='Pyramid rooftop (as in OOMAO)')
 parser.add_argument('--alpha', default=pi/2, type=float,help='Pyramid angle (as in OOMAO)')
 parser.add_argument('--zModes', default=[2,36], type=int, help='Reconstruction Zernikes')
