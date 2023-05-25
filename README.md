@@ -12,6 +12,17 @@ conda env create -f env.yml
 This repository contains two main codes. The MATLAB code includes the basic functions extracted from [OOMAO](https://github.com/rconan/OOMAO), which are used for the analysis of results.
 To train a diffractive element, we have also provided an implementation of the same equations in PyTorch.
 
+# Requirements
+
+* Python 3.9
+* Pytorch 1.10+
+* Numpy
+* Scikit-image
+* Scikit-learn
+* tqdm
+* scipy
+* mpmath
+
 #HowTo
 
 - You must first generate data using the generators provided in the pytorch folder.
