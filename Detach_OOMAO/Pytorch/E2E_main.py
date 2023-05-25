@@ -1,6 +1,6 @@
 from loadData import Imgdataset
 from torch.utils.data import DataLoader
-from model import PyrModel,PhaseConstraint
+from modelFast import PyrModel,PhaseConstraint
 import torch.optim as optim
 import torch.nn as nn
 import torch
@@ -194,7 +194,7 @@ for epoch in range(load_train + 1, load_train + nEpochs + 1):
     train(epoch, result_path, PyrNet, lr)
     if (epoch % 5 == 0) and (epoch < 100):
         lr = lr * 0.95
-        print(lr)
+        print("Learning rate changeg to {:.6}".format(lr)) 
     if (epoch % 1 == 0 or epoch > 50):
         PyrNet = PyrNet.module if hasattr(PyrNet, "module") else PyrNet
         checkpoint(epoch, model_path)
