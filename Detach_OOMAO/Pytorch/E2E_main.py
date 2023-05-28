@@ -23,11 +23,7 @@ from utils import *
 
 
 date = datetime.date.today()  
-os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
-n_gpu = torch.cuda.device_count()
-print(torch.cuda.is_available())
-print('The number of GPU is {}'.format(n_gpu))
+
 
 
 
@@ -60,6 +56,12 @@ wfs.modes = CreateZernikePolynomials(wfs)
 wfs.amplitude = 0.2 #small for low noise systems
 wfs.ModPhasor = CreateModulationPhasor(wfs)
 
+
+os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"]=wfs.gpu
+n_gpu = torch.cuda.device_count()
+print(torch.cuda.is_available())
+print('The number of GPU is {}'.format(n_gpu))
 
 ## Network parameters
 main_fold = "./dataset/"
