@@ -41,6 +41,7 @@ parser.add_argument('--batchSize', default=1, type=int, help='Batch size for tra
 parser.add_argument('--gpu', default="0", type=str)
 parser.add_argument('--ReadoutNoise', default=1, type=float)
 parser.add_argument('--PhotonNoise', default=0, type=float)
+parser.add_argument('--checkpoint', default=None, type=str)
 parser.add_argument('--nPhotonBackground', default=0, type=float)
 parser.add_argument('--quantumEfficiency', default=1, type=float)
 
@@ -80,6 +81,12 @@ lr         = 0.001
 PyrNet = PyrModel(wfs)              
 PyrNet = PyrModel(wfs).cuda()
 
+# Load Checkpoint
+if wfs.checkpoint is not None:
+        PyrNet.load_state_dict(torch.load(wfs.checkpoint))
+        print("Checkpoint loaded successfully!")
+else:
+        print("Training from scrach.")
 
 dataset = Imgdataset(train_fold)
 train_data_loader = DataLoader(dataset=dataset, batch_size=wfs.batchSize, shuffle=True)
