@@ -42,6 +42,7 @@ parser.add_argument('--gpu', default="0", type=str)
 parser.add_argument('--ReadoutNoise', default=1, type=float)
 parser.add_argument('--PhotonNoise', default=0, type=float)
 parser.add_argument('--checkpoint', default=None, type=str)
+parser.add_argument('--experimentName', default="", type=str)
 parser.add_argument('--nPhotonBackground', default=0, type=float)
 parser.add_argument('--quantumEfficiency', default=1, type=float)
 
@@ -69,7 +70,7 @@ main_fold = "./dataset/"
 sub_fold = "S{}_R{}_Z{}-{}_D{:d}".format(wfs.samp,wfs.nPxPup,wfs.zModes[0],wfs.zModes[1],wfs.D)
 train_fold = main_fold + sub_fold + "/train"
 val_fold   = main_fold + sub_fold + "/val"
-model_path = "./model/nocap/" + sub_fold + "/checkpoint"
+model_path = "./model/nocap/" + wfs.experimentName + sub_fold + "/checkpoint"
 result_path = "./results"
 log_path   = "./model/nocap/" + sub_fold + "/"
 load_train = 0
