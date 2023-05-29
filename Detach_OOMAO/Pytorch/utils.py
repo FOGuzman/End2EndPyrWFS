@@ -1,5 +1,12 @@
 import os
 import datetime
+import matplotlib.pyplot as plt
+import math
+from mpmath import *
+import matplotlib
+import numpy as np
+
+matplotlib.interactive(False)
 
 def GenerateLog(date,log_path,result_path,wfs,loss,mode):
     
@@ -42,3 +49,21 @@ def GenerateLog(date,log_path,result_path,wfs,loss,mode):
  # Close the file
  file_object.close()   
  print("Log done!")      
+
+
+
+
+
+def plot_tensorwt(t,yr,ygt,name):
+    plt.close()
+    fig, (ax1, ax2) = plt.subplots(1, 2,figsize=(9, 3))
+    line1, = ax2.plot(yr[:,-1],label="Estimation")
+    line2, = ax2.plot(ygt[:,-1],label="Groundtruth")
+    ax2.legend()
+    t = np.array(t)
+    t_ = np.squeeze(t)
+    d = ax1.imshow(t_, cmap ='jet', interpolation ='nearest', origin ='lower')
+    plt.colorbar(d, ax=ax1)
+    plt.title(name)
+    plt.show(block=False)
+    plt.pause(1)  

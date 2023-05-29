@@ -22,6 +22,7 @@ from math import sqrt, pi
 from utils import *
 
 
+
 date = datetime.date.today()  
 
 
@@ -34,14 +35,15 @@ parser.add_argument('--modulation', default=0, type=int, help='Pyramid modulatio
 parser.add_argument('--samp', default=2, type=int, help='Over sampling for fourier')
 parser.add_argument('--D', default=8, type=int, help='Telescope Diameter [m]')
 parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
-parser.add_argument('--rooftop', default=[0,0], type=float,help='Pyramid rooftop (as in OOMAO)')
-parser.add_argument('--alpha', default=pi/2, type=float,help='Pyramid angle (as in OOMAO)')
-parser.add_argument('--zModes', default=[2,36], type=int, help='Reconstruction Zernikes')
+parser.add_argument('--rooftop', default=[0,0], type=eval,help='Pyramid rooftop (as in OOMAO)')
+parser.add_argument('--alpha', default=np.pi/2, type=float,help='Pyramid angle (as in OOMAO)')
+parser.add_argument('--zModes', default=[2,36], type=eval, help='Reconstruction Zernikes')
 parser.add_argument('--batchSize', default=1, type=int, help='Batch size for training')
 parser.add_argument('--gpu', default="0", type=str)
 parser.add_argument('--ReadoutNoise', default=1, type=float)
 parser.add_argument('--PhotonNoise', default=0, type=float)
 parser.add_argument('--checkpoint', default=None, type=str)
+parser.add_argument('--verbose', action='store_true',help='plot each validation')
 parser.add_argument('--experimentName', default="", type=str)
 parser.add_argument('--nPhotonBackground', default=0, type=float)
 parser.add_argument('--quantumEfficiency', default=1, type=float)
@@ -72,8 +74,7 @@ train_fold = main_fold + sub_fold + "/train"
 val_fold   = main_fold + sub_fold + "/val"
 model_path = "./model/nocap/" + wfs.experimentName + sub_fold + "/checkpoint"
 result_path = "./results"
-log_path   = "./model/nocap/" + sub_fold + "/"
-load_train = 0
+log_path   = "./model/nocap/" + wfs.experimentName + sub_fold + "/"
 nEpochs    = 100
 lr         = 0.001
 
@@ -84,7 +85,8 @@ PyrNet = PyrModel(wfs).cuda()
 
 # Load Checkpoint
 if wfs.checkpoint is not None:
-        PyrNet.load_state_dict(torch.load(wfs.checkpoint))
+        PyrNet = torch.load(wfs.checkpoint)
+        PyrNet = PyrNet.module if hasattr(PyrNet, "module") else PyrNet
         print("Checkpoint loaded successfully!")
 else:
         print("Training from scrach.")
@@ -100,10 +102,6 @@ loss.cuda()
 # Enable dataparallelism (if mor that 1 GPU available)
 if n_gpu > 1:
     PyrNet = torch.nn.DataParallel(PyrNet)
-if load_train != 0:
-    PyrNet = torch.load(model_path + "/PyrNet_epoch_{}.pth".format(load_train))
-    PyrNet = PyrNet.module if hasattr(PyrNet, "module") else PyrNet
-    
     
 ## Train
 
@@ -140,11 +138,13 @@ def test(test_path, epoch, result_path, model):
                 Ygt_res = Ypyr.cpu()
             
             
-    prtname = "Diffractive Element result: RMSE -- {:.4f}".format(torch.mean(rmse_cnn))        
+    prtname = "Deep PWFS result: RMSE -- {:.4f}".format(torch.mean(rmse_cnn))        
     scio.savemat(name, {'Ypyr': Ypyr_res.numpy(),'Ygt': Ygt_res.numpy()})
     print(prtname)
     OL1_trained = PyrNet.state_dict()['prop.OL1'].cpu()
-    plot_tensorwt(torch.fft.fftshift(OL1_trained),prtname)
+    if wfs.verbose:
+        plot_tensorwt(torch.fft.fftshift(OL1_trained),Ypyr_res.numpy(),Ygt_res.numpy(),prtname)
+
     scio.savemat(model_path + "/OL1_R{}_M{}_RMSE{:.4}_Epoch_{}.mat".format(
         np.int(wfs.nPxPup),np.int(wfs.modulation),torch.mean(rmse_cnn),epoch) 
                  , {'OL1': OL1_trained.numpy()})
@@ -201,7 +201,7 @@ if not os.path.exists(model_path):
         os.makedirs(model_path)
 
 GenerateLog(date,log_path,result_path,wfs,loss,"update")        
-for epoch in range(load_train + 1, load_train + nEpochs + 1):
+for epoch in range(nEpochs):
     train(epoch, result_path, PyrNet, lr)
     if (epoch % 5 == 0) and (epoch < 100):
         lr = lr * 0.95

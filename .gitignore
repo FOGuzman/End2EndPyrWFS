@@ -1,4 +1,5 @@
 *.asv
+*.pyc
 Detach_OOMAO/Pytorch/dataset/
 Detach_OOMAO/Pytorch/model/
 Detach_OOMAO/Preconditioners

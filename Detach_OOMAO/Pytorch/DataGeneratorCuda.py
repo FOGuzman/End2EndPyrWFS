@@ -9,6 +9,7 @@ import os
 import numpy as np
 import argparse
 import random
+import ast
 from torch.autograd import Variable
 from tqdm import tqdm
 from skimage.metrics import mean_squared_error as MSE
@@ -23,10 +24,6 @@ import random
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 n_gpu = torch.cuda.device_count()
 
-
-tData = 10000
-vData = 500
-Rs = [0.11,0.26]
 main_fold = "./dataset/"
 
 
@@ -37,10 +34,13 @@ parser.add_argument('--modulation', default=0, type=int, help='Pyramid modulatio
 parser.add_argument('--samp', default=2, type=int, help='Sampling')
 parser.add_argument('--D', default=8, type=int, help='Telescope Diameter [m]')
 parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
-parser.add_argument('--rooftop', default=[0,0], type=float)
+parser.add_argument('--rooftop', default=[0,0], type=eval)
+parser.add_argument('--r0', default=[0.11,0.26], type=eval, help='Range of r0 to create')
 parser.add_argument('--gpu', default="0", type=str)
 parser.add_argument('--alpha', default=pi/2, type=float)
-parser.add_argument('--zModes', default=[2,36], type=int, help='Reconstruction Zernikes')
+parser.add_argument('--zModes', default=[2,36], type=eval, help='Reconstruction Zernikes')
+parser.add_argument('--training_data', default=10000, type=int, help='Amount of training data')
+parser.add_argument('--validation_data', default=1000, type=int, help='Amount of validation data')
 wfs = parser.parse_args()
 
 wfs.fovInPixel    = wfs.nPxPup*2*wfs.samp 
@@ -51,6 +51,11 @@ wfs.pupilLogical = wfs.pupil!=0
 wfs.modes = CreateZernikePolynomials(wfs)
 wfs.amplitude = 0.1 #small for low noise systems
 wfs.ModPhasor = CreateModulationPhasor(wfs)
+
+
+tData = wfs.training_data
+vData = wfs.validation_data
+Rs = wfs.r0
 
 os.environ["CUDA_VISIBLE_DEVICES"]=wfs.gpu
 print(torch.cuda.is_available())

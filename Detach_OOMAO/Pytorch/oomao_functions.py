@@ -19,16 +19,7 @@ def plot_tensor(t):
     d = plt.imshow(t_, cmap ='jet', interpolation ='nearest', origin ='lower')
     plt.colorbar(d)
     plt.show(block=False)
-    
-def plot_tensorwt(t,name):
-    t = np.array(t)
-    t_ = np.squeeze(t)
-    d = plt.imshow(t_, cmap ='jet', interpolation ='nearest', origin ='lower')
-    plt.colorbar(d)
-    plt.title(name)
-    plt.show(block=False)    
-    
-    
+     
 
 def cart2pol(x, y):
     rho = np.sqrt(x**2 + y**2)
