@@ -194,7 +194,7 @@ class OptimizedPyramid(nn.Module):
         self.OL1  = nn.Parameter(OL1)
 
 
-        self.NN = ConvNeXt(in_chans=1, num_classes=len(self.jModes),depths=[3, 3, 9, 3], dims=[96, 192, 384, 768])
+        self.NN = ConvNeXt(in_chans=1, num_classes=len(self.jModes),depths=[3, 3, 27, 3], dims=[128, 256, 512, 1024])
         self.NN = self.NN.cuda()
         # init weights
         nn.init.constant_(self.OL1,1)
@@ -228,7 +228,7 @@ class OptimizedPyramid(nn.Module):
         
         # Normalization
         Inorm = torch.sum(torch.sum(torch.sum(Ip,-1),-1),-1)
-        Ip = Ip/UNZ(UNZ(Inorm,-1),-1)-self.I_0
+        Ip = Ip/UNZ(UNZ(UNZ(Inorm,-1),-1),-1)-self.I_0
         # Estimation
         y = self.NN(Ip).permute(1,0)
         return y
