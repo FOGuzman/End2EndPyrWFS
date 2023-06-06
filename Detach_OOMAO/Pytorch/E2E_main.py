@@ -1,6 +1,7 @@
 from loadData import Imgdataset
 from torch.utils.data import DataLoader
-from modelFast import PyrModel,PhaseConstraint
+from modelFastplusConvNeXt import PyrModel
+#from modelFast import PyrModel
 import torch.optim as optim
 import torch.nn as nn
 import torch

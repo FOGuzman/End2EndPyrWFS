@@ -64,7 +64,7 @@ def Prop2VanillaPyrWFS_torch(phaseMap,wfs):
 def Prop2OptimizePyrWFS_torch(phaseMap,DE,wfs):
     
     nTheta = np.round(2*math.pi*wfs.samp*wfs.modulation)
-    nTheta = torch.tensor(nTheta)
+    nTheta = torch.tensor(nTheta).float()
     PyrQ  = torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
     pupil = wfs.pupil  
     pyrMask = UNZ(UNZ(torch.tensor(wfs.pyrMask),0),0)  
