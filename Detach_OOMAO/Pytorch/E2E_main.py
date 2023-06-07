@@ -11,15 +11,11 @@ import datetime
 import os
 import numpy as np
 import argparse
-import random
 from torch.autograd import Variable
 from tqdm import tqdm
-from skimage.metrics import mean_squared_error as MSE
-from skimage.metrics import structural_similarity as compare_ssim
 from oomao_functions import *
 from phaseGenerators import *
 from customLoss      import RMSE
-from math import sqrt, pi
 from utils import *
 
 
