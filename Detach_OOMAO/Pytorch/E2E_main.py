@@ -1,7 +1,6 @@
 from loadData import Imgdataset
 from torch.utils.data import DataLoader
-from modelFastplusConvNeXt import PyrModel
-#from modelFast import PyrModel
+import importlib
 import torch.optim as optim
 import torch.nn as nn
 import torch
@@ -40,6 +39,7 @@ parser.add_argument('--PhotonNoise', default=0, type=float)
 parser.add_argument('--nPhotonBackground', default=0, type=float)
 parser.add_argument('--quantumEfficiency', default=1, type=float)
 
+parser.add_argument('--model', default="modelFast", type=str)
 parser.add_argument('--batchSize', default=1, type=int, help='Batch size for training')
 parser.add_argument('--learning_rate', default=0.001, type=float)
 parser.add_argument('--Epochs', default=100, type=int, help='Number of epochs')
@@ -80,8 +80,8 @@ lr         = wfs.learning_rate
 
 
 # Model definition
-PyrNet = PyrModel(wfs)              
-PyrNet = PyrModel(wfs).cuda()
+method = importlib.import_module(wfs.model)
+PyrNet = method.PyrModel(wfs).cuda()              
 
 # Load Checkpoint
 if wfs.checkpoint is not None:
@@ -112,18 +112,16 @@ def test(test_path, epoch, result_path, model):
     Ypyr_res = None
     Ygt_res = None
     for i in range(len(test_list)):
-        datamat = scio.loadmat(test_path + '/' + test_list[i])
-        
+        rmse_1 = 0  
+        datamat = scio.loadmat(test_path + '/' + test_list[i])       
         Ygt = datamat['Zgt']
         Ygt = torch.from_numpy(Ygt).cuda().float()
         Ygt = torch.transpose(Ygt,0,1)
         phaseMap = datamat['x']
         phaseMap = torch.from_numpy(phaseMap).cuda().float()
-
+        phaseMap = torch.unsqueeze(torch.unsqueeze(phaseMap,0),0)
         with torch.no_grad():
-
-            rmse_1 = 0
-            phaseMap = torch.unsqueeze(phaseMap,0)
+                     
             Ypyr = model(phaseMap)
             rmse_1 = torch.sqrt(torch.mean((Ygt-Ypyr)**2)) 
             rmse_cnn[i] = rmse_1
