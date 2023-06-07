@@ -13,6 +13,9 @@ Detach_OOMAO/Pytorch/logs/
 Detach_OOMAO/Matlab/*.asv
 
 Detach_OOMAO/Pytorch/freedata_results/
+Detach_OOMAO/Pytorch/modelDWFS/
+Detach_OOMAO/Pytorch/dataset_cuda_test/
+Detach_OOMAO/Pytorch/dataset_tilt/
 Detach_OOMAO/Pytorch/E2EDWFS_main.py
 
 Detach_OOMAO/Matlab/Loos2_test.m
