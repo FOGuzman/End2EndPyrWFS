@@ -19,11 +19,6 @@ from phaseGenerators import *
 from math import sqrt, pi
 import random
 
-
-
-os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-n_gpu = torch.cuda.device_count()
-
 main_fold = "./dataset/"
 
 
@@ -57,9 +52,11 @@ tData = wfs.training_data
 vData = wfs.validation_data
 Rs = wfs.r0
 
+os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"]=wfs.gpu
+n_gpu = torch.cuda.device_count()
 print(torch.cuda.is_available())
-print('The number of GPU is {}'.format(n_gpu))
+print('The number of GPU is {} using {}'.format(n_gpu,wfs.gpu))
 #%% ############# Fourier Phase
 
 from phaseGenerators import *
