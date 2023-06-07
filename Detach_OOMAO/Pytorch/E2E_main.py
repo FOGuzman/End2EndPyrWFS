@@ -39,16 +39,18 @@ parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=eval,help='Pyramid rooftop (as in OOMAO)')
 parser.add_argument('--alpha', default=np.pi/2, type=float,help='Pyramid angle (as in OOMAO)')
 parser.add_argument('--zModes', default=[2,36], type=eval, help='Reconstruction Zernikes')
-parser.add_argument('--batchSize', default=1, type=int, help='Batch size for training')
-parser.add_argument('--learning_rate', default=0.001, type=float)
-parser.add_argument('--gpu', default="0", type=str)
 parser.add_argument('--ReadoutNoise', default=0, type=float)
 parser.add_argument('--PhotonNoise', default=0, type=float)
+parser.add_argument('--nPhotonBackground', default=0, type=float)
+parser.add_argument('--quantumEfficiency', default=1, type=float)
+
+parser.add_argument('--batchSize', default=1, type=int, help='Batch size for training')
+parser.add_argument('--learning_rate', default=0.001, type=float)
+parser.add_argument('--Epochs', default=100, type=int, help='Number of epochs')
+parser.add_argument('--gpu', default="0", type=str)
 parser.add_argument('--checkpoint', default=None, type=str)
 parser.add_argument('--verbose', action='store_true',help='plot each validation')
 parser.add_argument('--experimentName', default="", type=str)
-parser.add_argument('--nPhotonBackground', default=0, type=float)
-parser.add_argument('--quantumEfficiency', default=1, type=float)
 
 
 # Precalculations
