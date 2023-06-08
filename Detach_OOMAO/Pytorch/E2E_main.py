@@ -75,7 +75,7 @@ val_fold   = main_fold + sub_fold + "/val"
 model_path = "./model/nocap/" + wfs.experimentName + sub_fold + "/checkpoint"
 result_path = "./results"
 log_path   = "./model/nocap/" + wfs.experimentName + sub_fold + "/"
-nEpochs    = 100
+nEpochs    = wfs.Epochs
 lr         = wfs.learning_rate
 
 
