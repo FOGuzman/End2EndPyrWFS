@@ -213,9 +213,6 @@ class OptimizedPyramid(nn.Module):
 
     def forward(self, inputs):
         OL1 = UNZ(UNZ(torch.exp(1j * self.OL1),0),0)       
-        # Flat prop
-        I_0 = Prop2OptimizePyrWFS_torch(self.Flat,OL1,self).float()
-        self.I_0 = I_0/torch.sum(I_0)
          
         #propagation of X
         Ip = Prop2OptimizePyrWFS_torch(inputs,OL1,self)
@@ -228,7 +225,7 @@ class OptimizedPyramid(nn.Module):
         
         # Normalization
         Inorm = torch.sum(torch.sum(torch.sum(Ip,-1),-1),-1)
-        Ip = Ip/UNZ(UNZ(UNZ(Inorm,-1),-1),-1)-self.I_0
+        Ip = Ip/UNZ(UNZ(UNZ(Inorm,-1),-1),-1)
         # Estimation
         y = self.NN(Ip).permute(1,0)
         return y
