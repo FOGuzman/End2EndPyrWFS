@@ -39,6 +39,8 @@ class OptimizedPyramid(nn.Module):
         self.pupilLogical = torch.tensor(wfs.pupilLogical)
         self.Flat = torch.ones((self.nPxPup,self.nPxPup))*self.pupilLogical
         self.Flat = UNZ(UNZ(self.Flat,0),0).cuda()
+        OL1 = torch.ones((wfs.fovInPixel,wfs.fovInPixel))
+        self.OL1  = nn.Parameter(OL1)
         
         ## CUDA
         if torch.cuda.is_available() == 1:
@@ -873,6 +875,6 @@ class PyrModel(nn.Module):
         self.CNNModel = gc_vit_xxtiny(num_classes=len(wfs.jModes))
 
     def forward(self, x):
-        #Ip = self.prop(x)
-        y = self.CNNModel(x)
+        Ip = self.prop(x)
+        y = self.CNNModel(Ip)
         return y.permute(1,0)  

@@ -34,12 +34,13 @@ parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=eval,help='Pyramid rooftop (as in OOMAO)')
 parser.add_argument('--alpha', default=np.pi/2, type=float,help='Pyramid angle (as in OOMAO)')
 parser.add_argument('--zModes', default=[2,36], type=eval, help='Reconstruction Zernikes')
+parser.add_argument('--ZernikeUnits', default=1, type=float,help='Zernike units (1 for normalized)')
 parser.add_argument('--ReadoutNoise', default=0, type=float)
 parser.add_argument('--PhotonNoise', default=0, type=float)
 parser.add_argument('--nPhotonBackground', default=0, type=float)
 parser.add_argument('--quantumEfficiency', default=1, type=float)
 
-parser.add_argument('--model', default="modelFast", type=str)
+parser.add_argument('--model', default="GCViT_only", type=str)
 parser.add_argument('--batchSize', default=1, type=int, help='Batch size for training')
 parser.add_argument('--learning_rate', default=0.0001, type=float)
 parser.add_argument('--Epochs', default=100, type=int, help='Number of epochs')
@@ -77,6 +78,7 @@ result_path = "./results"
 log_path   = "./model/nocap/" + wfs.experimentName + sub_fold + "/"
 nEpochs    = wfs.Epochs
 lr         = wfs.learning_rate
+zu         = wfs.ZernikeUnits
 
 
 # Model definition
@@ -115,14 +117,14 @@ def test(test_path, epoch, result_path, model):
         rmse_1 = 0  
         datamat = scio.loadmat(test_path + '/' + test_list[i])       
         Ygt = datamat['Zgt']
-        Ygt = torch.from_numpy(Ygt).cuda().float()
+        Ygt = torch.from_numpy(Ygt).cuda().float()*zu
         Ygt = torch.transpose(Ygt,0,1)
         phaseMap = datamat['x']
         phaseMap = torch.from_numpy(phaseMap).cuda().float()
         phaseMap = torch.unsqueeze(torch.unsqueeze(phaseMap,0),0)
         with torch.no_grad():
                      
-            Ypyr = model(phaseMap)
+            Ypyr = model(phaseMap)*zu
             rmse_1 = torch.sqrt(torch.mean((Ygt-Ypyr)**2)) 
             rmse_cnn[i] = rmse_1
 
@@ -164,14 +166,14 @@ def train(epoch, result_path, model, lr):
 
     for iteration, batch in tqdm(enumerate(train_data_loader)):
         Ygt = Variable(batch[0])
-        Ygt = Ygt.cuda().float()
+        Ygt = Ygt.cuda().float()*zu
         Ygt = torch.transpose(Ygt,0,1)
         phaseMap = Variable(batch[1])
         phaseMap = phaseMap.cuda().float()
         phaseMap = torch.unsqueeze(phaseMap,1)
 
         optimizer_g.zero_grad()
-        Ypyr = model(phaseMap)
+        Ypyr = model(phaseMap)*zu
         Loss1 = loss(Ypyr,Ygt)
 
         Loss1.backward()

@@ -188,6 +188,8 @@ class OptimizedPyramid(nn.Module):
 
         self.NN = ConvNeXt(in_chans=1, num_classes=len(self.jModes),depths=[3, 3, 27, 3], dims=[128, 256, 512, 1024])
         self.NN = self.NN.cuda()
+        OL1 = torch.ones((wfs.fovInPixel,wfs.fovInPixel))
+        self.OL1  = nn.Parameter(OL1)
         
         ## CUDA
         if torch.cuda.is_available() == 1:
