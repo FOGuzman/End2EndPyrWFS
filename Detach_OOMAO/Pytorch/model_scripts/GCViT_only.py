@@ -1,23 +1,11 @@
 import torch.nn as nn
 import torch
-import scipy.io as scio
-import time
-import datetime
-import os
 import numpy as np
-import argparse
-import random
-from torch.autograd import Variable
-from tqdm import tqdm
-from skimage.metrics import mean_squared_error as MSE
-from skimage.metrics import structural_similarity as compare_ssim
-from oomao_functions import *
-from phaseGenerators import *
-from Propagators import *
-from math import sqrt, pi
+from functions.oomao_functions import *
+from functions.phaseGenerators import *
+from functions.Propagators import *
 from torch import unsqueeze as UNZ
-from timm.models.layers import trunc_normal_, DropPath, to_2tuple
-from timm.models.registry import register_model
+from timm.models.layers import trunc_normal_, DropPath
 import torchvision.transforms as resize
 transform = resize.Resize(224)
 
@@ -51,9 +39,6 @@ class OptimizedPyramid(nn.Module):
         self.pupilLogical = torch.tensor(wfs.pupilLogical)
         self.Flat = torch.ones((self.nPxPup,self.nPxPup))*self.pupilLogical
         self.Flat = UNZ(UNZ(self.Flat,0),0).cuda()
-        OL1 = torch.ones((wfs.fovInPixel,wfs.fovInPixel))
-        OL1 = torch.tensor(np.angle(wfs.pyrMask),dtype=torch.float)
-        self.OL1  = nn.Parameter(OL1)
         
         ## CUDA
         if torch.cuda.is_available() == 1:
@@ -68,10 +53,8 @@ class OptimizedPyramid(nn.Module):
             
 
     def forward(self, inputs):
-        OL1 = UNZ(UNZ(torch.exp(1j * self.OL1),0),0)       
-
         #propagation of X
-        Ip = Prop2OptimizePyrWFS_torch(inputs,OL1,self)
+        Ip = Prop2VanillaPyrWFS_torch(inputs,self)
         #Photon noise
         if self.PhotonNoise == 1:
             Ip = AddPhotonNoise(Ip,self)          
@@ -890,6 +873,6 @@ class PyrModel(nn.Module):
         self.CNNModel = gc_vit_xxtiny(num_classes=len(wfs.jModes))
 
     def forward(self, x):
-        Ip = self.prop(x)
-        y = self.CNNModel(Ip)
+        #Ip = self.prop(x)
+        y = self.CNNModel(x)
         return y.permute(1,0)  

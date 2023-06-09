@@ -1,14 +1,10 @@
-
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from timm.models.layers import trunc_normal_, DropPath
-import scipy.io as scio
 import numpy as np
-from oomao_functions import *
-from phaseGenerators import *
-from Propagators import *
-from math import sqrt, pi
+from functions.oomao_functions import *
+from functions.phaseGenerators import *
+from functions.Propagators import *
 from torch import unsqueeze as UNZ
 
 class Block(nn.Module):

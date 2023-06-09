@@ -1,4 +1,3 @@
-from loadData import Imgdataset
 from torch.utils.data import DataLoader
 import importlib
 import torch.optim as optim
@@ -12,10 +11,11 @@ import numpy as np
 import argparse
 from torch.autograd import Variable
 from tqdm import tqdm
-from oomao_functions import *
-from phaseGenerators import *
-from customLoss      import RMSE
-from utils import *
+from functions.loadData import Imgdataset
+from functions.oomao_functions import *
+from functions.phaseGenerators import *
+from functions.customLoss      import RMSE
+from functions.utils import *
 
 
 
@@ -80,7 +80,7 @@ lr         = wfs.learning_rate
 
 
 # Model definition
-method = importlib.import_module(wfs.model)
+method = importlib.import_module("model_scripts."+wfs.model)
 PyrNet = method.PyrModel(wfs).cuda()              
 
 # Load Checkpoint
