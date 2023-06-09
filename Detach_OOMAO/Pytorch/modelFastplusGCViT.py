@@ -890,6 +890,6 @@ class PyrModel(nn.Module):
         self.CNNModel = gc_vit_xxtiny(num_classes=len(wfs.jModes))
 
     def forward(self, x):
-        x = self.prop(x)
-        y = self.CNNModel(x)
-        return y  
+        Ip = self.prop(x)
+        y = self.CNNModel(Ip)
+        return y.permute(1,0)  

@@ -41,7 +41,7 @@ parser.add_argument('--quantumEfficiency', default=1, type=float)
 
 parser.add_argument('--model', default="modelFast", type=str)
 parser.add_argument('--batchSize', default=1, type=int, help='Batch size for training')
-parser.add_argument('--learning_rate', default=0.001, type=float)
+parser.add_argument('--learning_rate', default=0.0001, type=float)
 parser.add_argument('--Epochs', default=100, type=int, help='Number of epochs')
 parser.add_argument('--gpu', default="0", type=str)
 parser.add_argument('--checkpoint', default=None, type=str)
