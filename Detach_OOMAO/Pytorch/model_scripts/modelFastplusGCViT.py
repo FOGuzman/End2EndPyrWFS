@@ -42,6 +42,7 @@ class OptimizedPyramid(nn.Module):
         OL1 = torch.ones((wfs.fovInPixel,wfs.fovInPixel))
         OL1 = torch.tensor(np.angle(wfs.pyrMask),dtype=torch.float)
         self.OL1  = nn.Parameter(OL1)
+        nn.init.constant_(self.OL1,1)
         
         ## CUDA
         if torch.cuda.is_available() == 1:
