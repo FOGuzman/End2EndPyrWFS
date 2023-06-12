@@ -158,7 +158,6 @@ def convnext_large(pretrained=False, in_22k=False, **kwargs):
 class OptimizedPyramid(nn.Module):
     def __init__(self, wfs):
         super().__init__()
-        self.batchSize = wfs.batchSize
         self.nPxPup = wfs.nPxPup
         self.modulation = wfs.modulation
         self.samp = wfs.samp

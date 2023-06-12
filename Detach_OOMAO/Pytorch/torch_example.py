@@ -14,9 +14,10 @@ from torch.autograd import Variable
 from tqdm import tqdm
 from skimage.metrics import mean_squared_error as MSE
 from skimage.metrics import structural_similarity as compare_ssim
-from oomao_functions import *
-from phaseGenerators import *
-from Propagators import *
+from functions.oomao_functions import *
+from functions.phaseGenerators import *
+from functions.customLoss      import RMSE
+from functions.utils import *
 from math import sqrt, pi
 from matplotlib import pyplot as plt
 

@@ -38,7 +38,7 @@ def Prop2VanillaPyrWFS_torch(phaseMap,wfs):
     nTheta = torch.tensor(nTheta).float()
     PyrQ  = torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
     pupil = wfs.pupil  
-    pyrMask = UNZ(UNZ(torch.tensor(wfs.pyrMask),0),0)  
+    pyrMask = UNZ(UNZ(torch.tensor(wfs.pyrMask,dtype=torch.complex64),0),0)  
     pyrPupil = pupil*torch.exp(1j*phaseMap)
     subscale = 1/(2*wfs.samp)
     sx = torch.round(wfs.fovInPixel*subscale).to(torch.int16)   

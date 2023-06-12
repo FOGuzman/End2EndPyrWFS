@@ -10,7 +10,6 @@ class OptimizedWFS(nn.Module):
         super().__init__()
         self.conv1 = Conv2d(in_channels=1, out_channels=1,
 			kernel_size=(5, 5),padding=2)
-        self.batchSize = wfs.batchSize
         self.nPxPup = wfs.nPxPup
         self.modulation = wfs.modulation
         self.samp = wfs.samp

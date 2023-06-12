@@ -12,10 +12,8 @@ import random
 import ast
 from torch.autograd import Variable
 from tqdm import tqdm
-from skimage.metrics import mean_squared_error as MSE
-from skimage.metrics import structural_similarity as compare_ssim
-from oomao_functions import *
-from phaseGenerators import *
+from functions.oomao_functions import *
+from functions.phaseGenerators import *
 from math import sqrt, pi
 import random
 
@@ -58,8 +56,6 @@ n_gpu = torch.cuda.device_count()
 print(torch.cuda.is_available())
 print('The number of GPU is {} using {}'.format(n_gpu,wfs.gpu))
 #%% ############# Fourier Phase
-
-from phaseGenerators import *
 
 nLenslet      = 16                 # plens res
 resAO         = 2*nLenslet+1       # AO resolution           
