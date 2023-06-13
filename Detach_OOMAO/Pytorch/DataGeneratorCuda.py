@@ -1,4 +1,4 @@
-from loadData import Imgdataset
+from functions.loadData import Imgdataset
 import torch.optim as optim
 import torch.nn as nn
 import torch

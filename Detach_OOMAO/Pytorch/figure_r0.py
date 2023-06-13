@@ -15,6 +15,8 @@ from functions.customLoss      import RMSE
 from functions.utils import *
 from functions.Propagators import *
 import random
+from types import SimpleNamespace
+import matplotlib.pyplot as plt
 
 
 date = datetime.date.today()  
@@ -33,13 +35,13 @@ parser.add_argument('--nPxPup', default=224, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=eval,help='Pyramid rooftop (as in OOMAO)')
 parser.add_argument('--alpha', default=np.pi/2, type=float,help='Pyramid angle (as in OOMAO)')
 parser.add_argument('--zModes', default=[2,16], type=eval, help='Reconstruction Zernikes')
-parser.add_argument('--ZernikeUnits', default=1, type=float,help='Zernike units (1 for normalized)')
+parser.add_argument('--ZernikeUnits', default=88, type=float,help='Zernike units (1 for normalized)')
 parser.add_argument('--ReadoutNoise', default=0, type=float)
 parser.add_argument('--PhotonNoise', default=0, type=float)
 parser.add_argument('--nPhotonBackground', default=0, type=float)
 parser.add_argument('--quantumEfficiency', default=1, type=float)
 
-parser.add_argument('--r0', default=[0.11,0.26], type=eval, help='Range of r0 to create')
+parser.add_argument('--D_r0', default=[90,10], type=eval, help='Range of r0 to create')
 parser.add_argument('--datapoints', default=10, type=int, help='r0 intervals')
 parser.add_argument('--dperR0', default=100, type=int, help='test per datapoint')
 
@@ -47,11 +49,6 @@ parser.add_argument('--models', nargs='+',default=['GCViT_only','modelFastplusGC
 parser.add_argument('--checkpoints', nargs='+',default=
                     ['./model/nocap/GCViT/S2_R224_Z2-16_D8/checkpoint/PyrNet_epoch_34.pth',
                      './model/nocap/DE+GCViT/S2_R224_Z2-16_D8/checkpoint/PyrNet_epoch_358.pth'])
-
-
-
-wfs = parser.parse_args()
-
 
 
 # Precalculations
@@ -66,12 +63,21 @@ wfs.amplitude = 0.2 #small for low noise systems
 wfs.ModPhasor = CreateModulationPhasor(wfs)
 
 
+def clone_to_cuda(x):
+    out = x
+    if not isinstance(x, torch.Tensor):
+        out = torch.tensor(out)  # Convert to a tensor
+    if torch.cuda.is_available() and not out.is_cuda:
+        out = out.cuda()   
+    return out
 
-wfs_cuda=wfs
-#wfs_cuda.pupil = torch.from_numpy(wfs.pupil).cuda()
-#wfs_cuda.fovInPixel = torch.from_numpy(np.asarray(wfs.fovInPixel)).clone().cuda()
-#wfs_cuda.pyrMask = torch.tensor(wfs.pyrMask).cuda()
 
+wfs_cuda = SimpleNamespace()
+wfs_cuda.pupil = clone_to_cuda(wfs.pupil)
+wfs_cuda.fovInPixel = clone_to_cuda(wfs.fovInPixel)
+wfs_cuda.pyrMask = clone_to_cuda(wfs.pyrMask)
+wfs_cuda.samp = wfs.samp
+wfs_cuda.modulation = wfs.modulation
 model =[]
 for k in range(len(wfs.models)):
     method = importlib.import_module("model_scripts."+wfs.models[k])
@@ -94,7 +100,8 @@ D             = wfs.D
 nTimes        = wfs.fovInPixel/resAO
 
 
-r0Vector = np.linspace(wfs.r0[0],wfs.r0[1],wfs.datapoints)
+Dr0Vector = np.linspace(wfs.D_r0[0],wfs.D_r0[1],wfs.datapoints)
+r0Vector = D/Dr0Vector
 
 IM = None
     #%% Control matrix
@@ -124,11 +131,11 @@ for k in range(len(wfs.jModes)):
             zim = torch.unsqueeze(zim,0)
             #push
             z = gain*zim.cuda().float()
-            I4Q = Prop2VanillaPyrWFS_torch(z,wfs)
+            I4Q = Prop2VanillaPyrWFS_torch(z,wfs_cuda)
             sp = I4Q/torch.sum(I4Q)-I_0
             
             #pull
-            I4Q = Prop2VanillaPyrWFS_torch(-z,wfs)
+            I4Q = Prop2VanillaPyrWFS_torch(-z,wfs_cuda)
             sm = I4Q/torch.sum(I4Q)-I_0
             
             MZc = 0.5*(sp-sm)/gain
@@ -144,12 +151,12 @@ CM = torch.linalg.pinv(IM)
 def compute_rmse(vector1, vector2):
     mse = torch.mean((vector1 - vector2) ** 2)
     rmse = torch.sqrt(mse)
-    return rmse
+    return rmse.detach().cpu().numpy()
 
 
 ZFull = []
-vsize = np.zeros((wfs.dperR0,wfs.datapoints))
 for k in range(len(wfs.models)+1):
+    vsize = np.zeros((wfs.dperR0,wfs.datapoints))
     ZFull.append(vsize) 
 
 
@@ -174,17 +181,32 @@ for r0idx in range(wfs.datapoints):
         Ip = Ip/torch.sum(Ip)
 
         Zpyr = torch.matmul(CM,torch.reshape(Ip,[-1]))
-        ZFull[m+1][nridx,r0idx] = compute_rmse(Zgt,Zpyr)
+        ZFull[0][nridx,r0idx] = compute_rmse(Zgt,Zpyr)
         Zest = []
         for m in range(len(wfs.models)):
-            Z_single = model[m](phaseMap).detach()
+            Z_single = model[m](torch.unsqueeze(torch.unsqueeze(phaseMap,0),0)).detach()
             ZFull[m+1][nridx,r0idx] = compute_rmse(Zgt,Z_single)
 
-           
-        
+
+
+meanZ = []
+stdZ  = []
+meanZ.append(np.mean(ZFull[0],axis=0))     
+meanZ.append(np.mean(ZFull[1],axis=0)) 
+meanZ.append(np.mean(ZFull[2],axis=0)) 
+stdZ.append(np.std(ZFull[0],axis=0))     
+stdZ.append(np.std(ZFull[1],axis=0)) 
+stdZ.append(np.std(ZFull[2],axis=0)) 
 
 
 
 
-        
-        
+fig = plt.figure()
+
+
+plt.errorbar(Dr0Vector, meanZ[0], yerr=stdZ[0], label='PyrWFS')
+plt.errorbar(Dr0Vector, meanZ[1], yerr=stdZ[1], label='GCViT')
+plt.errorbar(Dr0Vector, meanZ[2], yerr=stdZ[2], label='DE+GCViT')
+plt.gca().invert_xaxis()        
+plt.legend()
+plt.show()        
