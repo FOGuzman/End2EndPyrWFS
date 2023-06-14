@@ -160,7 +160,8 @@ def train(epoch, model, lr,paths):
     optimizer_g = optim.AdamW([{'params': model.parameters()}], lr=lr)
     for iteration, batch in tqdm(enumerate(train_data_loader),
                                  desc ="Training... ",colour="red",
-                                 total=len(train_data_loader)//wfs.batchSize):
+                                 total=len(train_data_loader)//wfs.batchSize,
+                                 ascii=' 123456789═'):
         Ygt = Variable(batch[0])
         Ygt = Ygt.cuda().float()*zu
         Ygt = torch.transpose(Ygt,0,1)
