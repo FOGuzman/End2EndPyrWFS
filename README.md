@@ -6,7 +6,7 @@ Official implementation for Deep Optics Preconditioner for Enhanced Pyramid Wave
 # Requirements
 
 * Python 3.9
-* Pytorch 1.10+
+* Pytorch >=1.10+
 * Numpy
 * Scikit-image
 * Scikit-learn
@@ -56,7 +56,7 @@ To train a diffractive element, we have also provided an implementation of the s
 
   ```
   
-  check the script help for extra parameters like noise and pyramid shape
+  check the script help for extra parameters like noise and pyramid shape. If mor GPU's are available, you can use ``` --gpu 0,1,N ``` to load the process with data paralelization, or run mutiple instances on each GPU.
   
 Once the training is finished, and for each epoch, a phase matrix of size nPxPup x samp, with the extension .mat is created. This file can be directly loaded into MATLAB.
 
