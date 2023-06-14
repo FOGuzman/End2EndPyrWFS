@@ -40,7 +40,7 @@ def GenerateLog(date,paths,wfs,loss,mode):
  file_object.write("Model Used             = {}\n".format(wfs.model))
  file_object.write("Batch Size             = {}\n".format(wfs.batchSize))
  file_object.write("Epochs                 = {}\n".format(wfs.Epochs))
- file_object.write("Initial Learning Rate  = {}\n".format(wfs.Epochs))
+ file_object.write("Initial Learning Rate  = {}\n".format(wfs.learning_rate))
  file_object.write("Result path            = {}\n".format(paths.result_path))
  file_object.write("Loss function          = {}\n".format(loss))
  
