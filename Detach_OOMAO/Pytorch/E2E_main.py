@@ -25,10 +25,10 @@ parser = argparse.ArgumentParser(description='Settings, Training and Pyramid Wav
 parser.add_argument('--modulation', default=0, type=int, help='Pyramid modulation')
 parser.add_argument('--samp', default=2, type=int, help='Over sampling for fourier')
 parser.add_argument('--D', default=8, type=int, help='Telescope Diameter [m]')
-parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
+parser.add_argument('--nPxPup', default=32, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=eval,help='Pyramid rooftop (as in OOMAO)')
 parser.add_argument('--alpha', default=np.pi/2, type=float,help='Pyramid angle (as in OOMAO)')
-parser.add_argument('--zModes', default=[2,36], type=eval, help='Reconstruction Zernikes')
+parser.add_argument('--zModes', default=[2,16], type=eval, help='Reconstruction Zernikes')
 parser.add_argument('--ZernikeUnits', default=1, type=float,help='Zernike units (1 for normalized)')
 parser.add_argument('--ReadoutNoise', default=0, type=float)
 parser.add_argument('--PhotonNoise', default=0, type=float)
@@ -83,8 +83,10 @@ if wfs.checkpoint is not None:
 else:
         print("Training from scrach.")
 
-dataset = Imgdataset(paths.train_fold)
-train_data_loader = DataLoader(dataset=dataset, batch_size=wfs.batchSize, shuffle=True)
+train_dataset = Imgdataset(paths.train_fold)
+test_dataset = Imgdataset(paths.train_fold)
+train_data_loader = DataLoader(dataset=train_dataset, batch_size=wfs.batchSize, shuffle=True)
+test_data_loader = DataLoader(dataset=test_dataset, batch_size=4, shuffle=True)
 
 
 loss = RMSE()
@@ -99,46 +101,46 @@ if n_gpu > 1:
 
 # testing loop
 def test(epoch, model,paths):
-    test_list = os.listdir(paths.val_fold)
-    rmse_cnn = torch.zeros(len(test_list))
-    Ypyr_res = None
-    Ygt_res = None
-    for i in range(len(test_list)):
-        rmse_1 = 0  
-        datamat = scio.loadmat(paths.val_fold + '/' + test_list[i])       
-        Ygt = datamat['Zgt']
-        Ygt = torch.from_numpy(Ygt).cuda().float()*zu
+    rmse_stack,Ypyr_res,Ygt_res = None,None,None
+    val_batch_len = len(test_data_loader)//wfs.batchSize
+    name = paths.result_path + 'Epoch_{}'.format(epoch) + '_validation_results.mat'
+    scio.savemat(name,{})
+    for iteration, batch in tqdm(enumerate(test_data_loader),
+                                 desc ="Testing... ",colour="green",
+                                 total=val_batch_len,
+                                 ascii=' 123456789═'):
+        
+        Ygt = Variable(batch[0])
+        Ygt = Ygt.cuda().float()*zu
         Ygt = torch.transpose(Ygt,0,1)
-        phaseMap = datamat['x']
-        phaseMap = torch.from_numpy(phaseMap).cuda().float()
-        phaseMap = torch.unsqueeze(torch.unsqueeze(phaseMap,0),0)
+        phaseMap = Variable(batch[1])
+        phaseMap = phaseMap.cuda().float()
+        phaseMap = torch.unsqueeze(phaseMap,1)
         with torch.no_grad():
                      
             Ypyr = model(phaseMap)*zu
-            rmse_1 = torch.sqrt(torch.mean((Ygt-Ypyr)**2)) 
-            rmse_cnn[i] = rmse_1
-
-            a = test_list[i]
-            name = paths.result_path + '/PyrNet_' + a[0:len(a) - 4] + '_{}_{:.4f}'.format(epoch, rmse_cnn[i]) + '.mat'
+            rmse_1 = torch.sqrt(torch.mean((Ygt-Ypyr)**2,dim=0)) 
+    
             if Ypyr_res is not None:
                 Ypyr_res = torch.concat([Ypyr_res,Ypyr.cpu()],1)
                 Ygt_res = torch.concat([Ygt_res,Ygt.cpu()],1)
+                rmse_stack = torch.concat([rmse_stack,rmse_1.cpu()],0)
             else:
                 Ypyr_res = Ypyr.cpu()
                 Ygt_res = Ypyr.cpu()
-            
-            
-    prtname = "Epochs mean result: RMSE -- {:.4f}".format(torch.mean(rmse_cnn))   
+                rmse_stack = rmse_1.cpu()
+                             
+    prtname = "Epochs mean result: RMSE -- {:.4f}".format(torch.mean(rmse_stack))   
     print(prtname)
 
-    scio.savemat(name, {'Ypyr': Ypyr_res.numpy(),'Ygt': Ygt_res.numpy()})
+    scio.savemat(name, {'Ypyr_res': Ypyr_res.numpy(),'Ygt_res': Ygt_res.numpy(),'rmse': rmse_stack.numpy()})
     OL1_trained = PyrNet.state_dict()['prop.OL1'].cpu()
 
     #Add things to tensorboard
     im_out = map_tensor_to_range(torch.fft.fftshift(OL1_trained))
-    writer.add_scalar("RMSE",torch.mean(rmse_cnn),epoch)
+    writer.add_scalar("RMSE",torch.mean(rmse_stack),epoch)
     writer.add_image("DE trained",im_out,epoch,dataformats='HW')
-    fig = plot_summary(torch.fft.fftshift(OL1_trained),Ypyr_res.numpy()[:,-1],Ygt_res.numpy()[:,-1],prtname,phaseMap,wfs)
+    fig = plot_summary(torch.fft.fftshift(OL1_trained),Ypyr_res.numpy()[:,-1],Ygt_res.numpy()[:,-1],prtname,phaseMap[0,0,:,:],wfs)
     writer.add_figure("status",fig,epoch,close=True)
 
     #If want to plot
@@ -146,10 +148,10 @@ def test(epoch, model,paths):
         plt.show(block=False)
         plt.pause(1) 
         
-
-    scio.savemat(paths.de_path + "OL1_R{}_M{}_RMSE{:.4}_Epoch_{}.mat".format(
-        np.int(wfs.nPxPup),np.int(wfs.modulation),torch.mean(rmse_cnn),epoch) 
-                 , {'OL1': OL1_trained.numpy()})
+    DeFileName = paths.de_path + "DE_Epoch_{}_R{}_M{}_S{}_RMSE_{:.4}.mat".format(epoch,
+        int(wfs.nPxPup),int(wfs.modulation),int(wfs.samp),torch.mean(rmse_stack))
+    
+    scio.savemat(DeFileName, {'OL1': OL1_trained.numpy()})
 
 
 # training loop
@@ -183,7 +185,7 @@ def train(epoch, model, lr,paths):
     model = model.module if hasattr(model, "module") else model
     test(epoch,model.eval(),paths)
     end = time.time()
-    print("===> Epoch {} Complete: Avg. Loss: {:.7f}".format(epoch, epoch_loss / len(train_data_loader)),
+    print("||||||||| Epoch {} Complete: Avg. Loss: {:.7f} ||||||||||".format(epoch, epoch_loss / len(train_data_loader)),
           "  time: {:.2f}".format(end - begin))
     
 def checkpoint(epoch, paths):
