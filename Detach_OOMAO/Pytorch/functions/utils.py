@@ -5,17 +5,19 @@ import math
 from mpmath import *
 import matplotlib
 import numpy as np
+import torch
 
+matplotlib.use('Agg')
 matplotlib.interactive(False)
 
-def GenerateLog(date,log_path,result_path,wfs,loss,mode):
+def GenerateLog(date,paths,wfs,loss,mode):
     
     
        
  d = date.strftime("%b-%d-%Y")
- log_name = log_path +"/"+ d +".txt"  
- if not os.path.exists(log_path):
-        os.makedirs(log_path) 
+ log_name = paths.log_path +"/"+ d +".txt"  
+ if not os.path.exists(paths.log_path):
+        os.makedirs(paths.log_path) 
  if not os.path.exists(log_name) or mode=="update":
         open(log_name, 'w')        
         
@@ -39,7 +41,7 @@ def GenerateLog(date,log_path,result_path,wfs,loss,mode):
  file_object.write("Batch Size             = {}\n".format(wfs.batchSize))
  file_object.write("Epochs                 = {}\n".format(wfs.Epochs))
  file_object.write("Initial Learning Rate  = {}\n".format(wfs.Epochs))
- file_object.write("Result path            = {}\n".format(result_path))
+ file_object.write("Result path            = {}\n".format(paths.result_path))
  file_object.write("Loss function          = {}\n".format(loss))
  
  # Close the file
@@ -47,19 +49,38 @@ def GenerateLog(date,log_path,result_path,wfs,loss,mode):
  print("Log done!")      
 
 
+def map_tensor_to_range(tensor):
+    min_val = torch.min(tensor)
+    max_val = torch.max(tensor)
+    if max_val == min_val:
+         min_val = 0
+    
+    scaled_tensor = (tensor - min_val) / (max_val - min_val)  # Map tensor to the range 0 to 1
+    mapped_tensor = (scaled_tensor * 255).to(torch.uint8)  # Map tensor to the range 0 to 255
+    
+    return mapped_tensor
 
 
-
-def plot_tensorwt(t,yr,ygt,name):
+def plot_summary(t,yr,ygt,name,phaseMap,wfs):
     plt.close()
-    fig, (ax1, ax2) = plt.subplots(1, 2,figsize=(9, 3))
-    line1, = ax2.plot(yr[:,-1],label="Estimation")
-    line2, = ax2.plot(ygt[:,-1],label="Groundtruth")
-    ax2.legend()
+    Z_vect = np.arange(wfs.zModes[0],wfs.zModes[1]+1)
+
+    fig, axes = plt.subplot_mosaic("AB;CC",figsize=(10,8))
+    line1 = axes["C"].plot(Z_vect,yr,label=wfs.model)
+    line2 = axes["C"].plot(Z_vect,ygt,label="Groundtruth")
+    axes["C"].legend()
+    axes["C"].set_xlabel('Zernike index')
     t = np.array(t)
     t_ = np.squeeze(t)
-    d = ax1.imshow(t_, cmap ='jet', interpolation ='nearest', origin ='lower')
-    plt.colorbar(d, ax=ax1)
-    plt.title(name)
-    plt.show(block=False)
-    plt.pause(1)  
+    
+    Pa = axes["A"].imshow(t_, cmap ='jet', interpolation ='nearest', origin ='lower')
+    Pb = axes["B"].imshow(torch.squeeze(phaseMap).detach().cpu().numpy(), cmap ='jet', interpolation ='nearest', origin ='lower')
+    plt.colorbar(Pa, ax=axes["A"])
+    plt.colorbar(Pb, ax=axes["B"])
+
+    fig.suptitle(name)
+    axes["A"].title.set_text('Difrractive Element')
+    axes["B"].title.set_text('phaseMap example')
+    axes["C"].title.set_text('Zernike comparison example')
+
+    return(fig)
