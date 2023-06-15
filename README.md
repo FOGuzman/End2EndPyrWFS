@@ -57,8 +57,30 @@ To train a diffractive element, we have also provided an implementation of the s
   ```
   
   check the script help for extra parameters like noise and pyramid shape. If mor GPU's are available, you can use ``` --gpu 0,1,N ``` to load the process with data paralelization, or run mutiple instances on each GPU.
-  
-Once the training is finished, and for each epoch, a phase matrix of size nPxPup x samp, with the extension .mat is created. This file can be directly loaded into MATLAB.
+
+When a training instance is run, the resoults are save in ```./train_results/"expname"/```, you can set up the experiment name with ``` --experimentName ```. On this folder the following parameters are saved:
+- checkpoints: Those are the model saved as a pytorch module (epoch_n.pth) for each epoc during training, with this file you can resume the training by seting up the path in ``` --checkpoint ```.
+- DE: This folder contains the trained Diffractive Element on each epoch. The file is a .mat format that can be loaded into python as a double matrix or in python with scipy librarie.
+- validation_results: Here the estimation of the model fo the validation dataset is stored in .mat format.
+
+## Tensorboard monitoring
+Additionaly, on ```./train_results/``` a extra folder is created called ```tensorboard_summary/```. This folder contain metric results, DE as images of each Epoch and estimation examples of each experiment you run. To monitor tensorboard you have to run the following command on a terminal:
+
+  ```
+  tensorboard --logdir=train_results/tensorboard_summary
+
+  ```
+the folowwing output should apeear on the comand prompt:
+
+ ```
+NOTE: Using experimental fast data loading logic. To disable, pass
+    "--load_fast=false" and report issues on GitHub. More details:
+    https://github.com/tensorflow/tensorboard/issues/4784
+
+Serving TensorBoard on localhost; to expose to the network, use a proxy or pass --bind_all
+TensorBoard 2.6.0 at http://localhost:6006/ (Press CTRL+C to quit)  
+ ```
+the just enter ```http://localhost:6006/``` to check the results.
 
 # Reproducing Results
 All the figures generated in the research paper were obtained using the scripts in the MATLAB folder. Please ensure that you set up the path to the Diffractive Element (saved as a .mat file) in the first lines of each script you wish to run. Here is a list of available figures that can be reproduced:
