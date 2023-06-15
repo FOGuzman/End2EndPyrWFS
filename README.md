@@ -56,9 +56,9 @@ To train a diffractive element, we have also provided an implementation of the s
 
   ```
   
-  check the script help for extra parameters like noise and pyramid shape. If mor GPU's are available, you can use ``` --gpu 0,1,N ``` to load the process with data paralelization, or run mutiple instances on each GPU.
+  check the E2E_main script parser help for extra parameters like noise and pyramid shape. If more GPU's are available, you can use ``` --gpu 0,1,N ``` to load the process with data paralelization, or run mutiple instances on each GPU.
 
-When a training instance is run, the resoults are save in ```./train_results/"expname"/```, you can set up the experiment name with ``` --experimentName ```. On this folder the following parameters are saved:
+When a training instance is run, the results are saved in ```./train_results/"expname"/```. You can set up the experiment name with ```--experimentName```. In this folder, the following parameters are saved:
 - checkpoints: Those are the model saved as a pytorch module (epoch_n.pth) for each epoc during training, with this file you can resume the training by seting up the path in ``` --checkpoint ```.
 - DE: This folder contains the trained Diffractive Element on each epoch. The file is a .mat format that can be loaded into python as a double matrix or in python with scipy librarie.
 - validation_results: Here the estimation of the model fo the validation dataset is stored in .mat format.
