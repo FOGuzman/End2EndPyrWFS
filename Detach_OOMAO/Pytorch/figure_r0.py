@@ -152,7 +152,7 @@ for k in range(len(wfs.models)+1):
 
 
 for r0idx in tqdm(range(0,wfs.datapoints),
-                                 desc ="r0 tested ",colour="red",
+                                 desc ="r0 tested         ",colour="red",
                                  total=wfs.datapoints,
                                  ascii=' 123456789═'):
     r0el = r0Vector[r0idx]
