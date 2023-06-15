@@ -1,80 +1,71 @@
-addpath functions
+addpath tools/functions
 clear all
 
 preFold = "../Preconditioners/nocap/mod/OL1_R64_M2_RMSE0.03355_Epoch_70.mat";
 preFold = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.0285_Epoch_92.mat";
 
 
+physicalParams = struct();
 
-binning       = 1;
-D             = 0.005;
-modulation    = 0;
-nLenslet      = 16;
-resAO         = 2*nLenslet+1;
-L0            = 25;
-fR0           = 1;
-noiseVariance = 0.7;
-n_lvl         = 0.1;             % noise level in rad^2
-Samp          = 2;                % OVer-sampling factor
-nPxPup        = 128;               % number of pixels to describe the pupil
-alpha         = pi/2;
-rooftop       = [0,0]; 
-fovInPixel    = nPxPup*2*Samp;    % number of pixel to describe the PSD
-PyrQ          = zeros(fovInPixel,fovInPixel);
-I4Q4 = PyrQ;
-nTimes        = fovInPixel/resAO;
+% Pyramid propeties
+physicalParams.modulation           = 0;
+physicalParams.D                    = 8;             % Telescope diameter [m]
+physicalParams.nLenslet             = 16;            % Equivalent SH resolution lenslet
+physicalParams.binning              = 1;             % Binning in phase sampling
+physicalParams.Samp                 = 2;             % Oversampling factor
+physicalParams.nPxPup               = 128;           % number of pixels to describe the pupil
+physicalParams.alpha                = pi/2;          % Pyramid shape
+physicalParams.rooftop              = [0,0];         % Pyramid roftop imperfection
+% Atmosphere propeties
+physicalParams.L0                   = 25;            % Outer scale [m]
+physicalParams.fR0                  = 1;             % Fracional r0 (for multi layer - not implemented)
+% indecies for Zernike decomposition 
+physicalParams.jModes               = 2:60;
 
-N             = 2*Samp*nPxPup;
-L             = (N-1)*D/(nPxPup-1);
-pupil         = CreatePupil(nPxPup,"disc");
+%Camera parameters
+physicalParams.ReadoutNoise         = 1;
+physicalParams.PhotonNoise          = 1;
+physicalParams.quantumEfficiency    = 1;
+physicalParams.nPhotonBackground    = 0.1;
 
-jModes = [2:64];
+% Precomp aditional parameters
+physicalParams.resAO                = 2*physicalParams.nLenslet+1;
+physicalParams.pupil                = CreatePupil(physicalParams.nPxPup,"disc");
+physicalParams.N                    = 2*physicalParams.Samp*physicalParams.nPxPup;
+physicalParams.L                    = (physicalParams.N-1)*physicalParams.D/(physicalParams.nPxPup-1);
+physicalParams.fovInPixel           = physicalParams.nPxPup*2*physicalParams.Samp;    % number of pixel to describe the PSD
+physicalParams.nTimes               = physicalParams.fovInPixel/physicalParams.resAO;
+physicalParams.PyrQ                 = zeros(physicalParams.fovInPixel);
+physicalParams.I4Q4                 = physicalParams.PyrQ;
 
-%% Pyramid calibration
-modes = CreateZernikePolynomials(nPxPup,jModes,pupil~=0);
-flatMode = CreateZernikePolynomials(nPxPup,1,pupil~=0);
+physicalParams.modes = CreateZernikePolynomials(physicalParams.nPxPup,physicalParams.jModes,physicalParams.pupil~=0);
+physicalParams.flatMode = CreateZernikePolynomials(physicalParams.nPxPup,1,physicalParams.pupil~=0);
 
 
 %% Test
 % Phase inversion
-PhaseCM = pinv(modes);
+PhaseCM = pinv(physicalParams.modes);
 
 load(preFold);OL1_trained = OL1;
 %OL1_trained = 20*rand(512,512);
 
-[NetCM,NetI_0] = PyrCalibration(jModes,modes,flatMode,fovInPixel,nPxPup,Samp...
-    ,modulation,rooftop,alpha,pupil,OL1_trained,1);
+[DPWFS_CM,DPWFS_I0] = PyrCalibration(physicalParams,OL1_trained,1);
 
-[PyrCM,PyrI_0,PyrIM] = PyrCalibration(jModes,modes,flatMode,fovInPixel,nPxPup,Samp...
-    ,modulation,rooftop,alpha,pupil,OL1_trained,0);
+[PyrCM,PyrI_0,PyrIM] = PyrCalibration(physicalParams,OL1_trained,0);
         
 %% Meas
-r0            = 20;
+physicalParams.r0            = 20;
 ReadoutNoise = 0.;
 PhotonNoise = 0;
 nPhotonBackground = 0;
 quantumEfficiency = 1;
-atm = GenerateAtmosphereParameters(nLenslet,D,binning,r0,L0,fR0,modulation,fovInPixel,resAO,Samp,nPxPup,pupil);
+rng(rand)
+atm = GenerateAtmosphereParameters(physicalParams);atm.idx
 [x,Zg] = ComputePhaseScreen(atm,PhaseCM);
+%%
 
-
-y = PropagatePyr(fovInPixel,x,Samp,modulation,rooftop,alpha,pupil,nPxPup,OL1_trained,1);
-if PhotonNoise
-y = AddPhotonNoise(y,nPhotonBackground,quantumEfficiency);
-end
-y = y +randn(size(y)).*ReadoutNoise;
-Net_y = y/sum(y(:))-NetI_0;
-% Estimation
-NetZe = NetCM*Net_y(:);
-
-y = PropagatePyr(fovInPixel,x,Samp,modulation,rooftop,alpha,pupil,nPxPup,OL1_trained,0);
-if PhotonNoise
-y = AddPhotonNoise(y,nPhotonBackground,quantumEfficiency);
-end
-y = y +randn(size(y)).*ReadoutNoise;
-Pyr_y = y/sum(y(:))-PyrI_0;
-% Estimation
-PyrZe = PyrCM*Pyr_y(:);
+[Zpyr]    = PropAndSamp(physicalParams,x,OL1_trained ,PyrI_0   ,PyrCM    ,0);
+[Zdpwfs,ydpwfs]  = PropAndSamp(physicalParams,x,OL1_trained ,DPWFS_I0 ,DPWFS_CM ,1);
 
 
 imsc = [min(x(:)),max(x(:))];
@@ -83,21 +74,21 @@ subplot(341)
 imagesc(x,[imsc(1) imsc(2)]);axis image;colorbar
 title('Input Phase')
 subplot(342)
-imagesc(reshape(modes*Zg,[nPxPup nPxPup]));axis image;colorbar
+imagesc(reshape(physicalParams.modes*Zg,[physicalParams.nPxPup physicalParams.nPxPup]));axis image;colorbar
 title('Phase inversion')
 subplot(343)
-imagesc(reshape(modes*PyrZe,[nPxPup nPxPup]));axis image;colorbar
+imagesc(reshape(physicalParams.modes*Zpyr,[physicalParams.nPxPup physicalParams.nPxPup]));axis image;colorbar
 title('Pyramid estimation')
 subplot(344)
-imagesc(reshape(modes*NetZe,[nPxPup nPxPup]));axis image;colorbar
+imagesc(reshape(physicalParams.modes*Zdpwfs,[physicalParams.nPxPup physicalParams.nPxPup]));axis image;colorbar
 title('Network estimation')
 subplot(345)
-imagesc(Net_y);axis image;colorbar
+imagesc(ydpwfs);axis image;colorbar
 title('Network estimation')
 
-res1 = x-reshape(modes*Zg,[nPxPup nPxPup]);
-res2 = x-reshape(modes*PyrZe,[nPxPup nPxPup]);
-res3 = x-reshape(modes*NetZe,[nPxPup nPxPup]);
+res1 = x-reshape(physicalParams.modes*Zg,[physicalParams.nPxPup physicalParams.nPxPup]);
+res2 = x-reshape(physicalParams.modes*Zpyr,[physicalParams.nPxPup physicalParams.nPxPup]);
+res3 = x-reshape(physicalParams.modes*Zdpwfs,[physicalParams.nPxPup physicalParams.nPxPup]);
 resmax = max(max(max(cat(3,res1,res2,res3))));
 resmin = min(min(min(cat(3,res1,res2,res3))));
 subplot(346)
@@ -112,16 +103,22 @@ title(sprintf("Pyr+DE res $\\sigma = %2.2f$",std(res3(:))),'interpreter','latex'
 subplot(3,4,[9:12])
 hold on
 plot(Zg,'k','linewidth',2)
-plot(PyrZe,'r','linewidth',2)
-plot(NetZe,'b','linewidth',2)
+plot(Zpyr,'r','linewidth',2)
+plot(Zdpwfs,'b','linewidth',2)
 legend('Groundtruth','Traditional Pyramid','Pyramid with preconditioner')
 grid on; box on
 
 
 %%
+function [Ze,y_noise] = PropAndSamp(params,x,DE,I0,CM,flag)
 
-% figure,
-% subplot(1,2,1)
-% imagesc(zeros(512,512));axis image;colorbar
-% subplot(1,2,2)
-% imagesc(fftshift(OL1_trained));axis image;colorbar
+y = PropagatePyr(params,x,DE,flag);
+if params.PhotonNoise
+y = AddPhotonNoise(y,params.nPhotonBackground,params.quantumEfficiency);
+end
+y = y +randn(size(y)).*params.ReadoutNoise;
+y_noise = y/sum(y(:))-I0;
+% Estimation
+Ze = CM*y_noise(:);
+
+end

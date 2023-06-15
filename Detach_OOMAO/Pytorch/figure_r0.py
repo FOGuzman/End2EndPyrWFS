@@ -10,14 +10,16 @@ import os
 import numpy as np
 import argparse
 from functions.oomao_functions import *
-from functions.phaseGenerators import *
+from functions.phaseGeneratorsCuda import *
 from functions.customLoss      import RMSE
 from functions.utils import *
 from functions.Propagators import *
+from tqdm.auto import tqdm
 import random
 from types import SimpleNamespace
 import matplotlib.pyplot as plt
-
+matplotlib.use('TkAgg')
+matplotlib.interactive(True)
 
 date = datetime.date.today()  
 
@@ -43,7 +45,8 @@ parser.add_argument('--quantumEfficiency', default=1, type=float)
 
 parser.add_argument('--D_r0', default=[90,10], type=eval, help='Range of r0 to create')
 parser.add_argument('--datapoints', default=10, type=int, help='r0 intervals')
-parser.add_argument('--dperR0', default=100, type=int, help='test per datapoint')
+parser.add_argument('--data_batch', default=10, type=int, help='r0 intervals')
+parser.add_argument('--dperR0', default=5000, type=int, help='test per datapoint')
 
 parser.add_argument('--models', nargs='+',default=['GCViT_only','modelFastplusGCViT'])
 parser.add_argument('--checkpoints', nargs='+',default=
@@ -63,21 +66,19 @@ wfs.amplitude = 0.2 #small for low noise systems
 wfs.ModPhasor = CreateModulationPhasor(wfs)
 
 
-def clone_to_cuda(x):
-    out = x
-    if not isinstance(x, torch.Tensor):
-        out = torch.tensor(out)  # Convert to a tensor
-    if torch.cuda.is_available() and not out.is_cuda:
-        out = out.cuda()   
-    return out
+##TO CUDA
+wfs.pupil = torch.from_numpy(wfs.pupil).cuda().float()
+wfs.pyrMask = torch.from_numpy(wfs.pyrMask).cuda().cfloat()
+wfs.fovInPixel    = torch.tensor(wfs.fovInPixel).cuda()
+wfs.modes = torch.tensor(wfs.modes).cuda().float()
+wfs.D     = torch.tensor(wfs.D).cuda()
+IM_batch = torch.zeros(size=(len(wfs.jModes),1,wfs.nPxPup,wfs.nPxPup)).cuda()
+for k in range(len(wfs.jModes)):           
+    zim = torch.reshape(wfs.modes[:,k],(wfs.nPxPup,wfs.nPxPup))
+    zim = torch.unsqueeze(zim,0).cuda()
+    IM_batch[k,:,:,:] = zim
 
 
-wfs_cuda = SimpleNamespace()
-wfs_cuda.pupil = clone_to_cuda(wfs.pupil)
-wfs_cuda.fovInPixel = clone_to_cuda(wfs.fovInPixel)
-wfs_cuda.pyrMask = clone_to_cuda(wfs.pyrMask)
-wfs_cuda.samp = wfs.samp
-wfs_cuda.modulation = wfs.modulation
 model =[]
 for k in range(len(wfs.models)):
     method = importlib.import_module("model_scripts."+wfs.models[k])
@@ -90,62 +91,51 @@ for k in range(len(wfs.models)):
 
 
 
-nLenslet      = 16                 # plens res
-resAO         = 2*nLenslet+1       # AO resolution           
-L0            = 25
-fR0           = 1
-noiseVariance = 0.7
-n_lvl         = 0.1
-D             = wfs.D
+nLenslet      = torch.tensor(16).cuda()                 # plens res
+resAO         = 2*nLenslet+1       # AO resolution
+r0            = torch.tensor(0.11).cuda()            
+L0            = torch.tensor(25).cuda()   
+fR0           = torch.tensor(1.2).cuda()   
+noiseVariance = torch.tensor(0.7).cuda()   
+n_lvl         = torch.tensor(0.1).cuda()   
 nTimes        = wfs.fovInPixel/resAO
 
 
-Dr0Vector = np.linspace(wfs.D_r0[0],wfs.D_r0[1],wfs.datapoints)
-r0Vector = D/Dr0Vector
-
-IM = None
-    #%% Control matrix
-for k in range(len(wfs.jModes)):
-    imMode = torch.reshape(torch.tensor(wfs.modes[:,k]),(wfs.nPxPup,wfs.nPxPup))
-    Zv = torch.unsqueeze(torch.reshape(imMode,[-1]),1)
-    if IM is not None:
-        IM = torch.concat([IM,Zv],1)
-    else:
-        IM = Zv
-
-CMPhase = torch.linalg.pinv(IM).cuda()
+Dr0Vector = torch.linspace(wfs.D_r0[0],wfs.D_r0[1],wfs.datapoints).cuda()
+r0Vector = wfs.D/Dr0Vector
 
 
 
-###### Flat prop
-zim = np.reshape(wfs.modes[:,0],(wfs.nPxPup,wfs.nPxPup))
-zim = np.ones((wfs.nPxPup,wfs.nPxPup))*wfs.pupilLogical
-zim = torch.tensor(np.expand_dims(zim,0))
-I_0 = Prop2VanillaPyrWFS_torch(zim.cuda().float(),wfs_cuda)
+CMPhase = torch.linalg.pinv(torch.tensor(wfs.modes))
+
+
+
+###### Flat prop      
+        # Flat prop
+Flat = torch.ones((wfs.nPxPup,wfs.nPxPup))*wfs.pupilLogical
+Flat = UNZ(UNZ(Flat,0),0).cuda()        
+I_0 = Prop2VanillaPyrWFS_torch(Flat,wfs)
 I_0 = I_0/torch.sum(I_0)
-###### Calibration
-IM = None
-gain = 0.1
-for k in range(len(wfs.jModes)):           
-            zim = torch.reshape(torch.tensor(wfs.modes[:,k]),(wfs.nPxPup,wfs.nPxPup))
-            zim = torch.unsqueeze(zim,0)
-            #push
-            z = gain*zim.cuda().float()
-            I4Q = Prop2VanillaPyrWFS_torch(z,wfs_cuda)
-            sp = I4Q/torch.sum(I4Q)-I_0
-            
-            #pull
-            I4Q = Prop2VanillaPyrWFS_torch(-z,wfs_cuda)
-            sm = I4Q/torch.sum(I4Q)-I_0
-            
-            MZc = 0.5*(sp-sm)/gain
-            Zv = torch.unsqueeze(torch.reshape(MZc,[-1]),1)
-            if IM is not None:
-                IM = torch.concat([IM,Zv],1)
-            else:
-                IM = Zv
 
-CM = torch.linalg.pinv(IM)
+gain = 0.1
+
+# Calibration matrix as batch
+z = IM_batch*gain
+I4Q = Prop2VanillaPyrWFS_torch(z,wfs)
+spnorm = UNZ(UNZ(UNZ(torch.sum(torch.sum(torch.sum(I4Q,dim=-1),dim=-1),dim=-1),-1),-1),-1)
+sp = I4Q/spnorm
+
+I4Q = Prop2VanillaPyrWFS_torch(-z,wfs)
+smnorm = UNZ(UNZ(UNZ(torch.sum(torch.sum(torch.sum(I4Q,dim=-1),dim=-1),dim=-1),-1),-1),-1)
+sm = I4Q/smnorm
+
+MZc = 0.5*(sp-sm)/gain
+
+MZc = MZc.view(MZc.shape[0],wfs.nPxPup**2)
+MZc = MZc.permute(1,0)
+
+#% Control matrix
+CM = torch.linalg.pinv(MZc) 
 
 
 def compute_rmse(vector1, vector2):
@@ -161,30 +151,28 @@ for k in range(len(wfs.models)+1):
 
 
 
-for r0idx in range(wfs.datapoints):
+for r0idx in tqdm(range(0,wfs.datapoints),
+                                 desc ="r0 tested ",colour="red",
+                                 total=wfs.datapoints,
+                                 ascii=' 123456789═'):
     r0el = r0Vector[r0idx]
-    for nridx in range(wfs.dperR0):
+    for nridx in tqdm(range(0,wfs.dperR0//wfs.data_batch),
+                                 desc ="Datapoints tested ",colour="green",
+                                 total=wfs.dperR0//wfs.data_batch,
+                                 ascii=' 123456789═'):
 
         atm = GetTurbulenceParameters(wfs,resAO,nLenslet,r0el,L0,fR0,noiseVariance,nTimes,n_lvl)
-        psdAO_mean = torch.tensor(atm['psdAO_mean'])
-        N = torch.tensor(atm['N'],dtype=torch.float64)
-        fourierSampling = torch.tensor(atm['fourierSampling'])
-        idx = torch.tensor(atm['idx'])
-        pupil = torch.tensor(atm['pupil'])
-        nPxPup = torch.tensor(atm['nPxPup'])
-        phaseMap,Zgt = GetPhaseMapAndZernike_CUDA(psdAO_mean.cuda(),N.cuda(),fourierSampling.cuda(),idx.cuda(),pupil.cuda(),nPxPup.cuda(),CMPhase)
-        phaseMap = phaseMap.float()
-        Zgt = torch.unsqueeze(Zgt.float(),1)
+        phaseMap,Zgt = GetPhaseMapAndZernike(atm,CMPhase,wfs.data_batch)
+        Ip = Prop2VanillaPyrWFS_torch(phaseMap,wfs)
+        Inorm = torch.sum(torch.sum(torch.sum(Ip,-1),-1),-1)
+        Ip = Ip/UNZ(UNZ(UNZ(Inorm,-1),-1),-1)-I_0
 
+        Zpyr = torch.matmul(CM,torch.transpose(torch.reshape(Ip,[Ip.shape[0],-1]),0,1))
 
-        Ip = Prop2VanillaPyrWFS_torch(phaseMap,wfs_cuda)
-        Ip = Ip/torch.sum(Ip)
-
-        Zpyr = torch.matmul(CM,torch.reshape(Ip,[-1]))
         ZFull[0][nridx,r0idx] = compute_rmse(Zgt,Zpyr)
         Zest = []
         for m in range(len(wfs.models)):
-            Z_single = model[m](torch.unsqueeze(torch.unsqueeze(phaseMap,0),0)).detach()
+            Z_single = model[m](phaseMap).detach()
             ZFull[m+1][nridx,r0idx] = compute_rmse(Zgt,Z_single)
 
 
@@ -199,14 +187,15 @@ stdZ.append(np.std(ZFull[1],axis=0))
 stdZ.append(np.std(ZFull[2],axis=0)) 
 
 
-
+Dr0ax = Dr0Vector.cpu().numpy()
 
 fig = plt.figure()
 
 
-plt.errorbar(Dr0Vector, meanZ[0], yerr=stdZ[0], label='PyrWFS')
-plt.errorbar(Dr0Vector, meanZ[1], yerr=stdZ[1], label='GCViT')
-plt.errorbar(Dr0Vector, meanZ[2], yerr=stdZ[2], label='DE+GCViT')
+
+plt.errorbar(Dr0ax, meanZ[0], yerr=stdZ[0], label='PyrWFS')
+plt.errorbar(Dr0ax, meanZ[1], yerr=stdZ[1], label='GCViT')
+plt.errorbar(Dr0ax, meanZ[2], yerr=stdZ[2], label='DE+GCViT')
 plt.gca().invert_xaxis()        
 plt.legend()
-plt.show()        
+plt.show(block=True)        

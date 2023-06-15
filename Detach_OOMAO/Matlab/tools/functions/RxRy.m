@@ -15,8 +15,6 @@ function [Rx, Ry] =  RxRy(fx,fy,fc,nActuator,D,r0,L0,fR0,modulation,binning,nois
             Sx(idx) = 2*1i/pi*asin(u(idx)/umod);
             Av = sinc(binning*d*u).*sinc(binning*d*u)';
             Sy = Sx.';
-            SxAv = Sx.*Av;
-            SyAv = Sy.*Av;
 
             %reconstruction filter
             AvRec = Av;

@@ -66,6 +66,15 @@ def graduatedHeaviside(x,n):
     out[x>dx*n] = 1
     return(out)
 
+def graduated_heaviside(x, n):
+    dx = x[0, 1] - x[0, 0]
+    if dx == 0:
+        dx = x[1, 0] - x[0, 0]
+    out = np.zeros_like(x)
+    out[np.logical_and(-dx * n <= x, x <= dx * n)] = 0.5
+    out[x > dx * n] = 1
+    return out    
+
 
 def createPyrMask(wfs):
     pixSide = wfs.fovInPixel

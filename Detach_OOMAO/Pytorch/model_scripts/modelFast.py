@@ -90,7 +90,7 @@ class OptimizedPyramid(nn.Module):
         
         # Normalization
         Inorm = torch.sum(torch.sum(torch.sum(Ip,-1),-1),-1)
-        Ip = Ip/UNZ(UNZ(UNZ(Inorm,-1),-1),-1)-self.I_0
+        Ip = Ip/UNZ(UNZ(UNZ(Inorm,-1),-1),-1)
         # Estimation
         y = torch.matmul(CM,torch.transpose(torch.reshape(Ip,[Ip.shape[0],-1]),0,1))
         return y
