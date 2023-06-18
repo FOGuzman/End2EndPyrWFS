@@ -25,17 +25,18 @@ parser = argparse.ArgumentParser(description='Setting, compressive rate, size, a
 
 parser.add_argument('--modulation', default=0, type=int, help='Pyramid modulation')
 parser.add_argument('--samp', default=2, type=int, help='Sampling')
-parser.add_argument('--D', default=8, type=int, help='Telescope Diameter [m]')
+parser.add_argument('--D', default=3, type=int, help='Telescope Diameter [m]')
 parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=eval)
-parser.add_argument('--r0', default=[0.11,0.26], type=eval, help='Range of r0 to create')
+parser.add_argument('--Dr0', default=[15,40], type=eval, help='Range of D/r0 to create')
 parser.add_argument('--gpu', default="0", type=str)
 parser.add_argument('--alpha', default=pi/2, type=float)
-parser.add_argument('--zModes', default=[2,36], type=eval, help='Reconstruction Zernikes')
-parser.add_argument('--training_data', default=10000, type=int, help='Amount of training data')
-parser.add_argument('--validation_data', default=1000, type=int, help='Amount of validation data')
+parser.add_argument('--zModes', default=[2,24], type=eval, help='Reconstruction Zernikes')
+parser.add_argument('--training_data', default=100, type=int, help='Amount of training data')
+parser.add_argument('--validation_data', default=10, type=int, help='Amount of validation data')
 wfs = parser.parse_args()
-
+wfs.Dr0 = np.array(wfs.Dr0)
+wfs.r0 = np.round(wfs.D/wfs.Dr0[::-1], 2) # flipped Dr0 to obtain the r0 in a increasing pattern
 wfs.fovInPixel    = wfs.nPxPup*2*wfs.samp 
 wfs.pupil = CreateTelescopePupil(wfs.nPxPup,"disc")
 wfs.pyrMask = createPyrMask(wfs)
@@ -76,6 +77,22 @@ if not os.path.exists(train_fold):
         os.makedirs(train_fold)
 if not os.path.exists(val_fold):
         os.makedirs(val_fold)
+
+
+# Open a file with access mode 'a'
+file_object = open(main_fold + sub_fold +"/Dataset parameters.txt", 'a')
+# Append 'hello' at the end of file
+file_object.write("-- Physical parameters --\n")
+file_object.write("Modulation             = {}\n".format(wfs.modulation))
+file_object.write("Sampling factor        = {}\n".format(wfs.samp))
+file_object.write("Sensor resolution      = {}\n".format(wfs.nPxPup))
+file_object.write("Zernikes used          = {}\n".format(wfs.zModes))
+file_object.write("Diameter               = {}\n".format(wfs.D))
+file_object.write("D/r0                   = {}\n".format(wfs.Dr0))
+file_object.write("r0                     = {}\n".format(wfs.r0))
+# Close the file
+file_object.close()   
+print("Log done!")      
 
 
 IM = None
@@ -126,7 +143,7 @@ for k in range(vData):
     phaseMap = phaseMap.cpu()
     Zgt = Zgt.cpu()
     name = val_fold + "/data_{}.mat".format(k)
-    scio.savemat(name, {'x': phaseMap.numpy(),'Zgt': Zgt.numpy()})
+    scio.savemat(name, {'x': phaseMap.numpy(),'Zgt': Zgt.numpy(),'r0':r0})
     if k%100 == 0:
         t1 = time.time()
         print("Validation data ({}/{}) created Avg. time per data {:.2f}ms".format(k,vData,(t1-t0)*10)) 
