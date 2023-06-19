@@ -24,6 +24,28 @@ def CreateModulationPhasor(wfs):
     return(ModPhasor)
 
 
+def CreateModulationPhasorCuda(wfs):
+    device = wfs.fovInPixel.device
+    x = torch.arange(0,wfs.fovInPixel,1,device=device)/wfs.fovInPixel
+    vv, uu = torch.meshgrid(x,x)
+    r,o = cart2polCuda(uu,vv)
+    nTheta = torch.tensor(np.int16(np.round(2*math.pi*wfs.samp*wfs.modulation)),device=device)
+
+    if nTheta>0:
+        ModPhasor = torch.zeros((1,nTheta,wfs.fovInPixel,wfs.fovInPixel),dtype=torch.complex64,device=device)
+
+        for kTheta in range(nTheta):
+
+            theta = (kTheta)*2*math.pi/nTheta
+            ph = math.pi*4*wfs.modulation*wfs.samp*r*torch.cos(o+theta)
+            fftPhasor = torch.exp(-1j*ph)
+            ModPhasor[:,kTheta] = fftPhasor
+
+    else:
+        ModPhasor = 1    
+        
+    return(ModPhasor)
+
 def AddPhotonNoise(y,wfs):
     buffer    = y + wfs.nPhotonBackground
     y = y + torch.normal(0,1,size=y.shape).cuda()*(y + wfs.nPhotonBackground)
@@ -33,12 +55,11 @@ def AddPhotonNoise(y,wfs):
     return y
 
 def Prop2VanillaPyrWFS_torch(phaseMap,wfs):
-    
-    nTheta = np.round(2*math.pi*wfs.samp*wfs.modulation)
-    nTheta = torch.tensor(nTheta).float()
-    PyrQ  = torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
+    device = phaseMap.device  
+    nTheta = torch.tensor(np.int16(np.round(2*math.pi*wfs.samp*wfs.modulation)),device=device)
+    PyrQ  = torch.zeros((wfs.fovInPixel,wfs.fovInPixel),device=device)
     pupil = wfs.pupil  
-    pyrMask = UNZ(UNZ(torch.tensor(wfs.pyrMask,dtype=torch.complex64),0),0)  
+    pyrMask = UNZ(UNZ(torch.tensor(wfs.pyrMask,dtype=torch.complex64,device=device),0),0)  
     pyrPupil = pupil*torch.exp(1j*phaseMap)
     subscale = 1/(2*wfs.samp)
     sx = torch.round(wfs.fovInPixel*subscale).to(torch.int16)   
@@ -46,11 +67,11 @@ def Prop2VanillaPyrWFS_torch(phaseMap,wfs):
     PyrQ = torch.nn.functional.pad(pyrPupil,(npv,npv,npv,npv), "constant", 0)
 
     if nTheta > 0:
-        I4Q4 =  torch.zeros((1,1,wfs.fovInPixel,wfs.fovInPixel))
+        I4Q4 =  torch.zeros((1,1,wfs.fovInPixel,wfs.fovInPixel),device=device)
         buf = PyrQ*wfs.ModPhasor
         buf = torch.fft.fft2(buf)*pyrMask
         buf = torch.fft.fft2(buf)      
-        I4Q4 = torch.sum(torch.abs(buf)**2 ,1) 
+        I4Q4 = torch.sum(torch.abs(buf)**2 ,1,keepdim=True) 
         I4Q = I4Q4/nTheta
     else:
         buf = torch.fft.fft2(PyrQ)*pyrMask

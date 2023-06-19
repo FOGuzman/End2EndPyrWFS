@@ -24,7 +24,12 @@ def plot_tensor(t):
 def cart2pol(x, y):
     rho = np.sqrt(x**2 + y**2)
     phi = np.arctan2(y, x)
-    return(rho, phi)    
+    return(rho, phi)
+
+def cart2polCuda(x, y):
+    rho = torch.sqrt(x**2 + y**2)
+    phi = torch.atan2(y, x)
+    return(rho, phi)     
     
     
 def CreateTelescopePupil(Npx,shapetype):
