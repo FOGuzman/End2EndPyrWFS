@@ -3,9 +3,9 @@ clear all;clc;close all
 
 %% Preconditioners paths
 DPWFS_path = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.0285_Epoch_92.mat";
-savePath = "./ComputeResults/Fig4A/";if ~exist(savePath, 'dir'), mkdir(savePath); end
+savePath = "./ComputeResults/paper/Fig4A/";if ~exist(savePath, 'dir'), mkdir(savePath); end
 matName = "r0PerformanceFig4A";
-FigurePath = "./figures/Figure4/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
+FigurePath = "./figures/paper/Figure4/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
 FigureName = "ElementA.pdf";
 Compute = false;
 
@@ -89,8 +89,8 @@ fprintf("Progress:M[%i/%i] = %i | r0[%i/%i] = %.2f | Time per r0 = %.2f seg\n"..
     ,mc,length(Mods),Mods(mc),rc,rjumps,physicalParams.R0s(rc),toc)
 end
 
-Results(mc).RMSEpyr    = RMSEpyr;
-Results(mc).RMSEdpwfs  = RMSEdpwfs;
+Results{mc}.RMSEpyr    = RMSEpyr;
+Results{mc}.RMSEdpwfs  = RMSEdpwfs;
 
 end
 
@@ -101,7 +101,7 @@ INFO.date               = date;
 INFO.datapointsPerLevel = tpr0;
 INFO.RandNumberSeed = RandNumberSeed;
 INFO.FilesAndPathds = {DPWFS_path,savePath,matName,FigurePath,FigureName}';
-for k = 1:length(Mods);Results(k).INFO = INFO;Results(k).INFO.modulation = Mods(k);end
+for k = 1:length(Mods);Results{k}.INFO = INFO;Results{k}.INFO.modulation = Mods(k);end
 
 save(savePath+matName+".mat",'Results')
 end
@@ -114,16 +114,16 @@ end
 
 Rin = load(savePath+matName+".mat");R=Rin.Results;
 
-r0s = R(1).INFO.D_R0s;
-y1 = R(1).RMSEpyr(1,:);
-y2 = R(2).RMSEpyr(1,:);
-y3 = R(3).RMSEpyr(1,:);
-y4 = R(1).RMSEdpwfs(1,:);
+r0s = R{1}.INFO.D_R0s;
+y1 = R{1}.RMSEpyr(1,:);
+y2 = R{2}.RMSEpyr(1,:);
+y3 = R{3}.RMSEpyr(1,:);
+y4 = R{1}.RMSEdpwfs(1,:);
 
-lbltxt{1} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R(1).INFO.modulation);
-lbltxt{2} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R(2).INFO.modulation);
-lbltxt{3} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R(3).INFO.modulation);
-lbltxt{4} = sprintf("DPWFS, Mod $= %i\\lambda/D_0$",R(1).INFO.modulation);
+lbltxt{1} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R{1}.INFO.modulation);
+lbltxt{2} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R{2}.INFO.modulation);
+lbltxt{3} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R{3}.INFO.modulation);
+lbltxt{4} = sprintf("DPWFS, Mod $= %i\\lambda/D_0$",R{1}.INFO.modulation);
 
 fig = figure('Color','w','Units','normalized','Position',[0.5436 0.1528 0.4427 0.6331]);
 
