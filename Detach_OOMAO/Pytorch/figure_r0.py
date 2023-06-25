@@ -9,6 +9,7 @@ import datetime
 import os
 import numpy as np
 import argparse
+import scipy.io as sio
 from functions.oomao_functions import *
 from functions.phaseGeneratorsCuda import *
 from functions.customLoss      import RMSE
@@ -33,11 +34,11 @@ parser = argparse.ArgumentParser(description='Settings, Training and Pyramid Wav
 parser.add_argument('--modulation', default=0, type=int, help='Pyramid modulation')
 parser.add_argument('--samp', default=2, type=int, help='Over sampling for fourier')
 parser.add_argument('--D', default=8, type=int, help='Telescope Diameter [m]')
-parser.add_argument('--nPxPup', default=224, type=int, help='Pupil Resolution')
+parser.add_argument('--nPxPup', default=64, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=eval,help='Pyramid rooftop (as in OOMAO)')
 parser.add_argument('--alpha', default=np.pi/2, type=float,help='Pyramid angle (as in OOMAO)')
-parser.add_argument('--zModes', default=[2,16], type=eval, help='Reconstruction Zernikes')
-parser.add_argument('--ZernikeUnits', default=88, type=float,help='Zernike units (1 for normalized)')
+parser.add_argument('--zModes', default=[2,64], type=eval, help='Reconstruction Zernikes')
+parser.add_argument('--ZernikeUnits', default=1, type=float,help='Zernike units (1 for normalized)')
 parser.add_argument('--ReadoutNoise', default=0, type=float)
 parser.add_argument('--PhotonNoise', default=0, type=float)
 parser.add_argument('--nPhotonBackground', default=0, type=float)
@@ -46,12 +47,15 @@ parser.add_argument('--quantumEfficiency', default=1, type=float)
 parser.add_argument('--D_r0', default=[90,10], type=eval, help='Range of r0 to create')
 parser.add_argument('--datapoints', default=10, type=int, help='r0 intervals')
 parser.add_argument('--data_batch', default=10, type=int, help='r0 intervals')
-parser.add_argument('--dperR0', default=5000, type=int, help='test per datapoint')
+parser.add_argument('--dperR0', default=10000, type=int, help='test per datapoint')
 
-parser.add_argument('--models', nargs='+',default=['GCViT_only','modelFastplusGCViT'])
+parser.add_argument('--models', nargs='+',default=['ConvNeXt_only','modelFast','modelFastplusConvNeXt','modelFastplusConvNeXt'])
 parser.add_argument('--checkpoints', nargs='+',default=
-                    ['./model/nocap/GCViT/S2_R224_Z2-16_D8/checkpoint/PyrNet_epoch_34.pth',
-                     './model/nocap/DE+GCViT/S2_R224_Z2-16_D8/checkpoint/PyrNet_epoch_358.pth'])
+                    ['./training_results/EV/ConvNeXt/checkpoint/PyrNet_epoch_99.pth',
+                     './training_results/EV/DPWFS/checkpoint/PyrNet_epoch_99.pth',
+                     './training_results/EV/ConvNeXt+DE/checkpoint/PyrNet_epoch_99.pth',
+                     './training_results/EV/ConvNeXt+DE+hybrid/checkpoint/PyrNet_epoch_99.pth'])
+
 
 
 # Precalculations
@@ -62,11 +66,11 @@ wfs.pyrMask = createPyrMask(wfs)
 wfs.jModes = torch.arange(wfs.zModes[0], wfs.zModes[1]+1)
 wfs.pupilLogical = wfs.pupil!=0
 wfs.modes = CreateZernikePolynomials(wfs)
-wfs.amplitude = 0.2 #small for low noise systems
+wfs.amplitude = 0.1 #small for low noise systems  
 wfs.ModPhasor = CreateModulationPhasor(wfs)
 
 
-##TO CUDA
+# To Cuda
 wfs.pupil = torch.from_numpy(wfs.pupil).cuda().float()
 wfs.pyrMask = torch.from_numpy(wfs.pyrMask).cuda().cfloat()
 wfs.fovInPixel    = torch.tensor(wfs.fovInPixel).cuda()
@@ -182,20 +186,44 @@ stdZ  = []
 meanZ.append(np.mean(ZFull[0],axis=0))     
 meanZ.append(np.mean(ZFull[1],axis=0)) 
 meanZ.append(np.mean(ZFull[2],axis=0)) 
+meanZ.append(np.mean(ZFull[3],axis=0)) 
+meanZ.append(np.mean(ZFull[4],axis=0))
 stdZ.append(np.std(ZFull[0],axis=0))     
 stdZ.append(np.std(ZFull[1],axis=0)) 
 stdZ.append(np.std(ZFull[2],axis=0)) 
+stdZ.append(np.std(ZFull[3],axis=0)) 
+stdZ.append(np.std(ZFull[4],axis=0))
 
-
+Results = []
 Dr0ax = Dr0Vector.cpu().numpy()
+
+INFO = {}
+INFO['D_R0s'] = Dr0ax
+INFO['modulation'] = wfs.modulation
+methods= ["PyrWFS","DPWFS","ConvNeXt","ConvNext+DE","ConvNext+DE*"]
+
+for index, method in enumerate(methods):
+    RMSE_vec = np.zeros((2,wfs.datapoints))
+    RMSE_vec[0,:] = np.mean(ZFull[index],axis=0)
+    RMSE_vec[1,:] = np.std(ZFull[index],axis=0)
+    struct = {}
+    struct['RMSE_vec'] = RMSE_vec
+    struct['INFO'] = INFO
+    struct['method'] = method
+    Results.append(struct)
+
+sio.savemat("./training_results/EV/r0Performance_methods.mat", {'Results': Results},oned_as='row')
+
 
 fig = plt.figure()
 
 
 
 plt.errorbar(Dr0ax, meanZ[0], yerr=stdZ[0], label='PyrWFS')
-plt.errorbar(Dr0ax, meanZ[1], yerr=stdZ[1], label='GCViT')
-plt.errorbar(Dr0ax, meanZ[2], yerr=stdZ[2], label='DE+GCViT')
+plt.errorbar(Dr0ax, meanZ[1], yerr=stdZ[1], label='CNN')
+plt.errorbar(Dr0ax, meanZ[2], yerr=stdZ[2], label='DPWFS')
+plt.errorbar(Dr0ax, meanZ[3], yerr=stdZ[3], label='CNN+DPWFS')
+plt.errorbar(Dr0ax, meanZ[3], yerr=stdZ[3], label='CNN+DPWFS*')
 plt.gca().invert_xaxis()        
 plt.legend()
 plt.show(block=True)        
