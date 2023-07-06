@@ -34,6 +34,7 @@ parser.add_argument('--ReadoutNoise', default=0, type=float)
 parser.add_argument('--PhotonNoise', default=0, type=float)
 parser.add_argument('--nPhotonBackground', default=0, type=float)
 parser.add_argument('--quantumEfficiency', default=1, type=float)
+parser.add_argument('--Dr0_dataset', default=[20,80], type=eval, help='What D/r0 dataset to use')
 
 parser.add_argument('--model', default="modelFast", type=str)
 parser.add_argument('--batchSize', default=1, type=int, help='Batch size for training')
