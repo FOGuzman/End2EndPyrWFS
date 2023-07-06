@@ -69,7 +69,7 @@ nTimes        = wfs.fovInPixel/resAO
 
 
 
-sub_fold = "S{}_R{}_Z{}-{}_D{:d}".format(wfs.samp,wfs.nPxPup,wfs.zModes[0],wfs.zModes[1],D)
+sub_fold = "Dr0{}--{}_S{}_R{}_Z{}-{}_D{:d}".format(wfs.Dr0[0],wfs.Dr0[1],wfs.samp,wfs.nPxPup,wfs.zModes[0],wfs.zModes[1],D)
 train_fold = main_fold + sub_fold + "/train"
 val_fold   = main_fold + sub_fold + "/val"
 

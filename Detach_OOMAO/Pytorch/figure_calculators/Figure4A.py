@@ -40,7 +40,7 @@ parser.add_argument('--D', default=8, type=int, help='Telescope Diameter [m]')
 parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=eval,help='Pyramid rooftop (as in OOMAO)')
 parser.add_argument('--alpha', default=np.pi/2, type=float,help='Pyramid angle (as in OOMAO)')
-parser.add_argument('--zModes', default=[2,36], type=eval, help='Reconstruction Zernikes')
+parser.add_argument('--zModes', default=[2,60], type=eval, help='Reconstruction Zernikes')
 parser.add_argument('--ZernikeUnits', default=1, type=float,help='Zernike units (1 for normalized)')
 parser.add_argument('--ReadoutNoise', default=0, type=float)
 parser.add_argument('--PhotonNoise', default=0, type=float)
@@ -54,7 +54,7 @@ parser.add_argument('--dperR0', default=10000, type=int, help='test per datapoin
 
 parser.add_argument('--models', nargs='+',default=['modelFast'])
 parser.add_argument('--checkpoints', nargs='+',default=
-                    ['./model/nocap/DE_only/checkpoint/PyrNet_epoch_76.pth'])
+                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/paper/base_D20-80/checkpoint/PyrNet_epoch_56.pth'])
 parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/Fig4A/", type=str)
 
 # Precalculations
@@ -97,12 +97,11 @@ for k in range(len(wfs.models)):
 os.makedirs(wfs.saveMats, exist_ok=True)
 
 nLenslet      = torch.tensor(16).cuda()                 # plens res
-resAO         = 2*nLenslet+1       # AO resolution
-r0            = torch.tensor(0.11).cuda()            
+resAO         = 2*nLenslet+1       # AO resolution          
 L0            = torch.tensor(25).cuda()   
-fR0           = torch.tensor(1.2).cuda()   
+fR0           = torch.tensor(1).cuda()   
 noiseVariance = torch.tensor(0.7).cuda()   
-n_lvl         = torch.tensor(0.1).cuda()   
+n_lvl         = torch.tensor(0.2).cuda()   
 nTimes        = wfs.fovInPixel/resAO
 
 
@@ -141,11 +140,11 @@ for mod in tqdm(wfs.mods,
     z = IM_batch*gain
     I4Q = Prop2VanillaPyrWFS_torch(z,wfs)
     spnorm = UNZ(UNZ(UNZ(torch.sum(torch.sum(torch.sum(I4Q,dim=-1),dim=-1),dim=-1),-1),-1),-1)
-    sp = I4Q/spnorm
+    sp = I4Q/spnorm-I_0
 
     I4Q = Prop2VanillaPyrWFS_torch(-z,wfs)
     smnorm = UNZ(UNZ(UNZ(torch.sum(torch.sum(torch.sum(I4Q,dim=-1),dim=-1),dim=-1),-1),-1),-1)
-    sm = I4Q/smnorm
+    sm = I4Q/smnorm-I_0
 
     MZc = 0.5*(sp-sm)/gain
 
