@@ -4,7 +4,7 @@ class setupFolders:
     def __init__(self, wfs):
         main_fold           = "./dataset/"
         main_result_path    = "./training_results/"
-        sub_fold            = f"Dr0{wfs.Dr0_dataset[0]}--{wfs.Dr0_dataset[1]}/S{wfs.samp}_R{wfs.nPxPup}_Z{wfs.zModes[0]}-{wfs.zModes[1]}_D{wfs.D}"
+        sub_fold            = f"Dr0{wfs.Dr0_dataset[0]}--{wfs.Dr0_dataset[1]}_S{wfs.samp}_R{wfs.nPxPup}_Z{wfs.zModes[0]}-{wfs.zModes[1]}_D{wfs.D}"
         self.train_fold     = f"{main_fold}{sub_fold}/train"
         self.val_fold       = f"{main_fold}{sub_fold}/val"       
         self.model_path     = f"{main_result_path}{wfs.experimentName}/checkpoint/"
