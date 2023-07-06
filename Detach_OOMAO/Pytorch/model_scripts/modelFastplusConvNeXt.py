@@ -185,7 +185,6 @@ class OptimizedPyramid(nn.Module):
         self.Flat = torch.ones((self.nPxPup,self.nPxPup))*self.pupilLogical
         self.Flat = UNZ(UNZ(self.Flat,0),0).cuda()
         OL1 = torch.ones((wfs.fovInPixel,wfs.fovInPixel))
-        OL1 = torch.tensor(np.angle(wfs.pyrMask),dtype=torch.float)
         self.OL1  = nn.Parameter(OL1)
 
 
