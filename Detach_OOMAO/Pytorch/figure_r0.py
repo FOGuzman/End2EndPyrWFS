@@ -212,7 +212,7 @@ for index, method in enumerate(methods):
     struct['method'] = method
     Results.append(struct)
 
-sio.savemat("./training_results/EV/r0Performance_methods.mat", {'Results': Results},oned_as='row')
+#sio.savemat("./training_results/EV/r0Performance_methods.mat", {'Results': Results},oned_as='row')
 
 
 fig = plt.figure()

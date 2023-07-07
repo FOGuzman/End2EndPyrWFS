@@ -20,7 +20,6 @@ from functions.utils import *
 from functions.Propagators import *
 from tqdm.auto import tqdm
 import random
-import h5py
 from types import SimpleNamespace
 import matplotlib.pyplot as plt
 matplotlib.interactive(True)
@@ -54,7 +53,7 @@ parser.add_argument('--dperR0', default=10000, type=int, help='test per datapoin
 
 parser.add_argument('--models', nargs='+',default=['modelFast'])
 parser.add_argument('--checkpoints', nargs='+',default=
-                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/paper/base_D20-80/checkpoint/PyrNet_epoch_56.pth'])
+                    ['D:\FOGuzman\End2EndPyrWFS\Detach_OOMAO\Pytorch\training_results\Paper\06-07-2023\r1\checkpoint\PyrNet_epoch_99.pth'])
 parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/Fig4A/", type=str)
 
 # Precalculations
