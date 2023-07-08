@@ -133,3 +133,30 @@ def Prop2OptimizeDWFS_torch(phaseMap,DE,wfs):
     I4Q = F.resize(I4Q,(sx,sx))*2*wfs.samp
     return(I4Q)
 
+
+
+def Prop2OptimizePyrWFSPupil_torch(phaseMap,DE,wfs):
+    
+    nTheta = np.round(2*math.pi*wfs.samp*wfs.modulation)
+    nTheta = torch.tensor(nTheta).float()
+    PyrQ  = torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
+    pupil = wfs.pupil  
+    pyrMask = UNZ(UNZ(torch.tensor(wfs.pyrMask),0),0)  
+    pyrPupil = pupil*torch.exp(1j*phaseMap)
+    subscale = 1/(2*wfs.samp)
+    sx = torch.round(wfs.fovInPixel*subscale).to(torch.int16)   
+    npv = ((wfs.fovInPixel-sx)/2).to(torch.int16)
+    PyrQ = torch.nn.functional.pad(pyrPupil,(npv,npv,npv,npv), "constant", 0)
+    if nTheta > 0:
+        I4Q4 =  torch.zeros((1,1,wfs.fovInPixel,wfs.fovInPixel))
+        buf = PyrQ*wfs.ModPhasor*DE
+        buf = torch.fft.fft2(buf)*pyrMask 
+        buf = torch.fft.fft2(buf)      
+        I4Q4 = torch.sum(torch.abs(buf)**2 ,1) 
+        I4Q = I4Q4/nTheta
+    else:
+        buf = PyrQ*DE
+        buf = torch.fft.fft2(buf)*pyrMask 
+        I4Q = torch.abs(torch.fft.fft2(buf))**2
+    I4Q = F.resize(I4Q,(sx,sx))*2*wfs.samp
+    return(I4Q)

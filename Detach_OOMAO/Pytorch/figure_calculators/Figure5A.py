@@ -2,12 +2,8 @@ import sys
 import os
 sys.path.insert(0, '..')
 
-from torch.utils.data import DataLoader
 import importlib
-import torch.optim as optim
-import torch.nn as nn
 import torch
-import scipy.io as scio
 import time
 import datetime
 import numpy as np
@@ -15,14 +11,9 @@ import argparse
 import scipy.io as sio
 from functions.oomao_functions import *
 from functions.phaseGeneratorsCuda import *
-from functions.customLoss      import RMSE
 from functions.utils import *
 from functions.Propagators import *
 from tqdm.auto import tqdm
-import random
-import h5py
-from types import SimpleNamespace
-import matplotlib.pyplot as plt
 matplotlib.interactive(True)
 
 date = datetime.date.today()  
@@ -42,8 +33,8 @@ parser.add_argument('--rooftop', default=[0,0], type=eval,help='Pyramid rooftop 
 parser.add_argument('--alpha', default=np.pi/2, type=float,help='Pyramid angle (as in OOMAO)')
 parser.add_argument('--zModes', default=[2,60], type=eval, help='Reconstruction Zernikes')
 parser.add_argument('--ZernikeUnits', default=1, type=float,help='Zernike units (1 for normalized)')
-parser.add_argument('--ReadoutNoise', default=0, type=float)
-parser.add_argument('--PhotonNoise', default=0, type=float)
+parser.add_argument('--ReadoutNoise', default=1, type=float)
+parser.add_argument('--PhotonNoise', default=0.1, type=float)
 parser.add_argument('--nPhotonBackground', default=0, type=float)
 parser.add_argument('--quantumEfficiency', default=1, type=float)
 
@@ -54,7 +45,7 @@ parser.add_argument('--dperR0', default=10000, type=int, help='test per datapoin
 
 parser.add_argument('--models', nargs='+',default=['modelFast'])
 parser.add_argument('--checkpoints', nargs='+',default=
-                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/paper/base_D20-80/checkpoint/PyrNet_epoch_56.pth'])
+                    ['D:/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r1/checkpoint/PyrNet_epoch_99.pth'])
 parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/Fig4A/", type=str)
 
 # Precalculations
