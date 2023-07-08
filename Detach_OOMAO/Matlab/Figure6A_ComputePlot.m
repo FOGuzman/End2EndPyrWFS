@@ -88,8 +88,8 @@ fprintf("Progress:M[%i/%i] = %i | r0[%i/%i] = %.2f | Time per r0 = %.2f seg\n"..
     ,mc,length(Mods),Mods(mc),rc,rjumps,physicalParams.R0s(rc),toc)
 end
 
-Results(mc).RMSEpyr    = RMSEpyr;
-Results(mc).RMSEdpwfs  = RMSEdpwfs;
+Results{mc}.RMSEpyr    = RMSEpyr;
+Results{mc}.RMSEdpwfs  = RMSEdpwfs;
 
 end
 
@@ -105,24 +105,24 @@ for k = 1:length(Mods);Results(k).INFO = INFO;Results(k).INFO.modulation = Mods(
 save(savePath+matName+".mat",'Results')
 end
 %% Plot
+
 if ~exist(savePath+matName+".mat", 'file')
     warning('There is no computed files on the folder: Change "Compute" to false and recalculate');
     return;  % Finish the script
 end
 
-
 Rin = load(savePath+matName+".mat");R=Rin.Results;
 
-r0s = R(1).INFO.D_R0s;
-y1 = R(1).RMSEpyr(1,:);
-y2 = R(2).RMSEpyr(1,:);
-y3 = R(3).RMSEpyr(1,:);
-y4 = R(1).RMSEdpwfs(1,:);
+r0s = R{1}.INFO.D_R0s;
+y1 = R{1}.RMSEpyr(1,:);
+y2 = R{2}.RMSEpyr(1,:);
+y3 = R{3}.RMSEpyr(1,:);
+y4 = R{1}.RMSEdpwfs(1,:);
 
-lbltxt{1} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R(1).INFO.modulation);
-lbltxt{2} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R(2).INFO.modulation);
-lbltxt{3} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R(3).INFO.modulation);
-lbltxt{4} = sprintf("DPWFS, Mod $= %i\\lambda/D_0$",R(1).INFO.modulation);
+lbltxt{1} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R{1}.INFO.modulation);
+lbltxt{2} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R{2}.INFO.modulation);
+lbltxt{3} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R{3}.INFO.modulation);
+lbltxt{4} = sprintf("DPWFS, Mod $= %i\\lambda/D_0$",R{1}.INFO.modulation);
 
 fig = figure('Color','w','Units','normalized','Position',[0.5436 0.1528 0.4427 0.6331]);
 
@@ -131,10 +131,10 @@ hold on
 plot(r0s,y2,'--dg','LineWidth',1.5,'MarkerFaceColor','g')
 plot(r0s,y3,'--db','LineWidth',1.5,'MarkerFaceColor','b')
 plot(r0s,y4,'-or','LineWidth',1.5,'MarkerFaceColor','r')
-set(gca,'XDir','reverse','FontSize',22,'TickLabelInterpreter','latex')
+set(gca,'XDir','reverse','FontSize',28,'TickLabelInterpreter','latex')
 xlabel('$D/r_0$','interpreter','latex','FontSize',22)
 ylabel('RMSE','interpreter','latex','FontSize',22)
-legend(lbltxt,'interpreter','latex','FontSize',16)
+legend(lbltxt,'interpreter','latex','FontSize',19)
 xlim([min(r0s) max(r0s)])
 
 
