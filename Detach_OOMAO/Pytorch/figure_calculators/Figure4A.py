@@ -20,7 +20,6 @@ from functions.utils import *
 from functions.Propagators import *
 from tqdm.auto import tqdm
 import random
-import h5py
 from types import SimpleNamespace
 import matplotlib.pyplot as plt
 matplotlib.interactive(True)
