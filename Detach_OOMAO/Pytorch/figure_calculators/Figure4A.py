@@ -2,12 +2,8 @@ import sys
 import os
 sys.path.insert(0, '..')
 
-from torch.utils.data import DataLoader
 import importlib
-import torch.optim as optim
-import torch.nn as nn
 import torch
-import scipy.io as scio
 import time
 import datetime
 import numpy as np
@@ -15,14 +11,9 @@ import argparse
 import scipy.io as sio
 from functions.oomao_functions import *
 from functions.phaseGeneratorsCuda import *
-from functions.customLoss      import RMSE
 from functions.utils import *
 from functions.Propagators import *
 from tqdm.auto import tqdm
-import random
-import h5py
-from types import SimpleNamespace
-import matplotlib.pyplot as plt
 matplotlib.interactive(True)
 
 date = datetime.date.today()  

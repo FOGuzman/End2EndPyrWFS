@@ -46,7 +46,7 @@ parser.add_argument('--dperR0', default=10000, type=int, help='test per datapoin
 parser.add_argument('--models', nargs='+',default=['modelFast'])
 parser.add_argument('--checkpoints', nargs='+',default=
                     ['D:/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r1/checkpoint/PyrNet_epoch_99.pth'])
-parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/Fig4A/", type=str)
+parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/Fig6A/", type=str)
 
 # Precalculations
 wfs = parser.parse_args()
@@ -214,4 +214,4 @@ print(f"r0 Figure 4.A completed time({cal_time}) seg for {wfs.datapoints*wfs.dpe
 
 
 
-sio.savemat(wfs.saveMats+"r0PerformanceFig4A.mat", {'Results': Results},oned_as='row')
+sio.savemat(wfs.saveMats+"r0PerformanceFig6A.mat", {'Results': Results},oned_as='row')
