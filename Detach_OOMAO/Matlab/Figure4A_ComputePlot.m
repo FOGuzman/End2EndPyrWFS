@@ -2,8 +2,8 @@ addpath tools/functions
 clear all;clc;close all
 
 %% Preconditioners paths
-DPWFS_path = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.0285_Epoch_92.mat";
-savePath = "./ComputeResults/paper/Fig4A/";if ~exist(savePath, 'dir'), mkdir(savePath); end
+%DPWFS_path = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.0285_Epoch_92.mat";
+DPWFS_path = "/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/paper/base_D20-80/DE/DE_Epoch_56_R128_M0_S2_RMSE_0.1128.mat";savePath = "./ComputeResults/paper/Fig4A/";if ~exist(savePath, 'dir'), mkdir(savePath); end
 matName = "r0PerformanceFig4A";
 FigurePath = "./figures/paper/Figure4/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
 FigureName = "ElementA.pdf";
@@ -15,7 +15,7 @@ run("./tools/experiments_settings/F4_settings.m")
 
 %% Test parameters
 if Compute
-tpr0  = 10000;    % test per r0
+tpr0  = 1000;    % test per r0
 physicalParams.D_R0s = [90 80 70 60 50 40 30 20 10 1];%[30 25 20 15 10 8 5 3 1]
 physicalParams.R0s = physicalParams.D./physicalParams.D_R0s;
 rjumps = length(physicalParams.R0s);
@@ -68,7 +68,7 @@ v_RMSE_pyr     = zeros(1,tpr0);
 v_RMSE_dpwfs  = zeros(1,tpr0);
 
 tic
-parfor tc = 1:tpr0
+for tc = 1:tpr0
 [xin,Zg] = ComputePhaseScreen(atm,PhaseCM);
 
 [Zpyr]    = PropAndSamp(physicalParams,xin,DPWFS_DE ,PyrI_0   ,PyrCM    ,0);
