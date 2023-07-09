@@ -34,18 +34,18 @@ parser.add_argument('--alpha', default=np.pi/2, type=float,help='Pyramid angle (
 parser.add_argument('--zModes', default=[2,60], type=eval, help='Reconstruction Zernikes')
 parser.add_argument('--ZernikeUnits', default=1, type=float,help='Zernike units (1 for normalized)')
 parser.add_argument('--ReadoutNoise', default=1, type=float)
-parser.add_argument('--PhotonNoise', default=0.1, type=float)
-parser.add_argument('--nPhotonBackground', default=0, type=float)
+parser.add_argument('--PhotonNoise', default=1, type=float)
+parser.add_argument('--nPhotonBackground', default=0.1, type=float)
 parser.add_argument('--quantumEfficiency', default=1, type=float)
 
 parser.add_argument('--D_r0', default=[90,1], type=eval, help='Range of r0 to create')
 parser.add_argument('--datapoints', default=10, type=int, help='r0 intervals')
 parser.add_argument('--data_batch', default=50, type=int, help='r0 intervals')
-parser.add_argument('--dperR0', default=10000, type=int, help='test per datapoint')
+parser.add_argument('--dperR0', default=5000, type=int, help='test per datapoint')
 
-parser.add_argument('--models', nargs='+',default=['modelFast'])
+parser.add_argument('--models', nargs='+',default=['modelFastPupilPlane'])
 parser.add_argument('--checkpoints', nargs='+',default=
-                    ['D:/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r1/checkpoint/PyrNet_epoch_99.pth'])
+                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/pupil/checkpoint/PyrNet_epoch_7.pth'])
 parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/Fig6A/", type=str)
 
 # Precalculations

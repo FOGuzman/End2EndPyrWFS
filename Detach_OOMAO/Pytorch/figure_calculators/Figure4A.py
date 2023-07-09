@@ -41,11 +41,11 @@ parser.add_argument('--quantumEfficiency', default=1, type=float)
 parser.add_argument('--D_r0', default=[90,1], type=eval, help='Range of r0 to create')
 parser.add_argument('--datapoints', default=10, type=int, help='r0 intervals')
 parser.add_argument('--data_batch', default=50, type=int, help='r0 intervals')
-parser.add_argument('--dperR0', default=10000, type=int, help='test per datapoint')
+parser.add_argument('--dperR0', default=5000, type=int, help='test per datapoint')
 
-parser.add_argument('--models', nargs='+',default=['modelFast'])
+parser.add_argument('--models', nargs='+',default=['modelFastPupilPlane'])
 parser.add_argument('--checkpoints', nargs='+',default=
-                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/paper/base_D20-80/checkpoint/PyrNet_epoch_56.pth'])
+                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/pupil/checkpoint/PyrNet_epoch_7.pth'])
 parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/Fig4A/", type=str)
 
 # Precalculations

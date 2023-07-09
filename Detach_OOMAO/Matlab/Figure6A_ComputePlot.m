@@ -3,7 +3,7 @@ clear all;clc;close all
 
 %% Preconditioners paths
 DPWFS_path = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
-savePath = "./ComputeResults/Fig6A/";if ~exist(savePath, 'dir'), mkdir(savePath); end
+savePath = "./ComputeResults/paper/Fig6A/";if ~exist(savePath, 'dir'), mkdir(savePath); end
 matName = "r0PerformanceFig6A";
 FigurePath = "./figures/Figure6/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
 FigureName = "ElementA.pdf";

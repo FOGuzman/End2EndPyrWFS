@@ -3,7 +3,7 @@ clear all;clc;close all
 
 %% Preconditioners paths
 %DPWFS_path = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.0285_Epoch_92.mat";
-DPWFS_path = "/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r1/DE/DE_Epoch_99_R128_M0_S2_RMSE_0.05316.mat";
+DPWFS_path = "/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r4/DE/DE_Epoch_80_R128_M0_S2_RMSE_0.001984.mat";
 %DPWFSn_path = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
 DPWFSn_path = "/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/n1/DE/DE_Epoch_99_R128_M0_S2_RMSE_0.09754.mat";
 
