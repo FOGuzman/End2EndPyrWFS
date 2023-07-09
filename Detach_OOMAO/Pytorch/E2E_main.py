@@ -78,8 +78,8 @@ PyrNet = method.PyrModel(wfs).cuda()
 
 # Load Checkpoint
 if wfs.checkpoint is not None:
-        checkpoint = torch.load(wfs.checkpoint)
-        PyrNet = PyrNet.load_state_dict(checkpoint.state_dict())
+        PyrNet = torch.load(wfs.checkpoint)
+        PyrNet = PyrNet.module if hasattr(PyrNet, "module") else PyrNet
         print("Checkpoint loaded successfully!")
 else:
         print("Training from scrach.")
