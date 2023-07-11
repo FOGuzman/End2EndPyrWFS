@@ -4,11 +4,11 @@ clear all;clc;close all
 %% Preconditioners paths
 %DPWFS_path = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.0285_Epoch_92.mat";
 DPWFS_path = "/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/pupil/DE/DE_project.mat";
-savePath = "./ComputeResults/paper/Fig4A/";if ~exist(savePath, 'dir'), mkdir(savePath); end
-matName = "r0PerformanceFig4A";
-FigurePath = "./figures/paper/Figure4/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
+savePath = "./ComputeResults/paper/FullCMPn/";if ~exist(savePath, 'dir'), mkdir(savePath); end
+matName = "r0PerformanceOverAll";
+FigurePath = "./figures/paper/FigureFull/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
 FigureName = "ElementA.pdf";
-Compute = true;
+Compute = false;
 
 
 %% Phisycal parameters
@@ -120,11 +120,17 @@ y1 = R{1}.RMSEpyr(1,:);
 y2 = R{2}.RMSEpyr(1,:);
 y3 = R{3}.RMSEpyr(1,:);
 y4 = R{1}.RMSEdpwfs(1,:);
+y5 = R{1}.RMSEdpwfs2(1,:);
+y6 = R{1}.RMSEdpwfs3(1,:);
+y7 = R{1}.RMSEdpwfs4(1,:);
 
 lbltxt{1} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R{1}.INFO.modulation);
 lbltxt{2} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R{2}.INFO.modulation);
 lbltxt{3} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R{3}.INFO.modulation);
-lbltxt{4} = sprintf("DPWFS, Mod $= %i\\lambda/D_0$",R{1}.INFO.modulation);
+lbltxt{4} = sprintf("Pupil 15-40, Mod $= %i\\lambda/D_0$",R{1}.INFO.modulation);
+lbltxt{5} = sprintf("Pupil 15-40 noise, Mod $= %i\\lambda/D_0$",R{1}.INFO.modulation);
+lbltxt{6} = sprintf("r1 , Mod $= %i\\lambda/D_0$",R{1}.INFO.modulation);
+lbltxt{7} = sprintf("n1 , Mod $= %i\\lambda/D_0$",R{1}.INFO.modulation);
 
 fig = figure('Color','w','Units','normalized','Position',[0.5436 0.1528 0.4427 0.6331]);
 
@@ -132,7 +138,10 @@ plot(r0s,y1,'--dr','LineWidth',1.5,'MarkerFaceColor','r')
 hold on
 plot(r0s,y2,'--dg','LineWidth',1.5,'MarkerFaceColor','g')
 plot(r0s,y3,'--db','LineWidth',1.5,'MarkerFaceColor','b')
-plot(r0s,y4,'-or','LineWidth',1.5,'MarkerFaceColor','r')
+plot(r0s,y4,'-o','Color',"#4DBEEE",'LineWidth',1.5,'MarkerFaceColor',"#4DBEEE")
+plot(r0s,y5,'-ok','LineWidth',1.5,'MarkerFaceColor','k')
+plot(r0s,y6,'-om','LineWidth',1.5,'MarkerFaceColor','m')
+plot(r0s,y7,'-oy','LineWidth',1.5,'MarkerFaceColor','y')
 set(gca,'XDir','reverse','FontSize',28,'TickLabelInterpreter','latex')
 xlabel('$D/r_0$','interpreter','latex','FontSize',22)
 ylabel('RMSE','interpreter','latex','FontSize',22)

@@ -1,7 +1,7 @@
 physicalParams = struct();
 
 % Pyramid propeties
-physicalParams.D                    = 16;             % Telescope diameter [m]
+physicalParams.D                    = 8;             % Telescope diameter [m]
 physicalParams.nLenslet             = 16;            % Equivalent SH resolution lenslet
 physicalParams.binning              = 1;             % Binning in phase sampling
 physicalParams.Samp                 = 2;             % Oversampling factor
@@ -11,7 +11,7 @@ physicalParams.rooftop              = [0,0];         % Pyramid roftop imperfecti
 physicalParams.modulation           = 0;
 % Atmosphere propeties
 physicalParams.L0                   = 20;            % Outer scale [m]
-physicalParams.r0                   = 1.3;
+physicalParams.r0                   = 0.2;
 physicalParams.fR0                  = 1;             % Fracional r0 (for multi layer - not implemented)
 % indecies for Zernike decomposition 
 physicalParams.jModes               = 2:60;

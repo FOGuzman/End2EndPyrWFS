@@ -43,9 +43,9 @@ parser.add_argument('--datapoints', default=10, type=int, help='r0 intervals')
 parser.add_argument('--data_batch', default=50, type=int, help='r0 intervals')
 parser.add_argument('--dperR0', default=5000, type=int, help='test per datapoint')
 
-parser.add_argument('--models', nargs='+',default=['modelFastPupilPlane'])
+parser.add_argument('--models', nargs='+',default=['modelFast'])
 parser.add_argument('--checkpoints', nargs='+',default=
-                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/pupil/checkpoint/PyrNet_epoch_7.pth'])
+                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/n1-1-15_rr1/checkpoint/PyrNet_epoch_70.pth'])
 parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/Fig4A/", type=str)
 
 # Precalculations

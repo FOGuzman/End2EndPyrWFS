@@ -3,7 +3,7 @@ clear all;clc;close all
 
 %% Preconditioners paths
 %DPWFS_path = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.0285_Epoch_92.mat";
-DPWFS_path = "/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/pupil/DE/DE_project.mat";
+DPWFS_path = "/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/n1-1-15_rr1/DE/DE_Epoch_70_R128_M0_S2_RMSE_0.002502.mat";
 %DPWFSn_path = "../Preconditioners/nocap/pnoise/checkpoint/OL1_R128_M0_RMSE0.05275_Epoch_118.mat";
 DPWFSn_path = "/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/n1/DE/DE_Epoch_99_R128_M0_S2_RMSE_0.09754.mat";
 
@@ -12,7 +12,40 @@ FigurePath = "./figures/Figure5/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath
 FigureName1 = "ElementA.pdf";
 FigureName2 = "ElementB.pdf";
 %% Phisycal parameters
-run("./tools/experiments_settings/F4_settings.m")
+physicalParams = struct();
+
+% Pyramid propeties
+physicalParams.D                    = 8;             % Telescope diameter [m]
+physicalParams.nLenslet             = 16;            % Equivalent SH resolution lenslet
+physicalParams.binning              = 1;             % Binning in phase sampling
+physicalParams.Samp                 = 2;             % Oversampling factor
+physicalParams.nPxPup               = 64;           % number of pixels to describe the pupil
+physicalParams.alpha                = pi/2;          % Pyramid shape
+physicalParams.rooftop              = [0,0];         % Pyramid roftop imperfection
+% Atmosphere propeties
+physicalParams.L0                   = 25;            % Outer scale [m]
+physicalParams.fR0                  = 1;             % Fracional r0 (for multi layer - not implemented)
+% indecies for Zernike decomposition 
+physicalParams.jModes               = 2:60;
+
+%Camera parameters
+physicalParams.ReadoutNoise         = 0;
+physicalParams.PhotonNoise          = 0;
+physicalParams.quantumEfficiency    = 1;
+physicalParams.nPhotonBackground    = 0;
+
+% Precomp aditional parameters
+physicalParams.resAO                = 2*physicalParams.nLenslet+1;
+physicalParams.pupil                = CreatePupil(physicalParams.nPxPup,"disc");
+physicalParams.N                    = 2*physicalParams.Samp*physicalParams.nPxPup;
+physicalParams.L                    = (physicalParams.N-1)*physicalParams.D/(physicalParams.nPxPup-1);
+physicalParams.fovInPixel           = physicalParams.nPxPup*2*physicalParams.Samp;    % number of pixel to describe the PSD
+physicalParams.nTimes               = physicalParams.fovInPixel/physicalParams.resAO;
+physicalParams.PyrQ                 = zeros(physicalParams.fovInPixel);
+physicalParams.I4Q4                 = physicalParams.PyrQ;
+
+physicalParams.modes = CreateZernikePolynomials(physicalParams.nPxPup,physicalParams.jModes,physicalParams.pupil~=0);
+physicalParams.flatMode = CreateZernikePolynomials(physicalParams.nPxPup,1,physicalParams.pupil~=0);
 
 %% Test parameters
 radial_order = 30;
@@ -34,8 +67,8 @@ Mods = [0:2];
 
 %%
 mv = create_pyMask(physicalParams.fovInPixel,physicalParams.rooftop,physicalParams.alpha);
-m1 = mv.*exp(1j.*DPWFS_DE);
-m2 = mv.*exp(1j.*DPWFSn_DE);
+m1 = mv;
+m2 = mv;
 for m = 1:length(Mods)
 physicalParams.modulation = Mods(m);
 nTheta = round(2*pi*physicalParams.Samp*physicalParams.modulation);
@@ -77,22 +110,22 @@ ZerLen = length(physicalParams.jModes);
 lw = 1;
 fig1 = figure('Color','w','Position',[409 169 454 420]);
 hold on
-plot(1:ZerLen,Sv(1,:)*2,'--r','LineWidth',lw)
-plot(1:ZerLen,Sv(2,:)*2,'--g','LineWidth',lw)
-plot(1:ZerLen,Sv(3,:)*2,'--b','LineWidth',lw)
-plot(1:ZerLen,S1(1,:)*2,'-r','LineWidth',lw)
+plot(1:ZerLen,Sv(1,:),'--r','LineWidth',lw)
+plot(1:ZerLen,Sv(2,:),'--g','LineWidth',lw)
+plot(1:ZerLen,Sv(3,:),'--b','LineWidth',lw)
+plot(1:ZerLen,S1(1,:),'-r','LineWidth',lw)
 
 
-plot(1:ZerLen,SDv(1,:)*2,'--r','LineWidth',lw)
-plot(1:ZerLen,SDv(2,:)*2,'--g','LineWidth',lw)
-plot(1:ZerLen,SDv(3,:)*2,'--b','LineWidth',lw)
-plot(1:ZerLen,SD1(1,:)*2,'-r','LineWidth',lw)
+plot(1:ZerLen,SDv(1,:),'--r','LineWidth',lw)
+plot(1:ZerLen,SDv(2,:),'--g','LineWidth',lw)
+plot(1:ZerLen,SDv(3,:),'--b','LineWidth',lw)
+plot(1:ZerLen,SD1(1,:),'-r','LineWidth',lw)
 
 
-plot(1:ZerLen,Dv(1,:)*2,'--r','LineWidth',lw)
-plot(1:ZerLen,Dv(2,:)*2,'--g','LineWidth',lw)
-plot(1:ZerLen,Dv(3,:)*2,'--b','LineWidth',lw)
-plot(1:ZerLen,D1(1,:)*2,'-r','LineWidth',lw)
+plot(1:ZerLen,Dv(1,:),'--r','LineWidth',lw)
+plot(1:ZerLen,Dv(2,:),'--g','LineWidth',lw)
+plot(1:ZerLen,Dv(3,:),'--b','LineWidth',lw)
+plot(1:ZerLen,D1(1,:),'-r','LineWidth',lw)
 
 xlabel("Zernike radial order",'interpreter','latex')
 set(gca,'XScale','log','YScale','log','FontSize',20,'TickLabelInterpreter','latex','LineWidth',1)
