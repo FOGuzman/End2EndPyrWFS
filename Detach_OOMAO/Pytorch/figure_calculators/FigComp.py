@@ -25,7 +25,7 @@ os.chdir("../")
 parser = argparse.ArgumentParser(description='Settings, Training and Pyramid Wavefron Sensor parameters')
 
 
-parser.add_argument('--mods', default=[0,1,2], type=eval, help='Pyramid modulation')
+parser.add_argument('--mods', default=[0,1,2,3], type=eval, help='Pyramid modulation')
 parser.add_argument('--samp', default=2, type=int, help='Over sampling for fourier')
 parser.add_argument('--D', default=8, type=int, help='Telescope Diameter [m]')
 parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
