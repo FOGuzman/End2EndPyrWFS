@@ -11,7 +11,7 @@ def CreateModulationPhasor(wfs):
     x = np.arange(0,wfs.fovInPixel,1)/wfs.fovInPixel
     vv, uu = np.meshgrid(x,x)
     r,o = cart2pol(uu,vv)
-    nTheta = np.round(2*math.pi*wfs.samp*wfs.modulation)
+    nTheta = np.round(math.pi*wfs.samp*wfs.modulation)
     ModPhasor = np.zeros((wfs.fovInPixel,wfs.fovInPixel,np.int16(nTheta)),dtype=complex)
 
     for kTheta in range(np.int16(nTheta)):
@@ -29,7 +29,7 @@ def CreateModulationPhasorCuda(wfs):
     x = torch.arange(0,wfs.fovInPixel,1,device=device)/wfs.fovInPixel
     vv, uu = torch.meshgrid(x,x)
     r,o = cart2polCuda(uu,vv)
-    nTheta = torch.tensor(np.int16(np.round(2*math.pi*wfs.samp*wfs.modulation)),device=device)
+    nTheta = torch.tensor(np.int16(np.round(math.pi*wfs.samp*wfs.modulation)),device=device)
 
     if nTheta>0:
         ModPhasor = torch.zeros((1,nTheta,wfs.fovInPixel,wfs.fovInPixel),dtype=torch.complex64,device=device)
@@ -83,7 +83,7 @@ def Prop2VanillaPyrWFS_torch(phaseMap,wfs):
 
 def Prop2OptimizePyrWFS_torch(phaseMap,DE,wfs):
     
-    nTheta = np.round(2*math.pi*wfs.samp*wfs.modulation)
+    nTheta = np.round(math.pi*wfs.samp*wfs.modulation)
     nTheta = torch.tensor(nTheta).float()
     PyrQ  = torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
     pupil = wfs.pupil  
@@ -109,7 +109,7 @@ def Prop2OptimizePyrWFS_torch(phaseMap,DE,wfs):
 
 def Prop2OptimizeDWFS_torch(phaseMap,DE,wfs):
     
-    nTheta = np.round(2*math.pi*wfs.samp*wfs.modulation)
+    nTheta = np.round(math.pi*wfs.samp*wfs.modulation)
     nTheta = torch.tensor(nTheta)
     PyrQ  = torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
     pupil = wfs.pupil    
@@ -137,7 +137,7 @@ def Prop2OptimizeDWFS_torch(phaseMap,DE,wfs):
 
 def Prop2OptimizePyrWFSPupil_torch(phaseMap,DE,wfs):
     
-    nTheta = np.round(2*math.pi*wfs.samp*wfs.modulation)
+    nTheta = np.round(math.pi*wfs.samp*wfs.modulation)
     nTheta = torch.tensor(nTheta).float()
     PyrQ  = torch.zeros((wfs.fovInPixel,wfs.fovInPixel))
     pupil = wfs.pupil  

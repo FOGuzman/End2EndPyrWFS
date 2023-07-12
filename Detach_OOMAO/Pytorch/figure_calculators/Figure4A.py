@@ -31,7 +31,7 @@ parser.add_argument('--D', default=8, type=int, help='Telescope Diameter [m]')
 parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=eval,help='Pyramid rooftop (as in OOMAO)')
 parser.add_argument('--alpha', default=np.pi/2, type=float,help='Pyramid angle (as in OOMAO)')
-parser.add_argument('--zModes', default=[2,36], type=eval, help='Reconstruction Zernikes')
+parser.add_argument('--zModes', default=[2,60], type=eval, help='Reconstruction Zernikes')
 parser.add_argument('--ZernikeUnits', default=1, type=float,help='Zernike units (1 for normalized)')
 parser.add_argument('--ReadoutNoise', default=0, type=float)
 parser.add_argument('--PhotonNoise', default=0, type=float)
@@ -46,7 +46,7 @@ parser.add_argument('--dperR0', default=5000, type=int, help='test per datapoint
 parser.add_argument('--models', nargs='+',default=['modelFast','modelFast'])
 parser.add_argument('--checkpoints', nargs='+',default=
                     ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r1/checkpoint/PyrNet_epoch_99.pth',
-                     '/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r2/checkpoint/PyrNet_epoch_99.pth'])
+                     '/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r2/checkpoint/PyrNet_epoch_81.pth'])
 parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/Fig4/", type=str)
 
 # Precalculations
