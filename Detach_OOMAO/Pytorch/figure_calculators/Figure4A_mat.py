@@ -45,8 +45,8 @@ parser.add_argument('--dperR0', default=1000, type=int, help='test per datapoint
 
 parser.add_argument('--models', nargs='+',default=['modelFast','modelFast'])
 parser.add_argument('--checkpoints', nargs='+',default=
-                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r1/checkpoint/PyrNet_epoch_99.pth',
-                     '/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r2/checkpoint/PyrNet_epoch_81.pth'])
+                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/original.mat',
+                     '/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/OL1_R128_M0_RMSE0.02807_Epoch_91.mat'])
 parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/Fig4/", type=str)
 
 # Precalculations
@@ -78,8 +78,8 @@ for k in range(len(wfs.jModes)):
 model =[]
 for k in range(len(wfs.models)):
     method = importlib.import_module("model_scripts."+wfs.models[k])
-    single_model = method.PyrModel(wfs).cuda()
-
+    single_model = method.PyrModel(wfs).cuda() 
+    
     if wfs.checkpoints[k][-3:] == 'pth':
         checkpoint = torch.load(wfs.checkpoints[k])
         single_model.load_state_dict(checkpoint.state_dict())
