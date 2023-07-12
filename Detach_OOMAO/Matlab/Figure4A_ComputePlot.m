@@ -8,7 +8,7 @@ savePath = "./ComputeResults/paper/Fig4A/";if ~exist(savePath, 'dir'), mkdir(sav
 matName = "r0PerformanceFig4A";
 FigurePath = "./figures/paper/Figure4/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
 FigureName = "ElementA.pdf";
-Compute = true;
+Compute = false;
 
 
 %% Phisycal parameters
@@ -119,12 +119,14 @@ r0s = R{1}.INFO.D_R0s;
 y1 = R{1}.RMSEpyr(1,:);
 y2 = R{2}.RMSEpyr(1,:);
 y3 = R{3}.RMSEpyr(1,:);
-y4 = R{1}.RMSEdpwfs(1,:);
+y4 = R{4}.RMSEpyr(1,:);
+y5 = R{1}.RMSEdpwfs(1,:);
 
-lbltxt{1} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R{1}.INFO.modulation);
-lbltxt{2} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R{2}.INFO.modulation);
-lbltxt{3} = sprintf("PWFS, Mod $= %i\\lambda/D_0$",R{3}.INFO.modulation);
-lbltxt{4} = sprintf("DPWFS, Mod $= %i\\lambda/D_0$",R{1}.INFO.modulation);
+lbltxt{1} = sprintf("PWFS-M%i",R{1}.INFO.modulation);
+lbltxt{2} = sprintf("PWFS-M%i",R{2}.INFO.modulation);
+lbltxt{3} = sprintf("PWFS-M%i",R{3}.INFO.modulation);
+lbltxt{4} = sprintf("PWFS-M%i",R{4}.INFO.modulation);
+lbltxt{5} = sprintf("DPWFS-R1");
 
 fig = figure('Color','w','Units','normalized','Position',[0.5436 0.1528 0.4427 0.6331]);
 
@@ -132,7 +134,8 @@ plot(r0s,y1,'--dr','LineWidth',1.5,'MarkerFaceColor','r')
 hold on
 plot(r0s,y2,'--dg','LineWidth',1.5,'MarkerFaceColor','g')
 plot(r0s,y3,'--db','LineWidth',1.5,'MarkerFaceColor','b')
-plot(r0s,y4,'-or','LineWidth',1.5,'MarkerFaceColor','r')
+plot(r0s,y4,'--dm','LineWidth',1.5,'MarkerFaceColor','m')
+plot(r0s,y5,'-or','LineWidth',1.5,'MarkerFaceColor','r')
 set(gca,'XDir','reverse','FontSize',28,'TickLabelInterpreter','latex')
 xlabel('$D/r_0$','interpreter','latex','FontSize',22)
 ylabel('RMSE','interpreter','latex','FontSize',22)
