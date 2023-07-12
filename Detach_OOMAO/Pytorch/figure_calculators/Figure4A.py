@@ -43,10 +43,11 @@ parser.add_argument('--datapoints', default=11, type=int, help='r0 intervals')
 parser.add_argument('--data_batch', default=10, type=int, help='r0 intervals')
 parser.add_argument('--dperR0', default=5000, type=int, help='test per datapoint')
 
-parser.add_argument('--models', nargs='+',default=['modelFast'])
+parser.add_argument('--models', nargs='+',default=['modelFast','modelFast'])
 parser.add_argument('--checkpoints', nargs='+',default=
-                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r1/checkpoint/PyrNet_epoch_99.pth'])
-parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/Fig4A/", type=str)
+                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r1/checkpoint/PyrNet_epoch_99.pth',
+                     '/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r2/checkpoint/PyrNet_epoch_99.pth'])
+parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/Fig4/", type=str)
 
 # Precalculations
 wfs = parser.parse_args()
@@ -197,6 +198,10 @@ for mod in tqdm(wfs.mods,
     RMSEdpwfs[0,:] = np.mean(ZFull[1],axis=0)
     RMSEdpwfs[1,:] = np.std(ZFull[1],axis=0)
 
+    RMSEdpwfs2 = np.zeros((2,wfs.datapoints))
+    RMSEdpwfs2[0,:] = np.mean(ZFull[1],axis=0)
+    RMSEdpwfs2[1,:] = np.std(ZFull[1],axis=0)    
+
     INFO = {}
     INFO['D_R0s'] = Dr0ax
     INFO['modulation'] = mod
@@ -204,6 +209,7 @@ for mod in tqdm(wfs.mods,
     struct = {}
     struct['RMSEpyr'] = RMSEpyr
     struct['RMSEdpwfs'] = RMSEdpwfs
+    struct['RMSEdpwfs'] = RMSEdpwfs2    
     struct['INFO'] = INFO
     Results.append(struct)
 
