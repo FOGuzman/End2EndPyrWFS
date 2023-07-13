@@ -2,7 +2,9 @@ addpath tools/functions
 clear all;clc;close all
 
 %% Preconditioners paths
-DPWFS_path = "../Pytorch/training_results/Paper/06-07-2023/n1/DE/DE_Epoch_99_R128_M0_S2_RMSE_0.09754.mat";
+DPWFSr1_path = "../Pytorch/training_results/Paper/06-07-2023/n1_nico.mat";
+DPWFSr2_path = "../Pytorch/training_results/Paper/06-07-2023/r2/DE/DE_Epoch_81_R128_M0_S2_RMSE_0.01605.mat";
+DPWFSn1_path = "../Pytorch/training_results/Paper/06-07-2023/n1/DE/DE_Epoch_99_R128_M0_S2_RMSE_0.09754.mat";
 savePath = "./ComputeResults/paper/Fig5/";if ~exist(savePath, 'dir'), mkdir(savePath); end
 matName = "r0PerformanceFig5A";
 FigurePath = "./figures/paper/Figure5/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
@@ -48,7 +50,7 @@ physicalParams.modulation    = Mods(mc);
 %Phase inversion
 PhaseCM = pinv(physicalParams.modes);
 
-load(DPWFS_path);DPWFS_DE = OL1;
+load(DPWFSr1_path);DPWFS_DE = OL1;
 
 [PyrCM,PyrI_0,PyrIM]   = PyrCalibration(physicalParams,DPWFS_DE,0);
 [DPWFS_CM,DPWFS_I0]    = PyrCalibration(physicalParams,DPWFS_DE,1);
@@ -101,7 +103,7 @@ INFO.r0s  = physicalParams.D_R0s;
 INFO.date               = date;
 INFO.datapointsPerLevel = tpr0;
 INFO.RandNumberSeed = RandNumberSeed;
-INFO.FilesAndPathds = {DPWFS_path,savePath,matName,FigurePath,FigureNameA}';
+INFO.FilesAndPathds = {DPWFSr1_path,savePath,matName,FigurePath,FigureNameA}';
 for k = 1:length(Mods);Results{k}.INFO = INFO;Results{k}.INFO.modulation = Mods(k);end
 
 save(savePath+matName+".mat",'Results')
@@ -122,13 +124,15 @@ y3 = R{3}.RMSEpyr(1,:);
 y4 = R{4}.RMSEpyr(1,:);
 y5 = R{1}.RMSEdpwfs(1,:);
 y6 = R{1}.RMSEdpwfs2(1,:);
+y7 = R{1}.RMSEdpwfs3(1,:);
 
 lbltxt{1} = sprintf("PWFS-M%i",R{1}.INFO.modulation);
 lbltxt{2} = sprintf("PWFS-M%i",R{2}.INFO.modulation);
 lbltxt{3} = sprintf("PWFS-M%i",R{3}.INFO.modulation);
 lbltxt{4} = sprintf("PWFS-M%i",R{4}.INFO.modulation);
-lbltxt{5} = sprintf("DPWFS-R1");
-lbltxt{6} = sprintf("DPWFS-N1");
+lbltxt{5} = sprintf("DPWFS-R2_nico");
+lbltxt{6} = sprintf("DPWFS-R1--R1-15");
+lbltxt{7} = sprintf("DPWFS-N1");
 
 fig = figure('Color','w','Units','normalized','Position',[0.5436 0.1528 0.4427 0.6331]);
 
@@ -137,8 +141,9 @@ hold on
 plot(r0s,y2,'--dg','LineWidth',1.5,'MarkerFaceColor','g')
 plot(r0s,y3,'--db','LineWidth',1.5,'MarkerFaceColor','b')
 plot(r0s,y4,'--dm','LineWidth',1.5,'MarkerFaceColor','m')
-plot(r0s,y5,'-or','LineWidth',1.5,'MarkerFaceColor','r')
-plot(r0s,y6,'-ob','LineWidth',1.5,'MarkerFaceColor','b')
+plot(r0s,y5,'-r','LineWidth',1.5,'MarkerFaceColor','r')
+plot(r0s,y6,'-g','LineWidth',1.5,'MarkerFaceColor','b')
+plot(r0s,y7,'-b','LineWidth',1.5,'MarkerFaceColor','m')
 set(gca,'XDir','reverse','FontSize',28,'TickLabelInterpreter','latex')
 xlabel('$D/r_0$','interpreter','latex','FontSize',22)
 ylabel('RMSE','interpreter','latex','FontSize',22)
@@ -157,7 +162,9 @@ physicalParams.modes = CreateZernikePolynomials(physicalParams.nPxPup,physicalPa
 % Test
 % Phase inversion
 PhaseCM = pinv(physicalParams.modes);
-load(DPWFS_path);DPWFS_DE = OL1;
+load(DPWFSr1_path);DPWFS_R1 = OL1;
+load(DPWFSr2_path);DPWFS_R2 = OL1;
+load(DPWFSn1_path);DPWFS_N1 = OL1;
 
 pyrMask = fftshift(angle(create_pyMask(physicalParams.fovInPixel,physicalParams.rooftop,physicalParams.alpha)));
 
@@ -167,7 +174,9 @@ Mods = [0:3];
 
 %%
 mv = create_pyMask(physicalParams.fovInPixel,physicalParams.rooftop,physicalParams.alpha);
-m1 = mv.*exp(1j.*DPWFS_DE);
+m1 = mv.*exp(1j.*DPWFS_R1);
+m2 = mv.*exp(1j.*DPWFS_R2);
+m3 = mv.*exp(1j.*DPWFS_N1);
 for m = 1:length(Mods)
 physicalParams.modulation = Mods(m);
 nTheta = round(2*pi*physicalParams.Samp*physicalParams.modulation);
@@ -177,27 +186,36 @@ x = reshape(physicalParams.modes(:,k),[physicalParams.nPxPup physicalParams.nPxP
 x1 = x/norm(x,2);
 Sv(m,k) = Sensitivity(x1,nTheta,fftPhasor,mv,physicalParams);
 S1(m,k) = Sensitivity(x1,nTheta,fftPhasor,m1,physicalParams);
+S2(m,k) = Sensitivity(x1,nTheta,fftPhasor,m2,physicalParams);
+S3(m,k) = Sensitivity(x1,nTheta,fftPhasor,m3,physicalParams);
 
 x2 = x/norm(x,2);
 Dv(m,k) = Linearity(x2,nTheta,fftPhasor,mv,physicalParams);
 D1(m,k) = Linearity(x2,nTheta,fftPhasor,m1,physicalParams);
-
+D2(m,k) = Linearity(x2,nTheta,fftPhasor,m2,physicalParams);
+D3(m,k) = Linearity(x2,nTheta,fftPhasor,m3,physicalParams);
 
 SDv(m,k) = SDFactor(Sv(m,k),Dv(m,k),1.3);
 SD1(m,k) = SDFactor(S1(m,k),D1(m,k),1.3);
+SD2(m,k) = SDFactor(S2(m,k),D2(m,k),1.3);
+SD3(m,k) = SDFactor(S3(m,k),D3(m,k),1.3);
 
 end
 
 end
 Dv = Dv.^-1;
 D1 = D1.^-1;
+D2 = D2.^-1;
+D3 = D3.^-1;
 %% Fullplot
 
 lbltxt{1} = sprintf("PWFS-M%i",R{1}.INFO.modulation);
 lbltxt{2} = sprintf("PWFS-M%i",R{2}.INFO.modulation);
 lbltxt{3} = sprintf("PWFS-M%i",R{3}.INFO.modulation);
 lbltxt{4} = sprintf("PWFS-M%i",R{4}.INFO.modulation);
-lbltxt{5} = sprintf("DPWFS-R1");
+lbltxt{5} = sprintf("DPWFS-R2_nico");
+lbltxt{6} = sprintf("DPWFS-R1--R1-15");
+lbltxt{7} = sprintf("DPWFS-N1");
 
 ylimit = sort([floor(min(min([Dv(:) D1(:)]))) ceil(max(max([Sv(:) S1(:)])))+5 ]);
 % ylimit = [1e-2 1e2]
@@ -211,6 +229,8 @@ plot(1:ZerLen,Sv(2,:),'--g','LineWidth',lw)
 plot(1:ZerLen,Sv(3,:),'--b','LineWidth',lw)
 plot(1:ZerLen,Sv(4,:),'--m','LineWidth',lw)
 plot(1:ZerLen,S1(1,:),'-r','LineWidth',lw)
+plot(1:ZerLen,S2(1,:),'-g','LineWidth',lw)
+plot(1:ZerLen,S3(1,:),'-b','LineWidth',lw)
 
 
 plot(1:ZerLen,SDv(1,:),'--r','LineWidth',lw)
@@ -218,13 +238,16 @@ plot(1:ZerLen,SDv(2,:),'--g','LineWidth',lw)
 plot(1:ZerLen,SDv(3,:),'--b','LineWidth',lw)
 plot(1:ZerLen,SDv(4,:),'--m','LineWidth',lw)
 plot(1:ZerLen,SD1(1,:),'-r','LineWidth',lw)
-
+plot(1:ZerLen,SD2(1,:),'-g','LineWidth',lw)
+plot(1:ZerLen,SD3(1,:),'-b','LineWidth',lw)
 
 plot(1:ZerLen,Dv(1,:),'--r','LineWidth',lw)
 plot(1:ZerLen,Dv(2,:),'--g','LineWidth',lw)
 plot(1:ZerLen,Dv(3,:),'--b','LineWidth',lw)
 plot(1:ZerLen,Dv(4,:),'--m','LineWidth',lw)
 plot(1:ZerLen,D1(1,:),'-r','LineWidth',lw)
+plot(1:ZerLen,D2(1,:),'-g','LineWidth',lw)
+plot(1:ZerLen,D3(1,:),'-b','LineWidth',lw)
 
 xlabel("Zernike radial order",'interpreter','latex')
 set(gca,'XScale','log','YScale','log','FontSize',20,'TickLabelInterpreter','latex','LineWidth',1)

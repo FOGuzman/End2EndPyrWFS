@@ -45,8 +45,8 @@ parser.add_argument('--dperR0', default=1000, type=int, help='test per datapoint
 
 parser.add_argument('--models', nargs='+',default=['modelFast','modelFast'])
 parser.add_argument('--checkpoints', nargs='+',default=
-                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r1/checkpoint/PyrNet_epoch_99.pth',
-                     '/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r2/checkpoint/PyrNet_epoch_81.pth'])
+                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/original.mat',
+                     '/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r1-1-15_rr1/checkpoint/PyrNet_epoch_73.pth'])
 parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/Fig4/", type=str)
 
 # Precalculations
@@ -88,7 +88,7 @@ for k in range(len(wfs.models)):
         checkpoint = sio.loadmat(wfs.checkpoints[k])
         OL1 = torch.nn.Parameter(torch.tensor(checkpoint['OL1']).float().cuda())
         single_model.prop.OL1 = OL1
-        
+
     single_model.eval()
     model.append(single_model)
 

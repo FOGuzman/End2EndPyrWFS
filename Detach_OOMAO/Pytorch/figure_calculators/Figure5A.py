@@ -41,13 +41,13 @@ parser.add_argument('--quantumEfficiency', default=1, type=float)
 parser.add_argument('--D_r0', default=[50,1], type=eval, help='Range of r0 to create')
 parser.add_argument('--datapoints', default=11, type=int, help='r0 intervals')
 parser.add_argument('--data_batch', default=10, type=int, help='r0 intervals')
-parser.add_argument('--dperR0', default=5000, type=int, help='test per datapoint')
+parser.add_argument('--dperR0', default=1000, type=int, help='test per datapoint')
 
 parser.add_argument('--models', nargs='+',default=['modelFast','modelFast','modelFast'])
 parser.add_argument('--checkpoints', nargs='+',default=
-                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r1/checkpoint/PyrNet_epoch_99.pth',
-                     '/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r2/checkpoint/PyrNet_epoch_81.pth',
-                     '/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/n1/checkpoint/PyrNet_epoch_99.pth'])
+                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r2_nico.mat',
+                     '/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r1-1-15_rr1/checkpoint/PyrNet_epoch_73.pth',
+                     '/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/n1_nico.mat'])
 parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/Fig5/", type=str)
 
 # Precalculations
@@ -80,8 +80,14 @@ model =[]
 for k in range(len(wfs.models)):
     method = importlib.import_module("model_scripts."+wfs.models[k])
     single_model = method.PyrModel(wfs).cuda() 
-    checkpoint = torch.load(wfs.checkpoints[k])
-    single_model.load_state_dict(checkpoint.state_dict())
+    if wfs.checkpoints[k][-3:] == 'pth':
+        checkpoint = torch.load(wfs.checkpoints[k])
+        single_model.load_state_dict(checkpoint.state_dict())
+
+    if wfs.checkpoints[k][-3:] == 'mat':    
+        checkpoint = sio.loadmat(wfs.checkpoints[k])
+        OL1 = torch.nn.Parameter(torch.tensor(checkpoint['OL1']).float().cuda())
+        single_model.prop.OL1 = OL1
     single_model.eval()
     model.append(single_model)
 
@@ -212,8 +218,8 @@ for mod in tqdm(wfs.mods,
     RMSEdpwfs2[1,:] = np.std(ZFull[2],axis=0)
 
     RMSEdpwfs3 = np.zeros((2,wfs.datapoints))
-    RMSEdpwfs3[0,:] = np.mean(ZFull[2],axis=0)
-    RMSEdpwfs3[1,:] = np.std(ZFull[2],axis=0)    
+    RMSEdpwfs3[0,:] = np.mean(ZFull[3],axis=0)
+    RMSEdpwfs3[1,:] = np.std(ZFull[3],axis=0)    
 
     INFO = {}
     INFO['D_R0s'] = Dr0ax
