@@ -2,9 +2,9 @@ addpath tools/functions
 clear all;clc;close all
 
 %% Preconditioners paths
-DPWFSr1_path = "../Pytorch/training_results/Paper/06-07-2023/n1_nico.mat";
-DPWFSr2_path = "../Pytorch/training_results/Paper/06-07-2023/r2/DE/DE_Epoch_81_R128_M0_S2_RMSE_0.01605.mat";
-DPWFSn1_path = "../Pytorch/training_results/Paper/06-07-2023/n1/DE/DE_Epoch_99_R128_M0_S2_RMSE_0.09754.mat";
+DPWFSr1_path = "../Pytorch/training_results/Paper/06-07-2023/original.mat";
+DPWFSr2_path = "../Pytorch/training_results/Paper/06-07-2023/r2_nico.mat";
+DPWFSn1_path = "../Pytorch/training_results/Paper/06-07-2023/n1_nico.mat";
 savePath = "./ComputeResults/paper/Fig5/";if ~exist(savePath, 'dir'), mkdir(savePath); end
 matName = "r0PerformanceFig5A";
 FigurePath = "./figures/paper/Figure5/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
@@ -22,7 +22,7 @@ tpr0  = 500;    % test per r0
 physicalParams.D_R0s = [90 80 70 60 50 40 30 20 10 1];%[30 25 20 15 10 8 5 3 1]
 physicalParams.R0s = physicalParams.D./physicalParams.D_R0s;
 rjumps = length(physicalParams.R0s);
-Mods = [0 1 2 3];
+Mods = [0 3];
 RandNumberSeed = 666;
 
 
@@ -120,34 +120,28 @@ Rin = load(savePath+matName+".mat");R=Rin.Results;
 r0s = R{1}.INFO.D_R0s;
 y1 = R{1}.RMSEpyr(1,:);
 y2 = R{2}.RMSEpyr(1,:);
-y3 = R{3}.RMSEpyr(1,:);
-y4 = R{4}.RMSEpyr(1,:);
 y5 = R{1}.RMSEdpwfs(1,:);
 y6 = R{1}.RMSEdpwfs2(1,:);
 y7 = R{1}.RMSEdpwfs3(1,:);
 
 lbltxt{1} = sprintf("PWFS-M%i",R{1}.INFO.modulation);
 lbltxt{2} = sprintf("PWFS-M%i",R{2}.INFO.modulation);
-lbltxt{3} = sprintf("PWFS-M%i",R{3}.INFO.modulation);
-lbltxt{4} = sprintf("PWFS-M%i",R{4}.INFO.modulation);
-lbltxt{5} = sprintf("DPWFS-R2_nico");
-lbltxt{6} = sprintf("DPWFS-R1--R1-15");
-lbltxt{7} = sprintf("DPWFS-N1");
+lbltxt{2} = sprintf("DPWFS-R1");
+lbltxt{3} = sprintf("DPWFS-R2");
+lbltxt{4} = sprintf("DPWFS-N1");
 
 fig = figure('Color','w','Units','normalized','Position',[0.5436 0.1528 0.4427 0.6331]);
 
 plot(r0s,y1,'--dr','LineWidth',1.5,'MarkerFaceColor','r')
 hold on
-plot(r0s,y2,'--dg','LineWidth',1.5,'MarkerFaceColor','g')
-plot(r0s,y3,'--db','LineWidth',1.5,'MarkerFaceColor','b')
-plot(r0s,y4,'--dm','LineWidth',1.5,'MarkerFaceColor','m')
+plot(r0s,y2,'--dm','LineWidth',1.5,'MarkerFaceColor','m')
 plot(r0s,y5,'-r','LineWidth',1.5,'MarkerFaceColor','r')
 plot(r0s,y6,'-g','LineWidth',1.5,'MarkerFaceColor','b')
 plot(r0s,y7,'-b','LineWidth',1.5,'MarkerFaceColor','m')
-set(gca,'XDir','reverse','FontSize',28,'TickLabelInterpreter','latex')
+set(gca,'XDir','reverse','FontSize',20)
 xlabel('$D/r_0$','interpreter','latex','FontSize',22)
-ylabel('RMSE','interpreter','latex','FontSize',22)
-legend(lbltxt,'interpreter','latex','FontSize',19)
+ylabel('RMSE','FontSize',22)
+legend(lbltxt,'FontSize',19)
 xlim([min(r0s) max(r0s)])
 
 exportgraphics(fig,FigurePath+FigureNameA)
@@ -211,11 +205,9 @@ D3 = D3.^-1;
 
 lbltxt{1} = sprintf("PWFS-M%i",R{1}.INFO.modulation);
 lbltxt{2} = sprintf("PWFS-M%i",R{2}.INFO.modulation);
-lbltxt{3} = sprintf("PWFS-M%i",R{3}.INFO.modulation);
-lbltxt{4} = sprintf("PWFS-M%i",R{4}.INFO.modulation);
-lbltxt{5} = sprintf("DPWFS-R2_nico");
-lbltxt{6} = sprintf("DPWFS-R1--R1-15");
-lbltxt{7} = sprintf("DPWFS-N1");
+lbltxt{3} = sprintf("DPWFS-R1");
+lbltxt{4} = sprintf("DPWFS-R2");
+lbltxt{5} = sprintf("DPWFS-N1");
 
 ylimit = sort([floor(min(min([Dv(:) D1(:)]))) ceil(max(max([Sv(:) S1(:)])))+5 ]);
 % ylimit = [1e-2 1e2]
@@ -225,35 +217,29 @@ lw = 1;
 fig1 = figure('Color','w','Units','normalized','Position',[0.3141 0.2120 0.3766 0.6102]);
 hold on
 plot(1:ZerLen,Sv(1,:),'--r','LineWidth',lw)
-plot(1:ZerLen,Sv(2,:),'--g','LineWidth',lw)
-plot(1:ZerLen,Sv(3,:),'--b','LineWidth',lw)
-plot(1:ZerLen,Sv(4,:),'--m','LineWidth',lw)
+plot(1:ZerLen,Sv(2,:),'--m','LineWidth',lw)
 plot(1:ZerLen,S1(1,:),'-r','LineWidth',lw)
 plot(1:ZerLen,S2(1,:),'-g','LineWidth',lw)
 plot(1:ZerLen,S3(1,:),'-b','LineWidth',lw)
 
 
 plot(1:ZerLen,SDv(1,:),'--r','LineWidth',lw)
-plot(1:ZerLen,SDv(2,:),'--g','LineWidth',lw)
-plot(1:ZerLen,SDv(3,:),'--b','LineWidth',lw)
-plot(1:ZerLen,SDv(4,:),'--m','LineWidth',lw)
+plot(1:ZerLen,SDv(2,:),'--m','LineWidth',lw)
 plot(1:ZerLen,SD1(1,:),'-r','LineWidth',lw)
 plot(1:ZerLen,SD2(1,:),'-g','LineWidth',lw)
 plot(1:ZerLen,SD3(1,:),'-b','LineWidth',lw)
 
 plot(1:ZerLen,Dv(1,:),'--r','LineWidth',lw)
-plot(1:ZerLen,Dv(2,:),'--g','LineWidth',lw)
-plot(1:ZerLen,Dv(3,:),'--b','LineWidth',lw)
-plot(1:ZerLen,Dv(4,:),'--m','LineWidth',lw)
+plot(1:ZerLen,Dv(2,:),'--m','LineWidth',lw)
 plot(1:ZerLen,D1(1,:),'-r','LineWidth',lw)
 plot(1:ZerLen,D2(1,:),'-g','LineWidth',lw)
 plot(1:ZerLen,D3(1,:),'-b','LineWidth',lw)
 
 xlabel("Zernike radial order",'interpreter','latex')
-set(gca,'XScale','log','YScale','log','FontSize',20,'TickLabelInterpreter','latex','LineWidth',1)
+set(gca,'XScale','log','YScale','log','FontSize',20,'LineWidth',1)
 box on; grid on
 % ylim(ylimit)
-leg = legend(lbltxt,'FontSize',12,'interpreter','latex','Position',[0.6717 0.7317 0.2334 0.1935]);
+leg = legend(lbltxt,'FontSize',12,'Position',[0.6717 0.7317 0.2334 0.1935]);
 
 exportgraphics(fig1,FigurePath+FigureNameB)
 
