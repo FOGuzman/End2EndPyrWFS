@@ -136,9 +136,9 @@ plot(r0s,y2,'--dg','LineWidth',1.5,'MarkerFaceColor','g')
 plot(r0s,y3,'--db','LineWidth',1.5,'MarkerFaceColor','b')
 plot(r0s,y4,'--dm','LineWidth',1.5,'MarkerFaceColor','m')
 plot(r0s,y5,'-r','LineWidth',1.5,'MarkerFaceColor','r')
-set(gca,'XDir','reverse','FontSize',28)
+set(gca,'XDir','reverse','FontSize',20)
 xlabel('$D/r_0$','interpreter','latex','FontSize',22)
-ylabel('RMSE','FontSize',22)
+ylabel('RMSE [radians]','FontSize',20)
 legend(lbltxt,'FontSize',19)
 xlim([min(r0s) max(r0s)])
 
@@ -196,8 +196,8 @@ lbltxt{3} = sprintf("PWFS-M%i",R{3}.INFO.modulation);
 lbltxt{4} = sprintf("PWFS-M%i",R{4}.INFO.modulation);
 lbltxt{5} = sprintf("DPWFS-R1");
 
-ylimit = sort([floor(min(min([Dv(:) D1(:)]))) ceil(max(max([Sv(:) S1(:)])))+5 ]);
-% ylimit = [1e-2 1e2]
+%ylimit = sort([floor(min(min([Dv(:) D1(:)]))) ceil(max(max([Sv(:) S1(:)])))+5 ]);
+ylimit = [.08 6000];
 ZerLen = length(physicalParams.jModes);
 
 lw = 1;
@@ -226,8 +226,8 @@ plot(1:ZerLen,D1(1,:),'-r','LineWidth',lw)
 xlabel("Zernike radial order")
 set(gca,'XScale','log','YScale','log','FontSize',20,'LineWidth',1)
 box on; grid on
-% ylim(ylimit)
-leg = legend(lbltxt,'FontSize',12,'Position',[0.6717 0.7317 0.2334 0.1935]);
+ylim(ylimit)
+leg = legend(lbltxt,'FontSize',12,'Position',[0.6717 0.7165 0.2334 0.2086]);
 
 exportgraphics(fig1,FigurePath+FigureNameB)
 

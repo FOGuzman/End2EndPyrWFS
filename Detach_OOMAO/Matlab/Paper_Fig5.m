@@ -126,9 +126,9 @@ y7 = R{1}.RMSEdpwfs3(1,:);
 
 lbltxt{1} = sprintf("PWFS-M%i",R{1}.INFO.modulation);
 lbltxt{2} = sprintf("PWFS-M%i",R{2}.INFO.modulation);
-lbltxt{2} = sprintf("DPWFS-R1");
-lbltxt{3} = sprintf("DPWFS-R2");
-lbltxt{4} = sprintf("DPWFS-N1");
+lbltxt{3} = sprintf("DPWFS-R1");
+lbltxt{4} = sprintf("DPWFS-R2");
+lbltxt{5} = sprintf("DPWFS-N1");
 
 fig = figure('Color','w','Units','normalized','Position',[0.5436 0.1528 0.4427 0.6331]);
 
@@ -239,7 +239,7 @@ xlabel("Zernike radial order",'interpreter','latex')
 set(gca,'XScale','log','YScale','log','FontSize',20,'LineWidth',1)
 box on; grid on
 % ylim(ylimit)
-leg = legend(lbltxt,'FontSize',12,'Position',[0.6717 0.7317 0.2334 0.1935]);
+leg = legend(lbltxt,'FontSize',12,'Position',[0.6731 0.7165 0.2334 0.2086]);
 
 exportgraphics(fig1,FigurePath+FigureNameB)
 
