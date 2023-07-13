@@ -217,20 +217,20 @@ lw = 1;
 fig1 = figure('Color','w','Units','normalized','Position',[0.3141 0.2120 0.3766 0.6102]);
 hold on
 plot(1:ZerLen,Sv(1,:),'--r','LineWidth',lw)
-plot(1:ZerLen,Sv(2,:),'--m','LineWidth',lw)
+plot(1:ZerLen,Sv(4,:),'--m','LineWidth',lw)
 plot(1:ZerLen,S1(1,:),'-r','LineWidth',lw)
 plot(1:ZerLen,S2(1,:),'-g','LineWidth',lw)
 plot(1:ZerLen,S3(1,:),'-b','LineWidth',lw)
 
 
 plot(1:ZerLen,SDv(1,:),'--r','LineWidth',lw)
-plot(1:ZerLen,SDv(2,:),'--m','LineWidth',lw)
+plot(1:ZerLen,SDv(4,:),'--m','LineWidth',lw)
 plot(1:ZerLen,SD1(1,:),'-r','LineWidth',lw)
 plot(1:ZerLen,SD2(1,:),'-g','LineWidth',lw)
 plot(1:ZerLen,SD3(1,:),'-b','LineWidth',lw)
 
 plot(1:ZerLen,Dv(1,:),'--r','LineWidth',lw)
-plot(1:ZerLen,Dv(2,:),'--m','LineWidth',lw)
+plot(1:ZerLen,Dv(4,:),'--m','LineWidth',lw)
 plot(1:ZerLen,D1(1,:),'-r','LineWidth',lw)
 plot(1:ZerLen,D2(1,:),'-g','LineWidth',lw)
 plot(1:ZerLen,D3(1,:),'-b','LineWidth',lw)

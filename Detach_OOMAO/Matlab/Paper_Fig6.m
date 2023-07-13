@@ -50,7 +50,7 @@ fig = figure('Color','w',Units='normalized',Position=[0.1589 0.3491 0.6719 0.408
 ha = tight_subplot(1,3,[0 .01],[.019 .001],[.02 .02]);
 
 axes(ha(1))
-im1 = imagesc(DE(:,:,2),[-pi pi]); colormap jet;c1 = colorbar;axis image
+im1 = imagesc(DE(:,:,2),[-pi pi]); colormap hsv;c1 = colorbar;axis image
 axis off
 tx1 = annotation('textbox',[0.134 0.75 0.3 0.15],"String","(a)",'FontSize',20);
 tx1.LineStyle = 'none';tx1.FontWeight = 'bold';
@@ -59,7 +59,7 @@ ha(1).Position = [0.134 0.0190 0.2533 0.9800];
 
 
 axes(ha(2))
-im2 = imagesc(DE2(:,:,2),[-pi pi]); colormap jet;c2 = colorbar;axis image
+im2 = imagesc(DE2(:,:,2),[-pi pi]); colormap hsv;c2 = colorbar;axis image
 axis off
 tx2 = annotation('textbox',[0.4 0.75 0.3 0.15],"String","(b)",'FontSize',20);
 tx2.LineStyle = 'none';tx2.FontWeight = 'bold';
@@ -67,7 +67,7 @@ c2.Visible = 'off';
 ha(2).Position = [0.4 0.0190 0.2533 0.9800];
 
 axes(ha(3))
-im3 = imagesc(DEn(:,:,2),[-pi pi]); colormap jet;c3 = colorbar;axis image
+im3 = imagesc(DEn(:,:,2),[-pi pi]); colormap hsv;c3 = colorbar;axis image
 axis off
 tx3 = annotation('textbox',[0.67 0.75 0.3 0.15],"String","(c)",'FontSize',20);
 tx3.LineStyle = 'none';tx3.FontWeight = 'bold';
