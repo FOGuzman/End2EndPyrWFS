@@ -15,6 +15,7 @@ physicalParams.fR0                  = 1;             % Fracional r0 (for multi l
 % indecies for Zernike decomposition 
 
 %Camera parameters
+physicalParams.ReadoutNoise         = 1;
 physicalParams.PhotonNoise          = 0;
 physicalParams.quantumEfficiency    = 1;
 physicalParams.nPhotonBackground    = 0;
