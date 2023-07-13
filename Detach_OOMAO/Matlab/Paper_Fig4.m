@@ -2,7 +2,7 @@ addpath tools/functions
 clear all;clc;close all
 
 %% Preconditioners paths
-DPWFS_path = "../Pytorch/training_results/Paper/06-07-2023/r1/DE/DE_Epoch_99_R128_M0_S2_RMSE_0.05316.mat";
+DPWFS_path = "../Pytorch/training_results/Paper/06-07-2023/original.mat";
 savePath = "./ComputeResults/paper/Fig4/";if ~exist(savePath, 'dir'), mkdir(savePath); end
 matName = "r0PerformanceFig4A";
 FigurePath = "./figures/paper/Figure4/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
@@ -135,8 +135,8 @@ hold on
 plot(r0s,y2,'--dg','LineWidth',1.5,'MarkerFaceColor','g')
 plot(r0s,y3,'--db','LineWidth',1.5,'MarkerFaceColor','b')
 plot(r0s,y4,'--dm','LineWidth',1.5,'MarkerFaceColor','m')
-plot(r0s,y5,'-or','LineWidth',1.5,'MarkerFaceColor','r')
-set(gca,'XDir','reverse','FontSize',28,'TickLabelInterpreter','latex')
+plot(r0s,y5,'-r','LineWidth',1.5,'MarkerFaceColor','r')
+set(gca,'XDir','reverse','FontSize',28)
 xlabel('$D/r_0$','interpreter','latex','FontSize',22)
 ylabel('RMSE','FontSize',22)
 legend(lbltxt,'FontSize',19)
@@ -223,11 +223,11 @@ plot(1:ZerLen,Dv(3,:),'--b','LineWidth',lw)
 plot(1:ZerLen,Dv(4,:),'--m','LineWidth',lw)
 plot(1:ZerLen,D1(1,:),'-r','LineWidth',lw)
 
-xlabel("Zernike radial order",'interpreter','latex')
-set(gca,'XScale','log','YScale','log','FontSize',20,'TickLabelInterpreter','latex','LineWidth',1)
+xlabel("Zernike radial order")
+set(gca,'XScale','log','YScale','log','FontSize',20,'LineWidth',1)
 box on; grid on
 % ylim(ylimit)
-leg = legend(lbltxt,'FontSize',12,'interpreter','latex','Position',[0.6717 0.7317 0.2334 0.1935]);
+leg = legend(lbltxt,'FontSize',12,'Position',[0.6717 0.7317 0.2334 0.1935]);
 
 exportgraphics(fig1,FigurePath+FigureNameB)
 
