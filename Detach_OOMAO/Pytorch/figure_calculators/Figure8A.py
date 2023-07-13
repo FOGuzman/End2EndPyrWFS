@@ -25,7 +25,7 @@ os.chdir("../")
 parser = argparse.ArgumentParser(description='Settings, Training and Pyramid Wavefron Sensor parameters')
 
 
-parser.add_argument('--mods', default=[0], type=eval, help='Pyramid modulation')
+parser.add_argument('--mods', default=[0,3], type=eval, help='Pyramid modulation')
 parser.add_argument('--samp', default=2, type=int, help='Over sampling for fourier')
 parser.add_argument('--D', default=8, type=int, help='Telescope Diameter [m]')
 parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
@@ -40,7 +40,7 @@ parser.add_argument('--quantumEfficiency', default=1, type=float)
 
 parser.add_argument('--D_r0', default=[50,1], type=eval, help='Range of r0 to create')
 parser.add_argument('--datapoints', default=11, type=int, help='r0 intervals')
-parser.add_argument('--data_batch', default=100, type=int, help='r0 intervals')
+parser.add_argument('--data_batch', default=20, type=int, help='r0 intervals')
 parser.add_argument('--dperR0', default=10000, type=int, help='test per datapoint')
 
 parser.add_argument('--models', nargs='+',default=['modelFast','modelFast','modelFastPupilPlane','modelFastPupilPlane'])
