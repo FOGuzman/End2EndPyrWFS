@@ -56,18 +56,18 @@ class OptimizedPyramid(nn.Module):
     def forward(self, inputs):
         OL1 = UNZ(UNZ(torch.exp(1j * self.OL1),0),0)       
         # Flat prop
-        I_0 = Prop2OptimizePyrWFS_torch(self.Flat,OL1,self)
+        I_0 = Prop2VanillaPyrWFS_torch(self.Flat,self)
         self.I_0 = I_0/torch.sum(I_0)
         
         gain = 0.1
         
         # Calibration matrix as batch
         z = self.BatchModes*gain
-        I4Q = Prop2OptimizePyrWFS_torch(z,OL1,self)
+        I4Q = Prop2VanillaPyrWFS_torch(z,self)
         spnorm = UNZ(UNZ(UNZ(torch.sum(torch.sum(torch.sum(I4Q,dim=-1),dim=-1),dim=-1),-1),-1),-1)
         sp = I4Q/spnorm-self.I_0
 
-        I4Q = Prop2OptimizePyrWFS_torch(-z,OL1,self)
+        I4Q = Prop2VanillaPyrWFS_torch(-z,self)
         smnorm = UNZ(UNZ(UNZ(torch.sum(torch.sum(torch.sum(I4Q,dim=-1),dim=-1),dim=-1),-1),-1),-1)
         sm = I4Q/smnorm-self.I_0
 
@@ -79,7 +79,7 @@ class OptimizedPyramid(nn.Module):
 
         CM = torch.linalg.pinv(MZc)       
         #propagation of X
-        Ip = Prop2OptimizePyrWFS_torch(inputs,OL1,self)
+        Ip = Prop2VanillaPyrWFS_torch(inputs,self)
         #Photon noise
         if self.PhotonNoise == 1:
             Ip = AddPhotonNoise(Ip,self)          
