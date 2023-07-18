@@ -25,7 +25,7 @@ class OptimizedPyramid(nn.Module):
         self.fovInPixel    = torch.tensor(wfs.fovInPixel)
         self.pupil = torch.tensor(wfs.pupil)
         self.pyrMask = torch.tensor(wfs.pyrMask)
-        self.modes = torch.tensor(wfs.modes)       
+        self.modes = torch.tensor(wfs.modes).cuda().float()       
         self.BatchModes = torch.zeros(size=(len(self.jModes),1,self.nPxPup,self.nPxPup)).cuda()
         for k in range(len(self.jModes)):           
             zim = torch.reshape(self.modes[:,k],(self.nPxPup,self.nPxPup))
@@ -35,11 +35,10 @@ class OptimizedPyramid(nn.Module):
         self.pupilLogical = torch.tensor(wfs.pupilLogical)
         self.Flat = torch.ones((self.nPxPup,self.nPxPup))*self.pupilLogical
         self.Flat = UNZ(UNZ(self.Flat,0),0).cuda()
-        OL1 = torch.ones((wfs.fovInPixel,wfs.fovInPixel))
+        OL1 = torch.eye(len(self.jModes))*0.1
         self.OL1  = nn.Parameter(OL1)
 
         # init weights
-        nn.init.constant_(self.OL1,1)
         
         ## CUDA
         if torch.cuda.is_available() == 1:
@@ -54,30 +53,34 @@ class OptimizedPyramid(nn.Module):
             
 
     def forward(self, inputs):
-        OL1 = UNZ(UNZ(torch.exp(1j * self.OL1),0),0)       
+        optModes = torch.matmul(self.modes,self.OL1)      
         # Flat prop
         I_0 = Prop2VanillaPyrWFS_torch(self.Flat,self)
         self.I_0 = I_0/torch.sum(I_0)
-        
+        gainRow = torch.sum(self.OL1,dim=1)
+        IM = None
         gain = 0.1
-        
-        # Calibration matrix as batch
-        z = self.BatchModes*gain
-        I4Q = Prop2VanillaPyrWFS_torch(z,self)
-        spnorm = UNZ(UNZ(UNZ(torch.sum(torch.sum(torch.sum(I4Q,dim=-1),dim=-1),dim=-1),-1),-1),-1)
-        sp = I4Q/spnorm-self.I_0
+        for k in range(len(self.jModes)):           
+            zim = torch.reshape(optModes[:,k],(self.nPxPup,self.nPxPup))
+            zim = UNZ(UNZ(zim,0),0)
+            #push
+            I4Q = Prop2VanillaPyrWFS_torch(zim,self)
+            sp = I4Q/torch.sum(I4Q)-self.I_0
+            
+            #pull
+            I4Q = Prop2VanillaPyrWFS_torch(-zim,self)
+            sm = I4Q/torch.sum(I4Q)-self.I_0
+            
+            
+            MZc = 0.5*(sp-sm)/gainRow[k]
+            Zv = torch.unsqueeze(torch.reshape(MZc,[-1]),1)
+            if IM is not None:
+                IM = torch.concat([IM,Zv],1)
+            else:
+                IM = Zv
 
-        I4Q = Prop2VanillaPyrWFS_torch(-z,self)
-        smnorm = UNZ(UNZ(UNZ(torch.sum(torch.sum(torch.sum(I4Q,dim=-1),dim=-1),dim=-1),-1),-1),-1)
-        sm = I4Q/smnorm-self.I_0
 
-        MZc = 0.5*(sp-sm)/gain
-
-        MZc = MZc.view(MZc.shape[0],self.nPxPup**2)
-        MZc = MZc.permute(1,0)
-
-
-        CM = torch.linalg.pinv(MZc)       
+        CM = torch.linalg.pinv(IM)       
         #propagation of X
         Ip = Prop2VanillaPyrWFS_torch(inputs,self)
         #Photon noise
