@@ -8,7 +8,7 @@ matName = "r0PerformanceFig4A";
 FigurePath = "./figures/paper/Figure4/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
 FigureNameA = "ElementA.pdf";
 FigureNameB = "ElementB.pdf";
-Compute = false;
+Compute = true;
 
 
 %% Phisycal parameters
