@@ -1,8 +1,8 @@
 addpath tools/functions
 clear all
 
-preFold = "../Preconditioners/nocap/mod/OL1_R64_M2_RMSE0.03355_Epoch_70.mat";
-preFold = "../Preconditioners/nocap/base/checkpoint/OL1_R128_M0_RMSE0.0285_Epoch_92.mat";
+preFold = "";
+preFold = "/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/n1_nico.mat";
 
 
 physicalParams = struct();
@@ -20,13 +20,13 @@ physicalParams.rooftop              = [0,0];         % Pyramid roftop imperfecti
 physicalParams.L0                   = 25;            % Outer scale [m]
 physicalParams.fR0                  = 1;             % Fracional r0 (for multi layer - not implemented)
 % indecies for Zernike decomposition 
-physicalParams.jModes               = 2:60;
+physicalParams.jModes               = 2:66;
 
 %Camera parameters
-physicalParams.ReadoutNoise         = 1;
-physicalParams.PhotonNoise          = 1;
+physicalParams.ReadoutNoise         = 0.5;
+physicalParams.PhotonNoise          = 0;
 physicalParams.quantumEfficiency    = 1;
-physicalParams.nPhotonBackground    = 0.1;
+physicalParams.nPhotonBackground    = 0;
 
 % Precomp aditional parameters
 physicalParams.resAO                = 2*physicalParams.nLenslet+1;
@@ -63,7 +63,7 @@ rng(rand)
 atm = GenerateAtmosphereParameters(physicalParams);atm.idx
 [x,Zg] = ComputePhaseScreen(atm,PhaseCM);
 %%
-
+Zg = PhaseCM*x(:);
 [Zpyr]    = PropAndSamp(physicalParams,x,OL1_trained ,PyrI_0   ,PyrCM    ,0);
 [Zdpwfs,ydpwfs]  = PropAndSamp(physicalParams,x,OL1_trained ,DPWFS_I0 ,DPWFS_CM ,1);
 
@@ -107,7 +107,7 @@ plot(Zpyr,'r','linewidth',2)
 plot(Zdpwfs,'b','linewidth',2)
 legend('Groundtruth','Traditional Pyramid','Pyramid with preconditioner')
 grid on; box on
-
+fprintf("RMSE Pyr: %.2f  | DE: %.2f\n",sqrt(mse(Zg,Zpyr)),sqrt(mse(Zg,Zdpwfs)))
 
 %%
 function [Ze,y_noise] = PropAndSamp(params,x,DE,I0,CM,flag)
