@@ -26,13 +26,13 @@ parser = argparse.ArgumentParser(description='Setting, compressive rate, size, a
 parser.add_argument('--modulation', default=0, type=int, help='Pyramid modulation')
 parser.add_argument('--samp', default=2, type=int, help='Sampling')
 parser.add_argument('--D', default=3, type=int, help='Telescope Diameter [m]')
-parser.add_argument('--nPxPup', default=256, type=int, help='Pupil Resolution')
+parser.add_argument('--nPxPup', default=560, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=eval)
-parser.add_argument('--Dr0', default=35, type=int, help='Range of D/r0 to create')
+parser.add_argument('--Dr0', default=1, type=int, help='Range of D/r0 to create')
 parser.add_argument('--gpu', default="0", type=str)
 parser.add_argument('--alpha', default=pi/2, type=float)
 parser.add_argument('--zModes', default=[2,66], type=eval, help='Reconstruction Zernikes')
-parser.add_argument('--training_data', default=10, type=int, help='Amount of training data')
+parser.add_argument('--training_data', default=100, type=int, help='Amount of training data')
 # Precalculations
 wfs = parser.parse_args()
 wfs.fovInPixel    = wfs.nPxPup*2*wfs.samp 
@@ -115,13 +115,17 @@ CM = torch.linalg.pinv(IM)
 
 #%% Start loop
 t0 = time.time()
+
 atm = GetTurbulenceParameters(wfs,resAO,nLenslet,r0,L0,fR0,noiseVariance,nTimes,n_lvl)
-phaseMap,Zgt = GetPhaseMapAndZernike(atm,CM,wfs.training_data)
-
+phaseStack = torch.zeros((wfs.training_data,1,wfs.nPxPup,wfs.nPxPup))
+Zgts  = torch.zeros((wfs.training_data,len(wfs.jModes)))
 for k in range(wfs.training_data):
-     zin = torch.reshape(torch.matmul(IM,Zgt[:,0]),(wfs.nPxPup,wfs.nPxPup))
-     phaseMap[k] = torch.unsqueeze(zin,0)
+     phaseMap,Zgt = GetPhaseMapAndZernike(atm,CM,1)
+     zin = torch.reshape(torch.matmul(IM,Zgt),(wfs.nPxPup,wfs.nPxPup))
+     phaseStack[k] = torch.unsqueeze(zin,0)
+     Zgts[k] = Zgt.permute(1,0)
 
-phaseMap = torch.squeeze(phaseMap).permute(1,2,0)
-scio.savemat(main_fold+name, {'X_phase': phaseMap.cpu().numpy(),'Y_z': Zgt.cpu().numpy()})
+
+phaseStack = torch.squeeze(phaseStack).permute(1,2,0)
+scio.savemat(main_fold+name, {'X_phase': phaseStack.cpu().numpy(),'Y_z': Zgts.cpu().numpy()})
         
