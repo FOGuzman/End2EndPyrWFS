@@ -17,7 +17,7 @@ from functions.phaseGeneratorsCuda import *
 from math import sqrt, pi
 import random
 
-main_fold = "./dataset/dataset_exp/"
+main_fold = "./dataset/dataset_exp/zernike_version/now3/"
 
 
 
@@ -28,7 +28,7 @@ parser.add_argument('--samp', default=2, type=int, help='Sampling')
 parser.add_argument('--D', default=3, type=int, help='Telescope Diameter [m]')
 parser.add_argument('--nPxPup', default=560, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=eval)
-parser.add_argument('--Dr0', default=1, type=int, help='Range of D/r0 to create')
+parser.add_argument('--Dr0', default=50, type=int, help='Range of D/r0 to create')
 parser.add_argument('--gpu', default="0", type=str)
 parser.add_argument('--alpha', default=pi/2, type=float)
 parser.add_argument('--zModes', default=[2,66], type=eval, help='Reconstruction Zernikes')
@@ -78,7 +78,7 @@ nTimes        = wfs.fovInPixel/resAO
 
 
 
-name = "Dr0{}_S{}_R{}_Z{}-{}_D{:d}.mat".format(wfs.Dr0,wfs.samp,wfs.nPxPup,wfs.zModes[0],wfs.zModes[1],wfs.D)
+name = "Dr0{}_S{}_R{}_Z{}-{}_D{:d}_5active.mat".format(wfs.Dr0,wfs.samp,wfs.nPxPup,wfs.zModes[0],wfs.zModes[1],wfs.D)
 
 if not os.path.exists(main_fold):
         os.makedirs(main_fold)
@@ -100,18 +100,10 @@ file_object.close()
 print("Log done!")      
 
 
-IM = None
+IMm = torch.tensor(wfs.modes)
     #%% Control matrix
-for k in range(len(wfs.jModes)):
-    imMode = torch.reshape(torch.tensor(wfs.modes[:,k]),(wfs.nPxPup,wfs.nPxPup))
-    Zv = torch.unsqueeze(torch.reshape(imMode,[-1]),1)
-    if IM is not None:
-        IM = torch.concat([IM,Zv],1)
-    else:
-        IM = Zv
     
-    
-CM = torch.linalg.pinv(IM)
+CMm = torch.linalg.pinv(IMm)
 
 #%% Start loop
 t0 = time.time()
@@ -120,9 +112,9 @@ atm = GetTurbulenceParameters(wfs,resAO,nLenslet,r0,L0,fR0,noiseVariance,nTimes,
 phaseStack = torch.zeros((wfs.training_data,1,wfs.nPxPup,wfs.nPxPup))
 Zgts  = torch.zeros((wfs.training_data,len(wfs.jModes)))
 for k in range(wfs.training_data):
-     phaseMap,Zgt = GetPhaseMapAndZernike(atm,CM,1)
-     zin = torch.reshape(torch.matmul(IM,Zgt),(wfs.nPxPup,wfs.nPxPup))
-     phaseStack[k] = torch.unsqueeze(zin,0)
+     phaseMap,Zgt = GetPhaseMapAndZernike(atm,CMm,1)
+     zin = torch.squeeze(phaseMap)
+     phaseStack[k] = torch.unsqueeze(zin.permute(1,0),0)
      Zgts[k] = Zgt.permute(1,0)
 
 
