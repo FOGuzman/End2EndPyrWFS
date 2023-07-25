@@ -25,7 +25,7 @@ os.chdir("../")
 parser = argparse.ArgumentParser(description='Settings, Training and Pyramid Wavefron Sensor parameters')
 
 
-parser.add_argument('--mods', default=[0,1,2,3], type=eval, help='Pyramid modulation')
+parser.add_argument('--mods', default=[0], type=eval, help='Pyramid modulation')
 parser.add_argument('--samp', default=2, type=int, help='Over sampling for fourier')
 parser.add_argument('--D', default=8, type=int, help='Telescope Diameter [m]')
 parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
@@ -37,16 +37,18 @@ parser.add_argument('--ReadoutNoise', default=0, type=float)
 parser.add_argument('--PhotonNoise', default=0, type=float)
 parser.add_argument('--nPhotonBackground', default=0, type=float)
 parser.add_argument('--quantumEfficiency', default=1, type=float)
+parser.add_argument('--PupilMask', default=None)#"./functions/mask128.mat", type=str)
+
 
 parser.add_argument('--D_r0', default=[50,1], type=eval, help='Range of r0 to create')
 parser.add_argument('--datapoints', default=11, type=int, help='r0 intervals')
-parser.add_argument('--data_batch', default=10, type=int, help='r0 intervals')
-parser.add_argument('--dperR0', default=200, type=int, help='test per datapoint')
+parser.add_argument('--data_batch', default=50, type=int, help='r0 intervals')
+parser.add_argument('--dperR0', default=1000, type=int, help='test per datapoint')
 
 parser.add_argument('--models', nargs='+',default=['modelFast'])
 parser.add_argument('--checkpoints', nargs='+',default=
-                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/original.mat'])
-parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/Fig4/", type=str)
+                    ['D:\FOGuzman\End2EndPyrWFS\Detach_OOMAO\Preconditioners\original.mat'])
+parser.add_argument('--saveMats', default= "../Matlab/ComputeResults/paper/Fig4_test/", type=str)
 
 # Precalculations
 wfs = parser.parse_args()
@@ -56,7 +58,7 @@ wfs.pyrMask = createPyrMask(wfs)
 wfs.jModes = torch.arange(wfs.zModes[0], wfs.zModes[1]+1)
 wfs.pupilLogical = wfs.pupil!=0
 wfs.modes = CreateZernikePolynomials(wfs)
-wfs.amplitude = 0.2 #small for low noise systems
+wfs.amplitude = 0.1 #small for low noise systems
 wfs.modulation = 0    
 wfs.ModPhasor = CreateModulationPhasor(wfs)
 

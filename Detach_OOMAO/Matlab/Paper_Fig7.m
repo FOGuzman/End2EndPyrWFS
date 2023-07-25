@@ -5,11 +5,11 @@ savePath = "./ComputeResults/paper/Fig7/";if ~exist(savePath, 'dir'), mkdir(save
 matName = "Dr0_5_PerformanceFig7";
 FigurePath = "./figures/paper/Figure7/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
 
-
+Resoultion = 1200;
 
 
 %% A
-FigureName = "ElementA.pdf";
+FigureName = "ElementA.png";
 fig = figure('Color','w','Units','normalized','Position',[0.5436 0.1528 0.3465 0.6331]);
 Rin = load(savePath+matName+".mat");R=Rin.Results{1};
 
@@ -40,9 +40,9 @@ set(gca,'FontSize',16)
 box on
 title("(a)")
 
-exportgraphics(fig,FigurePath+FigureName)
+exportgraphics(fig,FigurePath+FigureName,'Resolution',Resoultion)
 %% B
-FigureName = "ElementB.pdf";
+FigureName = "ElementB.png";
 fig = figure('Color','w','Units','normalized','Position',[0.5436 0.1528 0.3465 0.6331]);
 matName = "Dr0_10_PerformanceFig7";
 
@@ -64,9 +64,9 @@ ylabel('Photon noise','FontSize',16)
 set(gca,'FontSize',16)
 box on
 title("(b)")
-exportgraphics(fig,FigurePath+FigureName)
+exportgraphics(fig,FigurePath+FigureName,'Resolution',Resoultion)
 %% C
-FigureName = "ElementC.pdf";
+FigureName = "ElementC.png";
 matName = "Dr0_15_PerformanceFig7";
 
 Rin = load(savePath+matName+".mat");R=Rin.Results{1};
@@ -89,4 +89,4 @@ set(gca,'FontSize',16)
 box on
 title("(c)")
 
-exportgraphics(fig,FigurePath+FigureName)
+exportgraphics(fig,FigurePath+FigureName,'Resolution',Resoultion)

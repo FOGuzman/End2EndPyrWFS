@@ -35,8 +35,10 @@ parser.add_argument('--PhotonNoise', default=0, type=float)
 parser.add_argument('--nPhotonBackground', default=0, type=float)
 parser.add_argument('--quantumEfficiency', default=1, type=float)
 parser.add_argument('--Dr0_dataset', default=[15,40], type=eval, help='What D/r0 dataset to use')
+parser.add_argument('--PupilMask', default="./functions/mask128.mat", type=str)
 
-parser.add_argument('--model', default="OptIMAT", type=str)
+
+parser.add_argument('--model', default="modelFast", type=str)
 parser.add_argument('--batchSize', default=1, type=int, help='Batch size for training')
 parser.add_argument('--learning_rate', default=0.001, type=float)
 parser.add_argument('--Epochs', default=100, type=int, help='Number of epochs')

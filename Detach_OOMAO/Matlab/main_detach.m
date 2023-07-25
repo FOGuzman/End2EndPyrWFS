@@ -23,7 +23,7 @@ physicalParams.fR0                  = 1;             % Fracional r0 (for multi l
 physicalParams.jModes               = 2:66;
 physicalParams.Multiplex            = 1;
 %Camera parameters
-physicalParams.ReadoutNoise         = 0.5;
+physicalParams.ReadoutNoise         = 0.0;
 physicalParams.PhotonNoise          = 0;
 physicalParams.quantumEfficiency    = 1;
 physicalParams.nPhotonBackground    = 0;

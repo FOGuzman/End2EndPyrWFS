@@ -5,6 +5,7 @@ from functions.oomao_functions import *
 from functions.phaseGenerators import *
 from functions.Propagators import *
 from torch import unsqueeze as UNZ
+import scipy.io as scio
 
 class OptimizedPyramid(nn.Module):
     def __init__(self, wfs):
@@ -50,28 +51,50 @@ class OptimizedPyramid(nn.Module):
         self.PhotonNoise = self.PhotonNoise.cuda()
         self.quantumEfficiency = self.quantumEfficiency.cuda()
         self.nPhotonBackground = self.nPhotonBackground.cuda()    
-            
+
+        if wfs.PupilMask is not None:
+            data = scio.loadmat(wfs.PupilMask)
+            mask = data['mask']
+            self.mask = torch.unsqueeze(torch.unsqueeze(torch.tensor(mask),0),0).cuda()
+            self.PupilConstrain = 1
+        else:
+            self.PupilConstrain = 0
+
             
 
     def forward(self, inputs):
         OL1 = UNZ(UNZ(torch.exp(1j * self.OL1),0),0)       
         # Flat prop
         I_0 = Prop2OptimizePyrWFS_torch(self.Flat,OL1,self)
+
+        if self.PupilConstrain == 1:
+            I_0 = I_0*self.mask
+
         self.I_0 = I_0/torch.sum(I_0)
         
+
         gain = 0.1
         
         # Calibration matrix as batch
         z = self.BatchModes*gain
         I4Q = Prop2OptimizePyrWFS_torch(z,OL1,self)
+        if self.PupilConstrain == 1:
+            I4Q = I4Q*self.mask
         spnorm = UNZ(UNZ(UNZ(torch.sum(torch.sum(torch.sum(I4Q,dim=-1),dim=-1),dim=-1),-1),-1),-1)
+        
         sp = I4Q/spnorm-self.I_0
 
         I4Q = Prop2OptimizePyrWFS_torch(-z,OL1,self)
+        if self.PupilConstrain == 1:
+            I4Q = I4Q*self.mask
+            
         smnorm = UNZ(UNZ(UNZ(torch.sum(torch.sum(torch.sum(I4Q,dim=-1),dim=-1),dim=-1),-1),-1),-1)
+
         sm = I4Q/smnorm-self.I_0
 
         MZc = 0.5*(sp-sm)/gain
+
+        
 
         MZc = MZc.view(MZc.shape[0],self.nPxPup**2)
         MZc = MZc.permute(1,0)
@@ -80,6 +103,10 @@ class OptimizedPyramid(nn.Module):
         CM = torch.linalg.pinv(MZc)       
         #propagation of X
         Ip = Prop2OptimizePyrWFS_torch(inputs,OL1,self)
+
+        if self.PupilConstrain == 1:
+            Ip = Ip*self.mask
+
         #Photon noise
         if self.PhotonNoise == 1:
             Ip = AddPhotonNoise(Ip,self)          
@@ -90,6 +117,8 @@ class OptimizedPyramid(nn.Module):
         # Normalization
         Inorm = torch.sum(torch.sum(torch.sum(Ip,-1),-1),-1)
         Ip = Ip/UNZ(UNZ(UNZ(Inorm,-1),-1),-1)-self.I_0
+
+        
         # Estimation
         y = torch.matmul(CM,torch.transpose(torch.reshape(Ip,[Ip.shape[0],-1]),0,1))
         return y

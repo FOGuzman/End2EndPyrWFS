@@ -223,7 +223,7 @@ def GetPhaseMapAndZernike(atm,CM,batch_size):
     phaseMap = torch.fft.ifft2(idx*torch.sqrt(torch.fft.fftshift(psdAO_mean))*torch.fft.fft2(rngTensor)/N)*fourierSampling
     phaseMap = torch.real(phaseMap)*N**2
     phaseMap = pupil*phaseMap[:,:,0:nPxPup,0:nPxPup]
-    Ze = torch.matmul(CM,torch.unsqueeze(torch.reshape(phaseMap,[-1]),-1))
+    Ze = torch.matmul(CM,torch.reshape(phaseMap,[-1, phaseMap.shape[0]]))
     return(phaseMap,Ze)
 
 
