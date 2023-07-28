@@ -12,7 +12,7 @@ physicalParams.rooftop              = [0,0];         % Pyramid roftop imperfecti
 physicalParams.L0                   = 25;            % Outer scale [m]
 physicalParams.fR0                  = 1;             % Fracional r0 (for multi layer - not implemented)
 % indecies for Zernike decomposition 
-physicalParams.jModes               = 2:60;
+physicalParams.jModes               = 2:66;
 
 %Camera parameters
 physicalParams.ReadoutNoise         = 0;

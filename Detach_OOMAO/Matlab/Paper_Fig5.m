@@ -8,8 +8,8 @@ DPWFSn1_path = "../Pytorch/training_results/Paper/06-07-2023/n1_nico.mat";
 savePath = "./ComputeResults/paper/Fig5/";if ~exist(savePath, 'dir'), mkdir(savePath); end
 matName = "r0PerformanceFig5A";
 FigurePath = "./figures/paper/Figure5/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
-FigureNameA = "ElementA.pdf";
-FigureNameB = "ElementB.pdf";
+FigureNameA = "fig_N1_rmse.pdf";
+FigureNameB = "fig_N1_SD.pdf";
 Compute = false;
 
 
@@ -130,7 +130,7 @@ lbltxt{3} = sprintf("DPWFS-R1");
 lbltxt{4} = sprintf("DPWFS-R2");
 lbltxt{5} = sprintf("DPWFS-N1");
 
-fig = figure('Color','w','Units','normalized','Position',[0.5436 0.1528 0.4427 0.6331]);
+fig = figure('Color','w','Units','normalized','Position',[0.5436 0.2204 0.4427 0.4120]);
 
 plot(r0s,y1,'--dr','LineWidth',1.5,'MarkerFaceColor','r')
 hold on
@@ -138,12 +138,12 @@ plot(r0s,y2,'--dm','LineWidth',1.5,'MarkerFaceColor','m')
 plot(r0s,y5,'-r','LineWidth',1.5,'MarkerFaceColor','r')
 plot(r0s,y6,'-g','LineWidth',1.5,'MarkerFaceColor','b')
 plot(r0s,y7,'-b','LineWidth',1.5,'MarkerFaceColor','m')
-set(gca,'XDir','reverse','FontSize',20)
-xlabel('$D/r_0$','interpreter','latex','FontSize',22)
-ylabel('RMSE','FontSize',22)
-legend(lbltxt,'FontSize',19)
+set(gca,'XDir','reverse','FontSize',16)
+xlabel('$D/r_0$','interpreter','latex','FontSize',16)
+ylabel('RMSE [radians]','FontSize',16)
+legend(lbltxt,'FontSize',16)
 xlim([min(r0s) max(r0s)])
-
+ylim([0 0.43]);box on
 exportgraphics(fig,FigurePath+FigureNameA)
 
 
@@ -214,7 +214,7 @@ ylimit = sort([floor(min(min([Dv(:) D1(:)]))) ceil(max(max([Sv(:) S1(:)])))+5 ])
 ZerLen = length(physicalParams.jModes);
 
 lw = 1;
-fig1 = figure('Color','w','Units','normalized','Position',[0.3141 0.2120 0.3766 0.6102]);
+fig1 = figure('Color','w','Units','normalized','Position',[0.3141 0.2120 0.3766 0.4149]);
 hold on
 plot(1:ZerLen,Sv(1,:),'--r','LineWidth',lw)
 plot(1:ZerLen,Sv(4,:),'--m','LineWidth',lw)
@@ -235,12 +235,13 @@ plot(1:ZerLen,D1(1,:),'-r','LineWidth',lw)
 plot(1:ZerLen,D2(1,:),'-g','LineWidth',lw)
 plot(1:ZerLen,D3(1,:),'-b','LineWidth',lw)
 
-xlabel("Zernike radial order",'interpreter','latex')
-set(gca,'XScale','log','YScale','log','FontSize',20,'LineWidth',1)
+xlabel("Zernike radial order")
+set(gca,'XScale','log','YScale','log','FontSize',12,'LineWidth',1)
 box on; grid on
-% ylim(ylimit)
-leg = legend(lbltxt,'FontSize',12,'Position',[0.6731 0.7165 0.2334 0.2086]);
-
+ylim([0.1 5300])
+leg = legend(lbltxt,'FontSize',9,'Position',[0.7077 0.6836 0.1974 0.2400]);
+leg.Orientation = 'horizontal';leg.Orientation = 'vertical';
+drawnow
 exportgraphics(fig1,FigurePath+FigureNameB)
 
 %% FUNCTIONS

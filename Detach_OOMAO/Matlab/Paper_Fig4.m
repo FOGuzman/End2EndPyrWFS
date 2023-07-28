@@ -3,11 +3,11 @@ clear all;clc;close all
 
 %% Preconditioners paths
 DPWFS_path = "../Pytorch/training_results/Paper/06-07-2023/original.mat";
-savePath = "./ComputeResults/paper/Fig4_test/";if ~exist(savePath, 'dir'), mkdir(savePath); end
+savePath = "./ComputeResults/paper/Fig4/";if ~exist(savePath, 'dir'), mkdir(savePath); end
 matName = "r0PerformanceFig4A";
 FigurePath = "./figures/paper/Figure4/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
-FigureNameA = "ElementA.pdf";
-FigureNameB = "ElementB.pdf";
+FigureNameA = "fig_R1_rmse.pdf";
+FigureNameB = "fig_R1_SD.pdf";
 Compute = false;
 
 
@@ -118,30 +118,30 @@ Rin = load(savePath+matName+".mat");R=Rin.Results;
 r0s = R{1}.INFO.D_R0s;
 y1 = R{1}.RMSEpyr(1,:);
 y2 = R{2}.RMSEpyr(1,:);
-%y3 = R{3}.RMSEpyr(1,:);
-%y4 = R{4}.RMSEpyr(1,:);
+y3 = R{3}.RMSEpyr(1,:);
+y4 = R{4}.RMSEpyr(1,:);
 y5 = R{1}.RMSEdpwfs(1,:);
 
 lbltxt{1} = sprintf("PWFS-M%i",R{1}.INFO.modulation);
 lbltxt{2} = sprintf("PWFS-M%i",R{2}.INFO.modulation);
-%lbltxt{3} = sprintf("PWFS-M%i",R{3}.INFO.modulation);
-%lbltxt{4} = sprintf("PWFS-M%i",R{4}.INFO.modulation);
-lbltxt{3} = sprintf("DPWFS-R1");
+lbltxt{3} = sprintf("PWFS-M%i",R{3}.INFO.modulation);
+lbltxt{4} = sprintf("PWFS-M%i",R{4}.INFO.modulation);
+lbltxt{5} = sprintf("DPWFS-R1");
 
-fig = figure('Color','w','Units','normalized','Position',[0.5436 0.1528 0.4427 0.6331]);
+fig = figure('Color','w','Units','normalized','Position',[0.5436 0.2204 0.4427 0.4120]);
 
 plot(r0s,y1,'--dr','LineWidth',1.5,'MarkerFaceColor','r')
 hold on
 plot(r0s,y2,'--dg','LineWidth',1.5,'MarkerFaceColor','g')
-%plot(r0s,y3,'--db','LineWidth',1.5,'MarkerFaceColor','b')
-%plot(r0s,y4,'--dm','LineWidth',1.5,'MarkerFaceColor','m')
+plot(r0s,y3,'--db','LineWidth',1.5,'MarkerFaceColor','b')
+plot(r0s,y4,'--dm','LineWidth',1.5,'MarkerFaceColor','m')
 plot(r0s,y5,'-r','LineWidth',1.5,'MarkerFaceColor','r')
-set(gca,'XDir','reverse','FontSize',20)
-xlabel('$D/r_0$','interpreter','latex','FontSize',22)
-ylabel('RMSE [radians]','FontSize',20)
-legend(lbltxt,'FontSize',19)
+set(gca,'XDir','reverse','FontSize',16)
+xlabel('$D/r_0$','interpreter','latex','FontSize',16)
+ylabel('RMSE [radians]','FontSize',16)
+legend(lbltxt,'FontSize',16)
 xlim([min(r0s) max(r0s)])
-
+ylim([0 0.43]);box on
 exportgraphics(fig,FigurePath+FigureNameA)
 
 
@@ -201,7 +201,7 @@ ylimit = [.08 6000];
 ZerLen = length(physicalParams.jModes);
 
 lw = 1;
-fig1 = figure('Color','w','Units','normalized','Position',[0.3141 0.2120 0.3766 0.6102]);
+fig1 = figure('Color','w','Units','normalized','Position',[0.3141 0.2120 0.3766 0.4149]);
 hold on
 plot(1:ZerLen,Sv(1,:),'--r','LineWidth',lw)
 plot(1:ZerLen,Sv(2,:),'--g','LineWidth',lw)
@@ -224,11 +224,12 @@ plot(1:ZerLen,Dv(4,:),'--m','LineWidth',lw)
 plot(1:ZerLen,D1(1,:),'-r','LineWidth',lw)
 
 xlabel("Zernike radial order")
-set(gca,'XScale','log','YScale','log','FontSize',20,'LineWidth',1)
+set(gca,'XScale','log','YScale','log','FontSize',12,'LineWidth',1)
 box on; grid on
 ylim(ylimit)
-leg = legend(lbltxt,'FontSize',12,'Position',[0.6717 0.7165 0.2334 0.2086]);
-
+leg = legend(lbltxt,'FontSize',9,'Position',[0.7077 0.6836 0.1974 0.2400]);
+leg.Orientation = 'horizontal';leg.Orientation = 'vertical';
+drawnow
 exportgraphics(fig1,FigurePath+FigureNameB)
 
 %% FUNCTIONS

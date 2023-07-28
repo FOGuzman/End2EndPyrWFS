@@ -5,7 +5,7 @@ savePath = "./ComputeResults/paper/Fig7/";if ~exist(savePath, 'dir'), mkdir(save
 matName = "Dr0_5_PerformanceFig7";
 FigurePath = "./figures/paper/Figure7/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
 
-Resoultion = 1200;
+Resoultion = 2400;
 
 
 %% A
@@ -30,7 +30,7 @@ surf(rx,py,y1,'FaceColor', [120 120 255]/255,'FaceAlpha', 0.55)
 hold on
 surf(rx,py,y2,'FaceColor', [100 255 100]/255,'FaceAlpha', 0.55)
 surf(rx,py,y3,'FaceColor', [255 50 50]/255,'FaceAlpha', 0.55)
-l1 = legend(lbltxt,'FontSize',12,'position',[0.1841 0.8303 0.7432 0.0453]);
+l1 = legend(lbltxt,'FontSize',12,'position',[0.1736 0.9312 0.7432 0.0453]);
 l1.Orientation = 'horizontal';
 
 zlabel('RMSE','FontSize',16)
@@ -38,7 +38,7 @@ xlabel('Readout noise','FontSize',16)
 ylabel('Photon noise','FontSize',16)
 set(gca,'FontSize',16)
 box on
-title("(a)")
+tt = title("(a)");
 
 exportgraphics(fig,FigurePath+FigureName,'Resolution',Resoultion)
 %% B
@@ -58,6 +58,7 @@ surf(rx,py,y2,'FaceColor', [100 255 100]/255,'FaceAlpha', 0.55)
 surf(rx,py,y3,'FaceColor', [255 50 50]/255,'FaceAlpha', 0.55)
 l1 = legend(lbltxt,'FontSize',12,'position',[0.1841 0.8303 0.7432 0.0453]);
 l1.Orientation = 'horizontal';
+l1.Visible = 'off';
 zlabel('RMSE','FontSize',16)
 xlabel('Readout noise','FontSize',16)
 ylabel('Photon noise','FontSize',16)
@@ -82,11 +83,39 @@ surf(rx,py,y2,'FaceColor', [100 255 100]/255,'FaceAlpha', 0.55)
 surf(rx,py,y3,'FaceColor', [255 50 50]/255,'FaceAlpha', 0.55)
 l1 = legend(lbltxt,'FontSize',12,'position',[0.1841 0.8303 0.7432 0.0453]);
 l1.Orientation = 'horizontal';
+l1.Visible = 'off';
 zlabel('RMSE','FontSize',16)
 xlabel('Readout noise','FontSize',16)
 ylabel('Photon noise','FontSize',16)
 set(gca,'FontSize',16)
 box on
 title("(c)")
+
+exportgraphics(fig,FigurePath+FigureName,'Resolution',Resoultion)
+
+%% D
+FigureName = "ElementD.png";
+matName = "Dr0_20_PerformanceFig7";
+
+Rin = load(savePath+matName+".mat");R=Rin.Results{1};
+
+y1 = squeeze(R.RMSEpyr(1,:,:));
+y2 = squeeze(R.RMSEdpwfs(1,:,:));
+y3 = squeeze(R.RMSEdpwfs2(1,:,:));
+
+fig = figure('Color','w','Units','normalized','Position',[0.5436 0.1528 0.3465 0.6331]);
+surf(rx,py,y1,'FaceColor', [120 120 255]/255,'FaceAlpha', 0.55)
+hold on
+surf(rx,py,y2,'FaceColor', [100 255 100]/255,'FaceAlpha', 0.55)
+surf(rx,py,y3,'FaceColor', [255 50 50]/255,'FaceAlpha', 0.55)
+l1 = legend(lbltxt,'FontSize',12,'position',[0.1841 0.8303 0.7432 0.0453]);
+l1.Orientation = 'horizontal';
+l1.Visible = 'off';
+zlabel('RMSE','FontSize',16)
+xlabel('Readout noise','FontSize',16)
+ylabel('Photon noise','FontSize',16)
+set(gca,'FontSize',16)
+box on
+title("(d)")
 
 exportgraphics(fig,FigurePath+FigureName,'Resolution',Resoultion)

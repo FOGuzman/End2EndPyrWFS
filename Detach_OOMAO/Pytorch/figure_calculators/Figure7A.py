@@ -37,16 +37,17 @@ parser.add_argument('--Rnoises', default=[0,2], type=eval)
 parser.add_argument('--PhotonNoise', default=1, type=float)
 parser.add_argument('--Pnoises', default=[0,0.4], type=eval)
 parser.add_argument('--quantumEfficiency', default=1, type=float)
+parser.add_argument('--PupilMask', default=None, type=str)
 
-parser.add_argument('--D_r0', default=15, type=eval, help='Range of r0 to create')
+parser.add_argument('--D_r0', default=20, type=eval, help='Range of r0 to create')
 parser.add_argument('--datapoints', default=20, type=int, help='r0 intervals')
-parser.add_argument('--data_batch', default=400, type=int, help='r0 intervals')
+parser.add_argument('--data_batch', default=200, type=int, help='r0 intervals')
 parser.add_argument('--dperR0', default=4000, type=int, help='test per datapoint')
 
 parser.add_argument('--models', nargs='+',default=['modelFast','modelFast'])
 parser.add_argument('--checkpoints', nargs='+',default=
-                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/original.mat',
-                     '/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/n1_nico.mat'])
+                    ['D:/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results\Paper/06-07-2023\original.mat',
+                     'D:/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/n1_nico.mat'])
 parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/Fig7/", type=str)
 
 # Precalculations
