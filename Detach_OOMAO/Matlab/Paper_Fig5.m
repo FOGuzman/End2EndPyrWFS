@@ -118,6 +118,7 @@ end
 Rin = load(savePath+matName+".mat");R=Rin.Results;
 
 r0s = R{1}.INFO.D_R0s;
+r0s = [50 45 40 35 30 25 20 15 10 5 1];
 y1 = R{1}.RMSEpyr(1,:);
 y2 = R{2}.RMSEpyr(1,:);
 y5 = R{1}.RMSEdpwfs(1,:);
@@ -130,23 +131,24 @@ lbltxt{3} = sprintf("DPWFS-R1");
 lbltxt{4} = sprintf("DPWFS-R2");
 lbltxt{5} = sprintf("DPWFS-N1");
 
+lwd = 1.4;
 fig = figure('Color','w','Units','normalized','Position',[0.5436 0.2204 0.4427 0.4120]);
 
-plot(r0s,y1,'--dr','LineWidth',1.5,'MarkerFaceColor','r')
+plot(r0s,y1,'--','LineWidth',lwd,'Color',[250 0 0]/255)
 hold on
-plot(r0s,y2,'--dm','LineWidth',1.5,'MarkerFaceColor','m')
-plot(r0s,y5,'-r','LineWidth',1.5,'MarkerFaceColor','r')
-plot(r0s,y6,'-g','LineWidth',1.5,'MarkerFaceColor','b')
-plot(r0s,y7,'-b','LineWidth',1.5,'MarkerFaceColor','m')
-set(gca,'XDir','reverse','FontSize',16)
+plot(r0s,y2,'--m','LineWidth',lwd)
+plot(r0s,y5,'-b','LineWidth',lwd)
+plot(r0s,y6,'-','LineWidth',lwd,'Color',[0 230 230]/255)
+plot(r0s,y7,'-','LineWidth',lwd,'Color',[0 180 0]/255)
+set(gca,'XDir','reverse','FontSize',16,'XTick',fliplr(r0s),'LineWidth',.8)
 xlabel('$D/r_0$','interpreter','latex','FontSize',16)
 ylabel('RMSE [radians]','FontSize',16)
-legend(lbltxt,'FontSize',16)
+leg1 = legend(lbltxt,'FontSize',14);
+leg1.Orientation = 'horizontal';leg1.Orientation = 'vertical';
 xlim([min(r0s) max(r0s)])
-ylim([0 0.43]);box on
+ylim([0 0.43]);box on;grid on
+
 exportgraphics(fig,FigurePath+FigureNameA)
-
-
 %% SD
 radial_order = 30;
 physicalParams.jModes = cumsum(kron([2:2:radial_order*2],[1 1]));
@@ -216,27 +218,27 @@ ZerLen = length(physicalParams.jModes);
 lw = 1;
 fig1 = figure('Color','w','Units','normalized','Position',[0.3141 0.2120 0.3766 0.4149]);
 hold on
-plot(1:ZerLen,Sv(1,:),'--r','LineWidth',lw)
+plot(1:ZerLen,Sv(1,:),'--','LineWidth',lw,'Color',[250 0 0]/255)
 plot(1:ZerLen,Sv(4,:),'--m','LineWidth',lw)
-plot(1:ZerLen,S1(1,:),'-r','LineWidth',lw)
-plot(1:ZerLen,S2(1,:),'-g','LineWidth',lw)
-plot(1:ZerLen,S3(1,:),'-b','LineWidth',lw)
+plot(1:ZerLen,S1(1,:),'-b','LineWidth',lw)
+plot(1:ZerLen,S2(1,:),'-','LineWidth',lw,'Color',[0 230 230]/255)
+plot(1:ZerLen,S3(1,:),'-','LineWidth',lw,'Color',[0 180 0]/255)
 
 
-plot(1:ZerLen,SDv(1,:),'--r','LineWidth',lw)
+plot(1:ZerLen,SDv(1,:),'--','LineWidth',lw,'Color',[250 0 0]/255)
 plot(1:ZerLen,SDv(4,:),'--m','LineWidth',lw)
-plot(1:ZerLen,SD1(1,:),'-r','LineWidth',lw)
-plot(1:ZerLen,SD2(1,:),'-g','LineWidth',lw)
-plot(1:ZerLen,SD3(1,:),'-b','LineWidth',lw)
+plot(1:ZerLen,SD1(1,:),'-b','LineWidth',lw)
+plot(1:ZerLen,SD2(1,:),'-','LineWidth',lw,'Color',[0 230 230]/255)
+plot(1:ZerLen,SD3(1,:),'-','LineWidth',lw,'Color',[0 180 0]/255)
 
-plot(1:ZerLen,Dv(1,:),'--r','LineWidth',lw)
+plot(1:ZerLen,Dv(1,:),'--','LineWidth',lw,'Color',[250 0 0]/255)
 plot(1:ZerLen,Dv(4,:),'--m','LineWidth',lw)
-plot(1:ZerLen,D1(1,:),'-r','LineWidth',lw)
-plot(1:ZerLen,D2(1,:),'-g','LineWidth',lw)
-plot(1:ZerLen,D3(1,:),'-b','LineWidth',lw)
+plot(1:ZerLen,D1(1,:),'-b','LineWidth',lw)
+plot(1:ZerLen,D2(1,:),'-','LineWidth',lw,'Color',[0 230 230]/255)
+plot(1:ZerLen,D3(1,:),'-','LineWidth',lw,'Color',[0 180 0]/255)
 
 xlabel("Zernike radial order")
-set(gca,'XScale','log','YScale','log','FontSize',12,'LineWidth',1)
+set(gca,'XScale','log','YScale','log','FontSize',12,'LineWidth',0.8)
 box on; grid on
 ylim([0.1 5300])
 leg = legend(lbltxt,'FontSize',9,'Position',[0.7077 0.6836 0.1974 0.2400]);

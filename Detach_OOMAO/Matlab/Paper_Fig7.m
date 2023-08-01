@@ -26,19 +26,21 @@ lbltxt{1} = sprintf("PWFS-M%i",R.INFO.modulation);
 lbltxt{2} = sprintf("DPWFS-R1");
 lbltxt{3} = sprintf("DPWFS-N1");
 
-surf(rx,py,y1,'FaceColor', [120 120 255]/255,'FaceAlpha', 0.55)
+surf(rx,py,y1,'FaceColor', [250 0 0]/255,'FaceAlpha', 0.55,'EdgeColor','none')
 hold on
-surf(rx,py,y2,'FaceColor', [100 255 100]/255,'FaceAlpha', 0.55)
-surf(rx,py,y3,'FaceColor', [255 50 50]/255,'FaceAlpha', 0.55)
+surf(rx,py,y2,'FaceColor', [0 0 255]/255,'FaceAlpha', 0.55,'EdgeColor','none')
+surf(rx,py,y3,'FaceColor', [0 180 0]/255,'FaceAlpha', 0.55,'EdgeColor','none')
 l1 = legend(lbltxt,'FontSize',12,'position',[0.1736 0.9312 0.7432 0.0453]);
 l1.Orientation = 'horizontal';
 
-zlabel('RMSE','FontSize',16)
-xlabel('Readout noise','FontSize',16)
-ylabel('Photon noise','FontSize',16)
+zlabel('RMSE [radians]','FontSize',16)
+xl1 = xlabel('Readout noise','FontSize',16);
+xl1.Rotation = 20;xl1.Position = [0.7 0.01 0.01];
+yl1 = ylabel('Photon noise','FontSize',16);
+yl1.Rotation = -35;yl1.Position = [-0.16 0.12 0.01];
 set(gca,'FontSize',16)
 box on
-tt = title("(a)");
+tt = title(" ");
 
 exportgraphics(fig,FigurePath+FigureName,'Resolution',Resoultion)
 %% B
@@ -52,16 +54,18 @@ y1 = squeeze(R.RMSEpyr(1,:,:));
 y2 = squeeze(R.RMSEdpwfs(1,:,:));
 y3 = squeeze(R.RMSEdpwfs2(1,:,:));
 
-surf(rx,py,y1,'FaceColor', [120 120 255]/255,'FaceAlpha', 0.55)
+surf(rx,py,y1,'FaceColor', [250 0 0]/255,'FaceAlpha', 0.55,'EdgeColor','none')
 hold on
-surf(rx,py,y2,'FaceColor', [100 255 100]/255,'FaceAlpha', 0.55)
-surf(rx,py,y3,'FaceColor', [255 50 50]/255,'FaceAlpha', 0.55)
+surf(rx,py,y2,'FaceColor', [0 0 255]/255,'FaceAlpha', 0.55,'EdgeColor','none')
+surf(rx,py,y3,'FaceColor', [0 180 0]/255,'FaceAlpha', 0.55,'EdgeColor','none')
 l1 = legend(lbltxt,'FontSize',12,'position',[0.1841 0.8303 0.7432 0.0453]);
 l1.Orientation = 'horizontal';
 l1.Visible = 'off';
-zlabel('RMSE','FontSize',16)
-xlabel('Readout noise','FontSize',16)
-ylabel('Photon noise','FontSize',16)
+zlabel('RMSE [radians]','FontSize',16)
+xl1 = xlabel('Readout noise','FontSize',16);
+xl1.Rotation = 20;xl1.Position = [0.7 0.01 0.01];
+yl1 = ylabel('Photon noise','FontSize',16);
+yl1.Rotation = -35;yl1.Position = [-0.16 0.12 0.01];
 set(gca,'FontSize',16)
 box on
 title("(b)")
@@ -77,16 +81,18 @@ y2 = squeeze(R.RMSEdpwfs(1,:,:));
 y3 = squeeze(R.RMSEdpwfs2(1,:,:));
 
 fig = figure('Color','w','Units','normalized','Position',[0.5436 0.1528 0.3465 0.6331]);
-surf(rx,py,y1,'FaceColor', [120 120 255]/255,'FaceAlpha', 0.55)
+surf(rx,py,y1,'FaceColor', [250 0 0]/255,'FaceAlpha', 0.55,'EdgeColor','none')
 hold on
-surf(rx,py,y2,'FaceColor', [100 255 100]/255,'FaceAlpha', 0.55)
-surf(rx,py,y3,'FaceColor', [255 50 50]/255,'FaceAlpha', 0.55)
+surf(rx,py,y2,'FaceColor', [0 0 255]/255,'FaceAlpha', 0.55,'EdgeColor','none')
+surf(rx,py,y3,'FaceColor', [0 180 0]/255,'FaceAlpha', 0.55,'EdgeColor','none')
 l1 = legend(lbltxt,'FontSize',12,'position',[0.1841 0.8303 0.7432 0.0453]);
 l1.Orientation = 'horizontal';
 l1.Visible = 'off';
-zlabel('RMSE','FontSize',16)
-xlabel('Readout noise','FontSize',16)
-ylabel('Photon noise','FontSize',16)
+zlabel('RMSE [radians]','FontSize',16)
+xl1 = xlabel('Readout noise','FontSize',16);
+xl1.Rotation = 20;xl1.Position = [0.7 0.01 -0.025];
+yl1 = ylabel('Photon noise','FontSize',16);
+yl1.Rotation = -35;yl1.Position = [-0.16 0.12 -0.02];
 set(gca,'FontSize',16)
 box on
 title("(c)")
@@ -104,16 +110,18 @@ y2 = squeeze(R.RMSEdpwfs(1,:,:));
 y3 = squeeze(R.RMSEdpwfs2(1,:,:));
 
 fig = figure('Color','w','Units','normalized','Position',[0.5436 0.1528 0.3465 0.6331]);
-surf(rx,py,y1,'FaceColor', [120 120 255]/255,'FaceAlpha', 0.55)
+surf(rx,py,y1,'FaceColor', [250 0 0]/255,'FaceAlpha', 0.55,'EdgeColor','none')
 hold on
-surf(rx,py,y2,'FaceColor', [100 255 100]/255,'FaceAlpha', 0.55)
-surf(rx,py,y3,'FaceColor', [255 50 50]/255,'FaceAlpha', 0.55)
+surf(rx,py,y2,'FaceColor', [0 0 255]/255,'FaceAlpha', 0.55,'EdgeColor','none')
+surf(rx,py,y3,'FaceColor', [0 180 0]/255,'FaceAlpha', 0.55,'EdgeColor','none')
 l1 = legend(lbltxt,'FontSize',12,'position',[0.1841 0.8303 0.7432 0.0453]);
 l1.Orientation = 'horizontal';
 l1.Visible = 'off';
-zlabel('RMSE','FontSize',16)
-xlabel('Readout noise','FontSize',16)
-ylabel('Photon noise','FontSize',16)
+zlabel('RMSE [radians]','FontSize',16)
+xl1 = xlabel('Readout noise','FontSize',16);
+xl1.Rotation = 20;xl1.Position = [0.7 0.01 -0.03];
+yl1 = ylabel('Photon noise','FontSize',16);
+yl1.Rotation = -35;yl1.Position = [-0.16 0.12 -0.024];
 set(gca,'FontSize',16)
 box on
 title("(d)")
