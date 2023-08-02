@@ -35,7 +35,7 @@ parser.add_argument('--PhotonNoise', default=0, type=float)
 parser.add_argument('--nPhotonBackground', default=0, type=float)
 parser.add_argument('--quantumEfficiency', default=1, type=float)
 parser.add_argument('--Dr0_dataset', default=[15,40], type=eval, help='What D/r0 dataset to use')
-parser.add_argument('--PupilMask', default="./functions/mask128.mat", type=str)
+parser.add_argument('--PupilMask', default=None, type=str)
 
 
 parser.add_argument('--model', default="modelFast", type=str)

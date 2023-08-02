@@ -1,9 +1,9 @@
 %% Calibration 0.1
 clear all; close all
 
-savePath = "./ComputeResults/paper/Fig11/";if ~exist(savePath, 'dir'), mkdir(savePath); end
+savePath = "./ComputeResults/paper/Fig12/";if ~exist(savePath, 'dir'), mkdir(savePath); end
 matName = "A_0_25";
-FigurePath = "./figures/paper/Figure11/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
+FigurePath = "./figures/paper/Figure12/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
 FigureName = "fig_experimental_RMSE.pdf";
 
 
