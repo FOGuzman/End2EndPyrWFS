@@ -13,6 +13,7 @@ Official implementation for Deep Optics Preconditioner for Enhanced Pyramid Wave
 * tqdm
 * scipy
 * mpmath
+* tensorboard
 
 # Installation
 - install anaconda (https://www.anaconda.com/products/distribution)
