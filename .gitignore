@@ -36,3 +36,4 @@ Detach_OOMAO/Pytorch/model_scripts/VGG_only.py
 Detach_OOMAO/Pytorch/model_scripts/modelFastPupilPlane.py
 .vscode/
 
+Detach_OOMAO/Pytorch/E2E_main_hybrid.py
