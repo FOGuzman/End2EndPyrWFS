@@ -37,17 +37,10 @@ To train a diffractive element, we have also provided an implementation of the s
   Example for modulation 0, resolution 128 and get 35 Zernike decomposition of each phasemap:
 
   ```
-  python DataGenerator.py --modulation 0 --samp 2 --D 8 --nPxPup 128 --zModes [2,36]
-
-  ```
-
-  or if Cuda is installed for GPU generation:
-
-  ```
   python DataGeneratorCuda.py --modulation 0 --samp 2 --D 8 --nPxPup 128 --zModes [2,36]
 
   ```
-  by default the script create 10000 training phases and zernike decompositions and 1000 for validation. 
+  by default the script create 100 training phases and zernike decompositions and 10 for validation. 
   
 - Then for training you have to use the same parameters generated:
 
@@ -86,21 +79,14 @@ the just enter ```http://localhost:6006/``` to check the results.
 All the figures generated in the research paper were obtained using the scripts in the MATLAB folder. Please ensure that you set up the path to the Diffractive Element (saved as a .mat file) in the first lines of each script you wish to run. Here is a list of available figures that can be reproduced:
 
 ```
-Figure4A_ComputePlot.m
-Figure4B_ComputePlot.m
-Figure5_ComputePlot.m
-Figure6A_ComputePlot.m
-Figure6B_ComputePlot.m
-Figure7_ComputePlot.m
-Figure8A_ComputePlot.m
-Figure8B_ComputePlot.m
-Figure9_ComputePlot.m
-Figure10A_ComputePlot.m
-Figure10B_ComputePlot.m
-Figure11_ComputePlot.m
-
+Paper_Fig4.m
+Paper_Fig5_6.m
+Paper_Fig7_8.m
+Paper_Fig9.m
+Paper_Fig10.m
+Paper_Fig12.m
 ```
-
+However it is highly recommended to use python scripts for figures 5, 7, 9 and 10 on ```Detach_OOMAO/Pytorch/```
 
 # Citation
 If you find our project useful, please cite:
