@@ -5,21 +5,21 @@ clear all;clc;close all
 DPWFSr1_path = "../Pytorch/training_results/Paper/06-07-2023/original.mat";
 DPWFSr2_path = "../Pytorch/training_results/Paper/06-07-2023/r2_nico.mat";
 DPWFSn1_path = "../Pytorch/training_results/Paper/06-07-2023/n1_nico.mat";
-savePath = "./ComputeResults/paper/Fig5/";if ~exist(savePath, 'dir'), mkdir(savePath); end
-matName = "r0PerformanceFig5A";
-FigurePath = "./figures/paper/Figure5/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
+savePath = "./ComputeResults/paper/Fig7/";if ~exist(savePath, 'dir'), mkdir(savePath); end
+matName = "r0PerformanceFig7A";
+FigurePath = "./figures/paper/Figure7/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
 FigureNameA = "fig_N1_rmse.pdf";
 FigureNameB = "fig_N1_SD.pdf";
 Compute = false;
 
 
 %% Phisycal parameters
-run("./tools/experiments_settings/F5_settings.m")
+run("./tools/experiments_settings/F_7_8_settings.m")
 
 %% Test parameters
 if Compute
-tpr0  = 500;    % test per r0
-physicalParams.D_R0s = [90 80 70 60 50 40 30 20 10 1];%[30 25 20 15 10 8 5 3 1]
+tpr0  = 10000;    % test per r0
+physicalParams.D_R0s = [50 45 40 35 30 25 20 15 10 5 1];%[30 25 20 15 10 8 5 3 1]
 physicalParams.R0s = physicalParams.D./physicalParams.D_R0s;
 rjumps = length(physicalParams.R0s);
 Mods = [0 3];

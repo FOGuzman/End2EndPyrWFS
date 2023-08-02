@@ -1,13 +1,11 @@
 addpath tools/functions
 clear all;clc;close all
 
-savePath = "./ComputeResults/paper/Fig7/";if ~exist(savePath, 'dir'), mkdir(savePath); end
-matName = "Dr0_5_PerformanceFig7";
-FigurePath = "./figures/paper/Figure7/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
+savePath = "./ComputeResults/paper/Fig9/";if ~exist(savePath, 'dir'), mkdir(savePath); end
+matName = "Dr0_5_PerformanceFig9";
+FigurePath = "./figures/paper/Figure9/";if ~exist(FigurePath, 'dir'), mkdir(FigurePath); end
 
 Resoultion = 2400;
-
-
 %% A
 FigureName = "ElementA.png";
 fig = figure('Color','w','Units','normalized','Position',[0.5436 0.1528 0.3465 0.6331]);

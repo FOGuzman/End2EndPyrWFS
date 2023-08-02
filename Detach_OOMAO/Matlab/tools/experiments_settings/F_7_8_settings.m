@@ -10,19 +10,17 @@ physicalParams.alpha                = pi/2;          % Pyramid shape
 physicalParams.rooftop              = [0,0];         % Pyramid roftop imperfection
 % Atmosphere propeties
 physicalParams.L0                   = 25;            % Outer scale [m]
-physicalParams.D_R0s                = 40;            % Turbulence strength
 physicalParams.fR0                  = 1;             % Fracional r0 (for multi layer - not implemented)
 % indecies for Zernike decomposition 
+physicalParams.jModes               = 2:66;
 
 %Camera parameters
 physicalParams.ReadoutNoise         = 1;
-physicalParams.PhotonNoise          = 0;
+physicalParams.PhotonNoise          = 1;
 physicalParams.quantumEfficiency    = 1;
-physicalParams.nPhotonBackground    = 0;
+physicalParams.nPhotonBackground    = 0.1;
 
 % Precomp aditional parameters
-physicalParams.R0s                  = physicalParams.D./physicalParams.D_R0s;
-physicalParams.r0                   = physicalParams.R0s;           % r0 value
 physicalParams.resAO                = 2*physicalParams.nLenslet+1;
 physicalParams.pupil                = CreatePupil(physicalParams.nPxPup,"disc");
 physicalParams.N                    = 2*physicalParams.Samp*physicalParams.nPxPup;
@@ -32,5 +30,5 @@ physicalParams.nTimes               = physicalParams.fovInPixel/physicalParams.r
 physicalParams.PyrQ                 = zeros(physicalParams.fovInPixel);
 physicalParams.I4Q4                 = physicalParams.PyrQ;
 
+physicalParams.modes = CreateZernikePolynomials(physicalParams.nPxPup,physicalParams.jModes,physicalParams.pupil~=0);
 physicalParams.flatMode = CreateZernikePolynomials(physicalParams.nPxPup,1,physicalParams.pupil~=0);
-

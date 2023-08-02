@@ -52,6 +52,19 @@ xlim([min(r0s) max(r0s)])
 ylim([0 0.43])
 l1.Orientation = 'horizontal';l1.Orientation = 'vertical';
 grid on
+
+
+% secondax = copyobj(firstax, fig);
+% delete( get(secondax, 'Children'))
+% H1 = plot(1, '-k', 'LineWidth', 2, 'Parent', secondax, 'Visible', 'on');
+% H2 = plot(1, '--k', 'LineWidth', 2, 'Parent', secondax, 'Visible', 'on');
+% set(secondax,'visible','off') 
+% l2 = legend (secondax, [H1 H2], 'noiseless', 'noise','position',[0.3796 0.7358 0.2465 0.1902]);
+% l2.Orientation = 'horizontal';l2.Orientation = 'vertical';
+
+
+
+
 exportgraphics(fig,FigurePath+FigureNameA)
 
 
