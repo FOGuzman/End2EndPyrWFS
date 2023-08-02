@@ -1,5 +1,5 @@
 # End2EndPyrWFS
-Official implementation for Deep Optics Preconditioner for Enhanced Pyramid Wavefront Sensing
+Official implementation for "Deep Optics Preconditioner for Modulation-free Pyramid Wavefront Sensing"
 
 ![ ](end2end_scheme.png)
 
