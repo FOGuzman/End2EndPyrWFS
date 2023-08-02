@@ -33,6 +33,6 @@ Detach_OOMAO/Pytorch/model_scripts/modelFastplusConvNeXt.py
 Detach_OOMAO/Pytorch/model_scripts/modelFastplusGCViT.py
 Detach_OOMAO/Pytorch/model_scripts/OptIMAT.py
 Detach_OOMAO/Pytorch/model_scripts/VGG_only.py
-
+Detach_OOMAO/Pytorch/model_scripts/modelFastPupilPlane.py
 .vscode/
 
