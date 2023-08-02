@@ -31,23 +31,24 @@ parser.add_argument('--D', default=8, type=int, help='Telescope Diameter [m]')
 parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=eval,help='Pyramid rooftop (as in OOMAO)')
 parser.add_argument('--alpha', default=np.pi/2, type=float,help='Pyramid angle (as in OOMAO)')
-parser.add_argument('--zModes', default=[2,60], type=eval, help='Reconstruction Zernikes')
+parser.add_argument('--zModes', default=[2,66], type=eval, help='Reconstruction Zernikes')
 parser.add_argument('--ZernikeUnits', default=1, type=float,help='Zernike units (1 for normalized)')
 parser.add_argument('--ReadoutNoise', default=0, type=float)
 parser.add_argument('--PhotonNoise', default=0, type=float)
 parser.add_argument('--nPhotonBackground', default=0, type=float)
 parser.add_argument('--quantumEfficiency', default=1, type=float)
+parser.add_argument('--PupilMask', default=None, type=str)
+
 
 parser.add_argument('--D_r0', default=[50,1], type=eval, help='Range of r0 to create')
 parser.add_argument('--datapoints', default=11, type=int, help='r0 intervals')
-parser.add_argument('--data_batch', default=10, type=int, help='r0 intervals')
-parser.add_argument('--dperR0', default=1000, type=int, help='test per datapoint')
+parser.add_argument('--data_batch', default=50, type=int, help='r0 intervals')
+parser.add_argument('--dperR0', default=10000, type=int, help='test per datapoint')
 
-parser.add_argument('--models', nargs='+',default=['modelFast','modelFast'])
+parser.add_argument('--models', nargs='+',default=['modelFast'])
 parser.add_argument('--checkpoints', nargs='+',default=
-                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/original.mat',
-                     '/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/OL1_R128_M0_RMSE0.02807_Epoch_91.mat'])
-parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/Fig4/", type=str)
+                    ['D:\FOGuzman\End2EndPyrWFS\Detach_OOMAO\Preconditioners\original.mat'])
+parser.add_argument('--saveMats', default= "../Matlab/ComputeResults/paper/Fig5/", type=str)
 
 # Precalculations
 wfs = parser.parse_args()
@@ -57,7 +58,7 @@ wfs.pyrMask = createPyrMask(wfs)
 wfs.jModes = torch.arange(wfs.zModes[0], wfs.zModes[1]+1)
 wfs.pupilLogical = wfs.pupil!=0
 wfs.modes = CreateZernikePolynomials(wfs)
-wfs.amplitude = 0.2 #small for low noise systems
+wfs.amplitude = 0.1 #small for low noise systems
 wfs.modulation = 0    
 wfs.ModPhasor = CreateModulationPhasor(wfs)
 
@@ -78,8 +79,8 @@ for k in range(len(wfs.jModes)):
 model =[]
 for k in range(len(wfs.models)):
     method = importlib.import_module("model_scripts."+wfs.models[k])
-    single_model = method.PyrModel(wfs).cuda() 
-    
+    single_model = method.PyrModel(wfs).cuda()
+
     if wfs.checkpoints[k][-3:] == 'pth':
         checkpoint = torch.load(wfs.checkpoints[k])
         single_model.load_state_dict(checkpoint.state_dict())
@@ -88,7 +89,7 @@ for k in range(len(wfs.models)):
         checkpoint = sio.loadmat(wfs.checkpoints[k])
         OL1 = torch.nn.Parameter(torch.tensor(checkpoint['OL1']).float().cuda())
         single_model.prop.OL1 = OL1
-        
+
     single_model.eval()
     model.append(single_model)
 
@@ -204,11 +205,7 @@ for mod in tqdm(wfs.mods,
 
     RMSEdpwfs = np.zeros((2,wfs.datapoints))
     RMSEdpwfs[0,:] = np.mean(ZFull[1],axis=0)
-    RMSEdpwfs[1,:] = np.std(ZFull[1],axis=0)
-
-    RMSEdpwfs2 = np.zeros((2,wfs.datapoints))
-    RMSEdpwfs2[0,:] = np.mean(ZFull[1],axis=0)
-    RMSEdpwfs2[1,:] = np.std(ZFull[1],axis=0)    
+    RMSEdpwfs[1,:] = np.std(ZFull[1],axis=0)  
 
     INFO = {}
     INFO['D_R0s'] = Dr0ax
@@ -216,8 +213,7 @@ for mod in tqdm(wfs.mods,
 
     struct = {}
     struct['RMSEpyr'] = RMSEpyr
-    struct['RMSEdpwfs'] = RMSEdpwfs
-    struct['RMSEdpwfs'] = RMSEdpwfs2    
+    struct['RMSEdpwfs'] = RMSEdpwfs  
     struct['INFO'] = INFO
     Results.append(struct)
 
@@ -228,4 +224,4 @@ print(f"r0 Figure 4.A completed time({cal_time}) seg for {wfs.datapoints*wfs.dpe
 
 
 
-sio.savemat(wfs.saveMats+"r0PerformanceFig4A.mat", {'Results': Results},oned_as='row')
+sio.savemat(wfs.saveMats+"r0PerformanceFig5A.mat", {'Results': Results},oned_as='row')

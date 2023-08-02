@@ -25,31 +25,30 @@ os.chdir("../")
 parser = argparse.ArgumentParser(description='Settings, Training and Pyramid Wavefron Sensor parameters')
 
 
-parser.add_argument('--mods', default=[0,1,2,3], type=eval, help='Pyramid modulation')
+parser.add_argument('--mods', default=[0,3], type=eval, help='Pyramid modulation')
 parser.add_argument('--samp', default=2, type=int, help='Over sampling for fourier')
 parser.add_argument('--D', default=8, type=int, help='Telescope Diameter [m]')
 parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
 parser.add_argument('--rooftop', default=[0,0], type=eval,help='Pyramid rooftop (as in OOMAO)')
 parser.add_argument('--alpha', default=np.pi/2, type=float,help='Pyramid angle (as in OOMAO)')
-parser.add_argument('--zModes', default=[2,60], type=eval, help='Reconstruction Zernikes')
+parser.add_argument('--zModes', default=[2,66], type=eval, help='Reconstruction Zernikes')
 parser.add_argument('--ZernikeUnits', default=1, type=float,help='Zernike units (1 for normalized)')
-parser.add_argument('--ReadoutNoise', default=0, type=float)
+parser.add_argument('--ReadoutNoise', default=1, type=float)
 parser.add_argument('--PhotonNoise', default=0, type=float)
-parser.add_argument('--nPhotonBackground', default=0, type=float)
+parser.add_argument('--nPhotonBackground', default=0.1, type=float)
 parser.add_argument('--quantumEfficiency', default=1, type=float)
 
-parser.add_argument('--D_r0', default=[90,1], type=eval, help='Range of r0 to create')
-parser.add_argument('--datapoints', default=10, type=int, help='r0 intervals')
-parser.add_argument('--data_batch', default=50, type=int, help='r0 intervals')
-parser.add_argument('--dperR0', default=1000, type=int, help='test per datapoint')
+parser.add_argument('--D_r0', default=[50,1], type=eval, help='Range of r0 to create')
+parser.add_argument('--datapoints', default=11, type=int, help='r0 intervals')
+parser.add_argument('--data_batch', default=20, type=int, help='r0 intervals')
+parser.add_argument('--dperR0', default=10000, type=int, help='test per datapoint')
 
-parser.add_argument('--models', nargs='+',default=['modelFastPupilPlane','modelFastPupilPlane','modelFast','modelFast'])
+parser.add_argument('--models', nargs='+',default=['modelFast','modelFast','modelFast'])
 parser.add_argument('--checkpoints', nargs='+',default=
-                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/pupil_15-40/checkpoint/PyrNet_epoch_73.pth',
-                     '/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/pupil_15-40_noise/checkpoint/PyrNet_epoch_71.pth',
-                     '/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r1/checkpoint/PyrNet_epoch_99.pth',
-                     '/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/n1/checkpoint/PyrNet_epoch_99.pth'])
-parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/FullCMP/", type=str)
+                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/original.mat',
+                     '/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r2_nico.mat',
+                     '/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/n1_nico.mat'])
+parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/Fig7/", type=str)
 
 # Precalculations
 wfs = parser.parse_args()
@@ -81,8 +80,14 @@ model =[]
 for k in range(len(wfs.models)):
     method = importlib.import_module("model_scripts."+wfs.models[k])
     single_model = method.PyrModel(wfs).cuda() 
-    checkpoint = torch.load(wfs.checkpoints[k])
-    single_model.load_state_dict(checkpoint.state_dict())
+    if wfs.checkpoints[k][-3:] == 'pth':
+        checkpoint = torch.load(wfs.checkpoints[k])
+        single_model.load_state_dict(checkpoint.state_dict())
+
+    if wfs.checkpoints[k][-3:] == 'mat':    
+        checkpoint = sio.loadmat(wfs.checkpoints[k])
+        OL1 = torch.nn.Parameter(torch.tensor(checkpoint['OL1']).float().cuda())
+        single_model.prop.OL1 = OL1
     single_model.eval()
     model.append(single_model)
 
@@ -169,11 +174,12 @@ for mod in tqdm(wfs.mods,
             atm = GetTurbulenceParameters(wfs,resAO,nLenslet,r0el,L0,fR0,noiseVariance,nTimes,n_lvl)
             phaseMap,Zgt = GetPhaseMapAndZernike(atm,CMPhase,wfs.data_batch)
             Ip = Prop2VanillaPyrWFS_torch(phaseMap,wfs)
+
             if wfs.PhotonNoise == 1:
                 Ip = AddPhotonNoise(Ip,wfs)          
             #Read out noise 
             if wfs.ReadoutNoise != 0:
-                Ip = Ip + torch.normal(0,wfs.ReadoutNoise,size=Ip.shape).cuda()   
+                Ip = Ip + torch.normal(0,wfs.ReadoutNoise,size=Ip.shape).cuda() 
 
 
             Inorm = torch.sum(torch.sum(torch.sum(Ip,-1),-1),-1)
@@ -206,7 +212,7 @@ for mod in tqdm(wfs.mods,
     RMSEdpwfs = np.zeros((2,wfs.datapoints))
     RMSEdpwfs[0,:] = np.mean(ZFull[1],axis=0)
     RMSEdpwfs[1,:] = np.std(ZFull[1],axis=0)
-    
+
     RMSEdpwfs2 = np.zeros((2,wfs.datapoints))
     RMSEdpwfs2[0,:] = np.mean(ZFull[2],axis=0)
     RMSEdpwfs2[1,:] = np.std(ZFull[2],axis=0)
@@ -214,10 +220,6 @@ for mod in tqdm(wfs.mods,
     RMSEdpwfs3 = np.zeros((2,wfs.datapoints))
     RMSEdpwfs3[0,:] = np.mean(ZFull[3],axis=0)
     RMSEdpwfs3[1,:] = np.std(ZFull[3],axis=0)    
-
-    RMSEdpwfs4 = np.zeros((2,wfs.datapoints))
-    RMSEdpwfs4[0,:] = np.mean(ZFull[4],axis=0)
-    RMSEdpwfs4[1,:] = np.std(ZFull[4],axis=0)
 
     INFO = {}
     INFO['D_R0s'] = Dr0ax
@@ -228,15 +230,14 @@ for mod in tqdm(wfs.mods,
     struct['RMSEdpwfs'] = RMSEdpwfs
     struct['RMSEdpwfs2'] = RMSEdpwfs2
     struct['RMSEdpwfs3'] = RMSEdpwfs3
-    struct['RMSEdpwfs4'] = RMSEdpwfs4
     struct['INFO'] = INFO
     Results.append(struct)
 
 end = time.time()
 
 cal_time = end-start
-print(f"r0 Figure 4.A completed time({cal_time}) seg for {wfs.datapoints*wfs.dperR0*len(wfs.mods)} total data process.")
+print(f"r0 Figure 7.A completed time({cal_time}) seg for {wfs.datapoints*wfs.dperR0*len(wfs.mods)} total data process.")
 
 
 
-sio.savemat(wfs.saveMats+"r0PerformanceOverAll.mat", {'Results': Results},oned_as='row')
+sio.savemat(wfs.saveMats+"r0PerformanceFig7A.mat", {'Results': Results},oned_as='row')

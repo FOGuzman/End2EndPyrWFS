@@ -25,7 +25,7 @@ os.chdir("../")
 parser = argparse.ArgumentParser(description='Settings, Training and Pyramid Wavefron Sensor parameters')
 
 
-parser.add_argument('--mods', default=[0,3], type=eval, help='Pyramid modulation')
+parser.add_argument('--mods', default=[0], type=eval, help='Pyramid modulation')
 parser.add_argument('--samp', default=2, type=int, help='Over sampling for fourier')
 parser.add_argument('--D', default=8, type=int, help='Telescope Diameter [m]')
 parser.add_argument('--nPxPup', default=128, type=int, help='Pupil Resolution')
@@ -33,22 +33,22 @@ parser.add_argument('--rooftop', default=[0,0], type=eval,help='Pyramid rooftop 
 parser.add_argument('--alpha', default=np.pi/2, type=float,help='Pyramid angle (as in OOMAO)')
 parser.add_argument('--zModes', default=[2,66], type=eval, help='Reconstruction Zernikes')
 parser.add_argument('--ZernikeUnits', default=1, type=float,help='Zernike units (1 for normalized)')
-parser.add_argument('--ReadoutNoise', default=1, type=float)
-parser.add_argument('--PhotonNoise', default=0, type=float)
-parser.add_argument('--nPhotonBackground', default=0.1, type=float)
+parser.add_argument('--Rnoises', default=[0,2], type=eval)
+parser.add_argument('--PhotonNoise', default=1, type=float)
+parser.add_argument('--Pnoises', default=[0,0.4], type=eval)
 parser.add_argument('--quantumEfficiency', default=1, type=float)
+parser.add_argument('--PupilMask', default=None, type=str)
 
-parser.add_argument('--D_r0', default=[50,1], type=eval, help='Range of r0 to create')
-parser.add_argument('--datapoints', default=11, type=int, help='r0 intervals')
-parser.add_argument('--data_batch', default=20, type=int, help='r0 intervals')
-parser.add_argument('--dperR0', default=10000, type=int, help='test per datapoint')
+parser.add_argument('--D_r0', default=20, type=eval, help='Range of r0 to create')
+parser.add_argument('--datapoints', default=20, type=int, help='r0 intervals')
+parser.add_argument('--data_batch', default=200, type=int, help='r0 intervals')
+parser.add_argument('--dperR0', default=4000, type=int, help='test per datapoint')
 
-parser.add_argument('--models', nargs='+',default=['modelFast','modelFast','modelFast'])
+parser.add_argument('--models', nargs='+',default=['modelFast','modelFast'])
 parser.add_argument('--checkpoints', nargs='+',default=
-                    ['/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/original.mat',
-                     '/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/r2_nico.mat',
-                     '/home/fg/Desktop/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/n1_nico.mat'])
-parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/Fig5/", type=str)
+                    ['D:/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results\Paper/06-07-2023\original.mat',
+                     'D:/FOGuzman/End2EndPyrWFS/Detach_OOMAO/Pytorch/training_results/Paper/06-07-2023/n1_nico.mat'])
+parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/Fig9/", type=str)
 
 # Precalculations
 wfs = parser.parse_args()
@@ -69,6 +69,8 @@ wfs.pyrMask = torch.from_numpy(wfs.pyrMask).cuda().cfloat()
 wfs.fovInPixel    = torch.tensor(wfs.fovInPixel).cuda()
 wfs.modes = torch.tensor(wfs.modes).cuda().float()
 wfs.D     = torch.tensor(wfs.D).cuda()
+wfs.ReadoutNoise = 1
+wfs.nPhotonBackground = 0
 IM_batch = torch.zeros(size=(len(wfs.jModes),1,wfs.nPxPup,wfs.nPxPup)).cuda()
 for k in range(len(wfs.jModes)):           
     zim = torch.reshape(wfs.modes[:,k],(wfs.nPxPup,wfs.nPxPup))
@@ -104,10 +106,11 @@ n_lvl         = torch.tensor(0.2).cuda()
 nTimes        = wfs.fovInPixel/resAO
 
 
-Dr0Vector = torch.linspace(wfs.D_r0[0],wfs.D_r0[1],wfs.datapoints).cuda()
-r0Vector = wfs.D/Dr0Vector
+r0 = wfs.D/wfs.D_r0
+r0 = r0.cuda()
 
-
+RnoiseV = torch.linspace(wfs.Rnoises[0],wfs.Rnoises[1],wfs.datapoints).cuda()
+PnoiseV = torch.linspace(wfs.Pnoises[0],wfs.Pnoises[1],wfs.datapoints).cuda()
 
 CMPhase = torch.linalg.pinv(torch.tensor(wfs.modes))
 
@@ -156,42 +159,67 @@ for mod in tqdm(wfs.mods,
 
     ZFull = []
     for k in range(len(wfs.models)+1):
-        vsize = np.zeros((wfs.dperR0//wfs.data_batch,wfs.datapoints))
+        vsize = np.zeros((wfs.dperR0//wfs.data_batch,wfs.datapoints,wfs.datapoints))
         ZFull.append(vsize) 
 
+    atm = GetTurbulenceParameters(wfs,resAO,nLenslet,r0,L0,fR0,noiseVariance,nTimes,n_lvl)
+
+    for pon in tqdm(range(0,wfs.datapoints),
+                                        desc ="Photon noise tested         ",colour="yellow",
+                                        total=wfs.datapoints,
+                                        ascii=' 123456789═'): 
+    
+    
+        for ron in tqdm(range(0,wfs.datapoints),
+                                        desc ="Readout noise tested         ",colour="red",
+                                        total=wfs.datapoints,
+                                        ascii=' 123456789═'):
+            
 
 
-    for r0idx in tqdm(range(0,wfs.datapoints),
-                                    desc ="r0 tested         ",colour="red",
-                                    total=wfs.datapoints,
-                                    ascii=' 123456789═'):
-        r0el = r0Vector[r0idx]
-        for nridx in tqdm(range(0,wfs.dperR0//wfs.data_batch),
-                                    desc ="Datapoints tested ",colour="green",
-                                    total=wfs.dperR0//wfs.data_batch,
-                                    ascii=' 123456789═'):
+            wfs.ReadoutNoise = RnoiseV[ron]
+            wfs.nPhotonBackground = PnoiseV[pon]
+            model =[]
+            for k in range(len(wfs.models)):
+                method = importlib.import_module("model_scripts."+wfs.models[k])
+                single_model = method.PyrModel(wfs).cuda() 
+                if wfs.checkpoints[k][-3:] == 'pth':
+                    checkpoint = torch.load(wfs.checkpoints[k])
+                    single_model.load_state_dict(checkpoint.state_dict())
 
-            atm = GetTurbulenceParameters(wfs,resAO,nLenslet,r0el,L0,fR0,noiseVariance,nTimes,n_lvl)
-            phaseMap,Zgt = GetPhaseMapAndZernike(atm,CMPhase,wfs.data_batch)
-            Ip = Prop2VanillaPyrWFS_torch(phaseMap,wfs)
+                if wfs.checkpoints[k][-3:] == 'mat':    
+                    checkpoint = sio.loadmat(wfs.checkpoints[k])
+                    OL1 = torch.nn.Parameter(torch.tensor(checkpoint['OL1']).float().cuda())
+                    single_model.prop.OL1 = OL1
+                single_model.eval()
+                model.append(single_model)
 
-            if wfs.PhotonNoise == 1:
-                Ip = AddPhotonNoise(Ip,wfs)          
-            #Read out noise 
-            if wfs.ReadoutNoise != 0:
-                Ip = Ip + torch.normal(0,wfs.ReadoutNoise,size=Ip.shape).cuda() 
+            
+            for nridx in tqdm(range(0,wfs.dperR0//wfs.data_batch),
+                                        desc ="Datapoints tested ",colour="green",
+                                        total=wfs.dperR0//wfs.data_batch,
+                                        ascii=' 123456789═'):
+
+                phaseMap,Zgt = GetPhaseMapAndZernike(atm,CMPhase,wfs.data_batch)
+                Ip = Prop2VanillaPyrWFS_torch(phaseMap,wfs)
+
+                if wfs.PhotonNoise == 1:
+                    Ip = AddPhotonNoise(Ip,wfs)          
+                #Read out noise 
+                if wfs.ReadoutNoise != 0:
+                    Ip = Ip + torch.normal(0,wfs.ReadoutNoise,size=Ip.shape).cuda() 
 
 
-            Inorm = torch.sum(torch.sum(torch.sum(Ip,-1),-1),-1)
-            Ip = Ip/UNZ(UNZ(UNZ(Inorm,-1),-1),-1)-I_0
+                Inorm = torch.sum(torch.sum(torch.sum(Ip,-1),-1),-1)
+                Ip = Ip/UNZ(UNZ(UNZ(Inorm,-1),-1),-1)-I_0
 
-            Zpyr = torch.matmul(CM,torch.transpose(torch.reshape(Ip,[Ip.shape[0],-1]),0,1))
+                Zpyr = torch.matmul(CM,torch.transpose(torch.reshape(Ip,[Ip.shape[0],-1]),0,1))
 
-            ZFull[0][nridx,r0idx] = compute_rmse(Zgt,Zpyr)
-            Zest = []
-            for m in range(len(wfs.models)):
-                Z_single = model[m](phaseMap).detach()
-                ZFull[m+1][nridx,r0idx] = compute_rmse(Zgt,Z_single)
+                ZFull[0][nridx,ron,pon] = compute_rmse(Zgt,Zpyr)
+                Zest = []
+                for m in range(len(wfs.models)):
+                    Z_single = model[m](phaseMap).detach()
+                    ZFull[m+1][nridx,ron,pon] = compute_rmse(Zgt,Z_single)
 
 
 
@@ -203,41 +231,40 @@ for mod in tqdm(wfs.mods,
     stdZ.append(np.std(ZFull[1],axis=0))  
 
 
-    Dr0ax = Dr0Vector.cpu().numpy()
+    RN = RnoiseV.cpu().numpy()
+    PN = PnoiseV.cpu().numpy()
 
-    RMSEpyr = np.zeros((2,wfs.datapoints))
-    RMSEpyr[0,:] = np.mean(ZFull[0],axis=0)
-    RMSEpyr[1,:] = np.std(ZFull[0],axis=0)
+    RMSEpyr = np.zeros((2,wfs.datapoints,wfs.datapoints))
+    RMSEpyr[0] = np.mean(ZFull[0],axis=0)
+    RMSEpyr[1] = np.std(ZFull[0],axis=0)
 
-    RMSEdpwfs = np.zeros((2,wfs.datapoints))
+    RMSEdpwfs = np.zeros((2,wfs.datapoints,wfs.datapoints))
     RMSEdpwfs[0,:] = np.mean(ZFull[1],axis=0)
     RMSEdpwfs[1,:] = np.std(ZFull[1],axis=0)
 
-    RMSEdpwfs2 = np.zeros((2,wfs.datapoints))
+    RMSEdpwfs2 = np.zeros((2,wfs.datapoints,wfs.datapoints))
     RMSEdpwfs2[0,:] = np.mean(ZFull[2],axis=0)
     RMSEdpwfs2[1,:] = np.std(ZFull[2],axis=0)
 
-    RMSEdpwfs3 = np.zeros((2,wfs.datapoints))
-    RMSEdpwfs3[0,:] = np.mean(ZFull[3],axis=0)
-    RMSEdpwfs3[1,:] = np.std(ZFull[3],axis=0)    
-
     INFO = {}
-    INFO['D_R0s'] = Dr0ax
+    INFO['Readout'] = RN
+    INFO['r0'] = r0.cpu().numpy()
+    INFO['D_r0'] = wfs.D_r0
+    INFO['PhotonN'] = PN
     INFO['modulation'] = mod
 
     struct = {}
     struct['RMSEpyr'] = RMSEpyr
     struct['RMSEdpwfs'] = RMSEdpwfs
     struct['RMSEdpwfs2'] = RMSEdpwfs2
-    struct['RMSEdpwfs3'] = RMSEdpwfs3
     struct['INFO'] = INFO
     Results.append(struct)
 
 end = time.time()
 
 cal_time = end-start
-print(f"r0 Figure 5.A completed time({cal_time}) seg for {wfs.datapoints*wfs.dperR0*len(wfs.mods)} total data process.")
+print(f"r0 Figure 9 completed time({cal_time}) seg for {wfs.datapoints*wfs.dperR0*len(wfs.mods)} total data process.")
 
 
 
-sio.savemat(wfs.saveMats+"r0PerformanceFig5A.mat", {'Results': Results},oned_as='row')
+sio.savemat(wfs.saveMats+f"Dr0_{wfs.D_r0}_PerformanceFig9.mat", {'Results': Results},oned_as='row')

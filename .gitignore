@@ -1,6 +1,8 @@
 *.asv
 __pycache__
+Detach_OOMAO/Matlab/arquivedfiles/
 Detach_OOMAO/Pytorch/dataset/
+Detach_OOMAO/Pytorch/archived/
 Detach_OOMAO/Pytorch/model/
 Detach_OOMAO/Preconditioners
 Detach_OOMAO/Pytorch/__pycache__
@@ -23,4 +25,13 @@ Detach_OOMAO/Matlab/main_LoopSImulation.m
 Detach_OOMAO/Matlab/main_LoopSImulation.m
 Detach_OOMAO/Matlab/create_Experimental_plot.m
 
+Detach_OOMAO/Pytorch/model_scripts/ConvNeXt_only.py
+Detach_OOMAO/Pytorch/model_scripts/GCViT_only.py
+Detach_OOMAO/Pytorch/model_scripts/modelDWFS.py
+Detach_OOMAO/Pytorch/model_scripts/modelFastplusConvNeXt.py
+Detach_OOMAO/Pytorch/model_scripts/modelFastplusGCViT.py
+Detach_OOMAO/Pytorch/model_scripts/OptIMAT.py
+Detach_OOMAO/Pytorch/model_scripts/VGG_only.py
+
 .vscode/
+
