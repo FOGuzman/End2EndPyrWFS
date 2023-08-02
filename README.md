@@ -86,7 +86,7 @@ Paper_Fig9.m
 Paper_Fig10.m
 Paper_Fig12.m
 ```
-However it is highly recommended to use python scripts for figures 5, 7, 9 and 10 on ```Detach_OOMAO/Pytorch/```
+However it is highly recommended to use python scripts for figures 5, 7, 9 and 10 on ```Detach_OOMAO/Pytorch/figure_calculators/``` to compute the results and then using the MATLAB scripts to plot the figures.
 
 # Citation
 If you find our project useful, please cite:
