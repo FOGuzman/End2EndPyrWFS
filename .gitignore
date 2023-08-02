@@ -1,4 +1,5 @@
 *.asv
+*.pyc
 __pycache__
 Detach_OOMAO/Matlab/arquivedfiles/
 Detach_OOMAO/Pytorch/dataset/
