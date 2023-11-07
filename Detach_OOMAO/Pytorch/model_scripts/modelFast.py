@@ -63,7 +63,7 @@ class OptimizedPyramid(nn.Module):
             
 
     def forward(self, inputs):
-        OL1 = UNZ(UNZ(torch.exp(1j * self.OL1),0),0)       
+        OL1 = UNZ(UNZ(torch.exp(1j * self.OL1),0),0)     
         # Flat prop
         I_0 = Prop2OptimizePyrWFS_torch(self.Flat,OL1,self)
 

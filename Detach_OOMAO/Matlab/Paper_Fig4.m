@@ -95,7 +95,6 @@ for fr = 1:frames
     frame = getframe(fig);
     writeVideo(writer, frame);
 end
-
 % Close the writer
 close(writer);
 
