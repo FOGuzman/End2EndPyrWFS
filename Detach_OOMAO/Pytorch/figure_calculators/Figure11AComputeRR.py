@@ -157,7 +157,7 @@ for mod in tqdm(wfs.mods,
 
     ZFull = []
     for k in range(len(wfs.models)+1):
-        vsize = np.zeros((wfs.dperR0//wfs.data_batch,wfs.datapoints))
+        vsize = np.zeros((wfs.dperR0,wfs.datapoints))
         ZFull.append(vsize) 
 
 
