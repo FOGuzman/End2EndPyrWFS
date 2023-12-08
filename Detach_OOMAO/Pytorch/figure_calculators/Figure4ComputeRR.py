@@ -114,7 +114,7 @@ r0Vector = wfs.D/Dr0Vector
 CMPhase = torch.linalg.pinv(torch.tensor(wfs.modes))
 
 def compute_rmse(vector1, vector2):
-    mse = torch.mean((vector1 - vector2) ** 2)
+    mse = torch.mean((vector1 - vector2) ** 2,dim=0)
     rmse = torch.sqrt(mse)
     return rmse.detach().cpu().numpy()
 
@@ -158,7 +158,7 @@ for mod in tqdm(wfs.mods,
 
     ZFull = []
     for k in range(len(wfs.models)+1):
-        vsize = np.zeros((wfs.dperR0//wfs.data_batch,wfs.datapoints))
+        vsize = np.zeros((wfs.dperR0,wfs.datapoints))
         ZFull.append(vsize) 
 
 
@@ -188,11 +188,11 @@ for mod in tqdm(wfs.mods,
 
             Zpyr = torch.matmul(CM,torch.transpose(torch.reshape(Ip,[Ip.shape[0],-1]),0,1))
 
-            ZFull[0][nridx,r0idx] = compute_rmse(Zgt,Zpyr)
+            ZFull[0][nridx*wfs.data_batch:(nridx+1)*wfs.data_batch,r0idx] = compute_rmse(Zgt,Zpyr)
             Zest = []
             for m in range(len(wfs.models)):
                 Z_single = model[m](phaseMap).detach()
-                ZFull[m+1][nridx,r0idx] = compute_rmse(Zgt,Z_single) 
+                ZFull[m+1][nridx*wfs.data_batch:(nridx+1)*wfs.data_batch,r0idx] = compute_rmse(Zgt,Z_single) 
 
 
     Dr0ax = Dr0Vector.cpu().numpy()
