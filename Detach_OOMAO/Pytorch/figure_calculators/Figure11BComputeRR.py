@@ -113,7 +113,7 @@ r0Vector = wfs.D/Dr0Vector
 CMPhase = torch.linalg.pinv(torch.tensor(wfs.modes))
 
 def compute_rmse(vector1, vector2):
-    mse = torch.mean((vector1 - vector2) ** 2)
+    mse = torch.mean((vector1 - vector2) ** 2,dim=0)
     rmse = torch.sqrt(mse)
     return rmse.detach().cpu().numpy()
 
