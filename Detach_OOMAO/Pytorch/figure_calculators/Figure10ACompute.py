@@ -60,7 +60,7 @@ wfs.pyrMask = createPyrMask(wfs)
 wfs.jModes = torch.arange(wfs.zModes[0], wfs.zModes[1]+1)
 wfs.pupilLogical = wfs.pupil!=0
 wfs.modes = CreateZernikePolynomials(wfs)
-wfs.amplitude = 0.2 #small for low noise systems
+wfs.amplitude = 0.1 #small for low noise systems
 wfs.modulation = 0    
 wfs.ModPhasor = CreateModulationPhasor(wfs)
 
