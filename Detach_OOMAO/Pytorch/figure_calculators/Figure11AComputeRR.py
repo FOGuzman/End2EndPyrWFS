@@ -45,7 +45,7 @@ parser.add_argument('--models', nargs='+',default=['modelFast','modelFastPupilPl
 parser.add_argument('--checkpoints', nargs='+',default=
                     ['../Preconditioners/original.mat',
                      '../Pytorch/training_results/Paper/06-07-2023/pupil_15-40/checkpoint/PyrNet_epoch_99.pth'])
-parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paper/Fig11/", type=str)
+parser.add_argument('--saveMats', default="../Matlab/ComputeResults/paperRR/Fig11/", type=str)
 
 
 
