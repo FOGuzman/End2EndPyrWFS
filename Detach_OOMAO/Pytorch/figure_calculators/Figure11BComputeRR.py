@@ -187,11 +187,11 @@ for mod in tqdm(wfs.mods,
 
             Zpyr = torch.matmul(CM,torch.transpose(torch.reshape(Ip,[Ip.shape[0],-1]),0,1))
 
-            ZFull[0][nridx,r0idx] = compute_rmse(Zgt,Zpyr)
+            ZFull[0][nridx*wfs.data_batch:(nridx+1)*wfs.data_batch,r0idx] = compute_rmse(Zgt,Zpyr)
             Zest = []
             for m in range(len(wfs.models)):
                 Z_single = model[m](phaseMap).detach()
-                ZFull[m+1][nridx,r0idx] = compute_rmse(Zgt,Z_single)
+                ZFull[m+1][nridx*wfs.data_batch:(nridx+1)*wfs.data_batch,r0idx] = compute_rmse(Zgt,Z_single)
 
 
 
