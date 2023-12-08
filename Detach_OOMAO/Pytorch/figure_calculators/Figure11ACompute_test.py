@@ -344,7 +344,7 @@ for mod in tqdm(wfs.mods,
     struct['RMSEdpwfs'] = RMSEdpwfs 
     struct['RMSEdpwfs2'] = RMSEdpwfs2  
     struct['INFO'] = INFO
-    Results.append(struct)
+    ResultsN.append(struct)
 
 end = time.time()
 

@@ -176,6 +176,13 @@ for mod in tqdm(wfs.mods,
             atm = GetTurbulenceParameters(wfs,resAO,nLenslet,r0el,L0,fR0,noiseVariance,nTimes,n_lvl)
             phaseMap,Zgt = GetPhaseMapAndZernike(atm,CMPhase,wfs.data_batch)
             Ip = Prop2VanillaPyrWFS_torch(phaseMap,wfs)
+ 
+            if wfs.PhotonNoise == 1:
+                Ip = AddPhotonNoise(Ip,wfs)          
+            #Read out noise 
+            if wfs.ReadoutNoise != 0:
+                Ip = Ip + torch.normal(0,wfs.ReadoutNoise,size=Ip.shape).cuda() 
+ 
             Inorm = torch.sum(torch.sum(torch.sum(Ip,-1),-1),-1)
             Ip = Ip/UNZ(UNZ(UNZ(Inorm,-1),-1),-1)-I_0
 
