@@ -118,7 +118,7 @@ def compute_rmse(vector1, vector2):
     return rmse.detach().cpu().numpy()
 
 
-Results = []
+ResultsN = []
 start = time.time()
 for mod in tqdm(wfs.mods,
                                     desc ="Modulation        ",colour="yellow",
@@ -221,7 +221,7 @@ for mod in tqdm(wfs.mods,
     struct['RMSEdpwfs2'] = RMSEdpwfs2 
     struct['Alldata'] = ZFull 
     struct['INFO'] = INFO
-    Results.append(struct)
+    ResultsN.append(struct)
 
 end = time.time()
 
@@ -230,5 +230,5 @@ print(f"r0 Figure 11 B completed time({cal_time}) seg for {wfs.datapoints*wfs.dp
 
 
 
-sio.savemat(wfs.saveMats+"r0PerformanceFig11B.mat", {'Results': Results},oned_as='row')
+sio.savemat(wfs.saveMats+"r0PerformanceFig11B.mat", {'ResultsN': ResultsN},oned_as='row')
 
