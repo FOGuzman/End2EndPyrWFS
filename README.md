@@ -93,13 +93,16 @@ However it is highly recommended to use python scripts for figures 5, 7, 9 and 1
 If you find our project useful, please cite:
 
 ```
-@article{Vera2023,
-author = "Esteban Vera and Felipe Guzmán and Camilo Weinberger and Jorge Tapia and Nicolas Alegría and Jorge Bacca and Benoit Neichel",
-title = "{Deep Optics Preconditioner for Modulation-free Pyramid Wavefront Sensing}",
-year = "2023",
-month = "8",
-url = "https://preprints.opticaopen.org/articles/preprint/Deep_Optics_Preconditioner_for_Modulation-free_Pyramid_Wavefront_Sensing/23812041",
-doi = "10.1364/opticaopen.23812041.v1"
+@article{guzman2024deep,
+  title={Deep optics preconditioner for modulation-free pyramid wavefront sensing},
+  author={Guzm{\'a}n, Felipe and Tapia, Jorge and Weinberger, Camilo and Hern{\'a}ndez, Nicol{\'a}s and Bacca, Jorge and Neichel, Benoit and Vera, Esteban},
+  journal={Photonics Research},
+  volume={12},
+  number={2},
+  pages={301--312},
+  year={2024},
+  publisher={Optica Publishing Group}
+}
 }
 ```
 
