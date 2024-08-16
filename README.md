@@ -103,7 +103,6 @@ If you find our project useful, please cite:
   year={2024},
   publisher={Optica Publishing Group}
 }
-}
 ```
 
 # Contact
