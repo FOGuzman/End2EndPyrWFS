@@ -48,9 +48,9 @@ class OptimizedPyramid(nn.Module):
             self.pupil = self.pupil.cuda()
             if wfs.modulation > 0:
                 self.ModPhasor = self.ModPhasor.cuda()
-        self.PhotonNoise = self.PhotonNoise.cuda()
-        self.quantumEfficiency = self.quantumEfficiency.cuda()
-        self.nPhotonBackground = self.nPhotonBackground.cuda()    
+            self.PhotonNoise = self.PhotonNoise.cuda()
+            self.quantumEfficiency = self.quantumEfficiency.cuda()
+            self.nPhotonBackground = self.nPhotonBackground.cuda()    
 
         if wfs.PupilMask is not None:
             data = scio.loadmat(wfs.PupilMask)
